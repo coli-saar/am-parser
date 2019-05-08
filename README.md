@@ -19,10 +19,12 @@ __Internal note: use /proj/irtg.shadow/conda/envs/allennlp__
 Two example configurations are provided (.jsonnet files). To see if everything's working and to train a parser (on the EWT corpus), run:
 
 ```bash
+mkdir -p data/
 cd data/
 wget https://github.com/UniversalDependencies/UD_English-EWT/raw/master/en_ewt-ud-train.conllu
 wget https://github.com/UniversalDependencies/UD_English-EWT/raw/master/en_ewt-ud-dev.conllu
 
+mkdir -p models/
 bash example_train.sh
 
 echo Evaluating on development set
@@ -31,4 +33,3 @@ bash example_evaluate.sh
 ```
 
 If you play around with the code in an IDE you might want to use `run.py` instead of the bash scripts.
-
