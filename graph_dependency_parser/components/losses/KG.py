@@ -59,18 +59,18 @@ class KGLabelLoss(EdgeLabelLoss):
     def __init__(self, normalize_wrt_seq_len : bool = True):
         super().__init__()
         self.normalize_wrt_seq_len = normalize_wrt_seq_len
-        self.hinge_loss = torch.nn.MultiLabelMarginLoss(reduction="none")
+        self.hinge_loss = torch.nn.MultiMarginLoss(reduction='none')
 
-    def loss(self, edge_label_logits:torch.Tensor, mask:torch.Tensor, head_tags:torch.Tensor) -> torch.Tensor:
+    def loss(self, edge_label_logits:torch.Tensor, mask:torch.Tensor, gold_edge_labels:torch.Tensor) -> torch.Tensor:
         """
         Computes the arc and tag loss for a sequence given gold head indices and tags.
 
         Parameters
         ----------
         edge_label_logits : ``torch.Tensor``, required.
-            A tensor of shape (batch_size, sequence_length, num_head_tags),
+            A tensor of shape (batch_size, sequence_length, num_edge_labels),
             that contains raw predictions for incoming edge labels
-        head_tags : ``torch.Tensor``, required.
+        gold_edge_labels : ``torch.Tensor``, required.
             A tensor of shape (batch_size, sequence_length).
             The dependency labels of the heads for every word.
         mask : ``torch.Tensor``, required.
@@ -84,24 +84,21 @@ class KGLabelLoss(EdgeLabelLoss):
         """
         #Remove artificial root:
         edge_label_logits = edge_label_logits[:, 1:, :]
-        head_tags = head_tags[:,1:]
+        gold_edge_labels = gold_edge_labels[:, 1:]
         mask = mask[:,1:]
 
-        batch_size, sequence_length, num_head_tags = edge_label_logits.size()
-        head_tags_r = head_tags.reshape(batch_size * sequence_length).unsqueeze(1) #shape (batch_size * seq len, 1)
+        batch_size, sequence_length, num_edge_labels = edge_label_logits.size()
+        #We have to reshape the label predictions to be of shape (some batch size, num of edge labels)
+        #and the gold edge labels to be of shape (some batch size)
+        #see https://pytorch.org/docs/stable/nn.html#torch.nn.MultiMarginLoss for details
 
-        #We want to use a hinge loss for multiple classes but pytorch only offers one where an instance can have multiple labels
-        #See here: https://pytorch.org/docs/stable/nn.html#torch.nn.MultiLabelMarginLoss
-        #To denote classes that do not apply to an instance, we use -1 as the target
+        gold_edge_labels_r = gold_edge_labels.reshape(batch_size * sequence_length)
 
-        padding = -torch.ones((batch_size*sequence_length,num_head_tags-1),device=get_device_of(head_tags),dtype=torch.long)
-        targets = torch.cat([head_tags_r, padding],dim=1) #shape (batch_size*seq len, num_head_tag_logits), the last num_head_tag_logits-1 dimensions on axis 2 are filled with -1
-
-        head_tag_logits_r = edge_label_logits.reshape(batch_size * sequence_length, num_head_tags)
+        edge_label_logits_r = edge_label_logits.reshape(batch_size * sequence_length, num_edge_labels)
 
         mask_r = mask.reshape((batch_size*sequence_length)).float()
 
-        loss = (self.hinge_loss(head_tag_logits_r,targets) * mask_r).sum()
+        loss = (self.hinge_loss(edge_label_logits_r,gold_edge_labels_r) * mask_r).sum()
 
         if self.normalize_wrt_seq_len:
             valid_positions = mask_r.sum()
