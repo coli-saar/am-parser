@@ -5,18 +5,18 @@ local word_dim = 100;
 local encoder_output_dim = 512;
 local train_data = "data/en_ewt-ud-train.conllu";
 local dev_data = "data/en_ewt-ud-dev.conllu";
+local extern_tools = "external_eval_tools/";
 
-{
-    "dataset_reader": {
-        "type": "universal_dependencies",
+local dataset_reader =  {
+        "type": "conllu",
          "token_indexers": {
             "tokens": {
               "type": "single_id",
               "lowercase_tokens": true
             },
         }
-    },
-    "iterator": {
+    };
+local data_iterator = {
         "type": "bucket",
         "batch_size": 64,
         "sorting_keys": [
@@ -25,7 +25,11 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
                 "num_tokens"
             ]
         ]
-    },
+    };
+
+{
+    "dataset_reader": dataset_reader ,
+    "iterator": data_iterator,
     "model": {
         "type": "graph_dependency_parser",
         "edge_model" : {
@@ -58,7 +62,22 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
                     "type": "embedding",
                     "embedding_dim": word_dim
                 },
+        },
+         #optional: set validation evaluator that is called during each validation call
+        "validation_evaluator": {
+            "system_input" : dev_data,
+            "gold_file": dev_data,
+            "predictor" : {
+                    "type" : "conllu_predictor",
+                    "dataset_reader" : dataset_reader, #same dataset_reader as above
+                    "evaluation_command" : {
+                        "type" : "bash_evaluation_command",
+                        "command" : "python "+extern_tools+"conll18_ud_eval.py {gold_file} {system_output}",
+                        "result_regexes" : { "Official_LAS" : "LAS F1 Score: (?P<value>.+)" }
+                    }
+            }
         }
+
     },
     "train_data_path": train_data,
     "validation_data_path": dev_data,
@@ -67,9 +86,8 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
          "cuda_device": device,
         "optimizer": {
             "type": "adam",
-            "amsgrad" : true
         },
-        "validation_metric" : "+LAS",
+        "validation_metric" : "+LAS", #or Official_LAS
         "num_serialized_models_to_keep" : 1
     }
 }

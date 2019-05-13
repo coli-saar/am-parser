@@ -5,17 +5,17 @@ local elmo_path = "/local/mlinde/elmo/";
 local encoder_output_dim = 512;
 local train_data = "data/en_ewt-ud-train.conllu";
 local dev_data = "data/en_ewt-ud-dev.conllu";
+local extern_tools = "external_eval_tools/";
 
-{
-    "dataset_reader": {
-        "type": "universal_dependencies",
+local dataset_reader = {
+        "type": "conllu",
         "token_indexers": {
             "elmo": {
               "type": "elmo_characters"
             }
         }
-    },
-    "iterator": {
+      };
+local data_iterator = {
         "type": "bucket",
         "batch_size": 64,
         "sorting_keys": [
@@ -24,7 +24,11 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
                 "num_tokens"
             ]
         ]
-    },
+    };
+
+{
+    "dataset_reader": dataset_reader,
+    "iterator": data_iterator,
     "model": {
         "type": "graph_dependency_parser",
         "edge_model" : {
@@ -64,6 +68,22 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
                         "dropout": 0.3
                     },
              }
+        },
+
+        #optional: set validation evaluator that is called after each epoch.
+        "validation_evaluator": {
+            "system_input" : dev_data,
+            "gold_file": dev_data,
+            "predictor" : {
+                    "type" : "conllu_predictor",
+                    "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                    "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                    "evaluation_command" : {
+                        "type" : "bash_evaluation_command",
+                        "command" : "python "+extern_tools+"conll18_ud_eval.py {gold_file} {system_output}",
+                        "result_regexes" : { "Official_LAS" : "LAS F1 Score: (?P<value>.+)" }
+                    }
+            }
         }
     },
     "train_data_path": train_data,
@@ -73,9 +93,8 @@ local dev_data = "data/en_ewt-ud-dev.conllu";
          "cuda_device": device,
         "optimizer": {
             "type": "adam",
-            "amsgrad" : true
         },
-        "validation_metric" : "+LAS",
+        "validation_metric" : "+Official_LAS",
         "num_serialized_models_to_keep" : 1
     }
 }

@@ -19,6 +19,7 @@ import graph_dependency_parser.components.losses
 import graph_dependency_parser.components.edge_models
 
 from graph_dependency_parser.components.cle import  cle_decode
+from graph_dependency_parser.components.evaluation.predictors import  ValidationEvaluator
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -71,8 +72,11 @@ class GraphDependencyParser(Model):
                  dropout: float = 0.0,
                  input_dropout: float = 0.0,
                  initializer: InitializerApplicator = InitializerApplicator(),
-                 regularizer: Optional[RegularizerApplicator] = None) -> None:
+                 regularizer: Optional[RegularizerApplicator] = None,
+                 validation_evaluator: Optional[ValidationEvaluator] = None) -> None:
         super(GraphDependencyParser, self).__init__(vocab, regularizer)
+
+        self.validation_evaluator = validation_evaluator
 
         self.text_field_embedder = text_field_embedder
         self.encoder = encoder
@@ -202,6 +206,15 @@ class GraphDependencyParser(Model):
             #Predict edge labels
             predicted_edge_labels = self._greedy_decode_edge_labels(edge_label_logits)
 
+        output_dict = {
+            "heads": predicted_heads,
+            "edge_labels": predicted_edge_labels,
+            "mask": mask,
+            "words": [meta["words"] for meta in metadata],
+            "pos": [meta["pos"] for meta in metadata],
+            "position_in_corpus": [meta["position_in_corpus"] for meta in metadata],
+        }
+
         if head_indices is not None and head_tags is not None:
             gold_edge_label_logits = self.edge_model.label_scores(encoded_text, head_indices)
             edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
@@ -219,23 +232,40 @@ class GraphDependencyParser(Model):
                                     head_indices[:, 1:],
                                     head_tags[:, 1:],
                                     evaluation_mask)
-        else:
-            raise NotImplementedError()
+            output_dict["arc_loss"] = arc_nll
+            output_dict["edge_label_loss"] = edge_label_loss
+            output_dict["loss"] = loss
 
-        output_dict = {
-                "heads": predicted_heads,
-                "edge_labels": predicted_edge_labels,
-                "arc_loss": arc_nll,
-                "edge_label_loss": edge_label_loss,
-                "loss": loss,
-                "mask": mask,
-                "words": [meta["words"] for meta in metadata],
-                "pos": [meta["pos"] for meta in metadata]
-                }
         if self.pass_over_data_just_started:
             # here we could decide if we want to start collecting info for the decoder.
             pass
         self.pass_over_data_just_started = False
+        return output_dict
+
+    @overrides
+    def decode(self, output_dict: Dict[str, torch.Tensor]):
+        """
+        Takes the result of forward and creates human readable, non-padded dependency trees.
+        :param output_dict:
+        :return: output_dict with two new keys, "predicted_labels" and "predicted_heads", which are lists of lists.
+        """
+
+        head_tags = output_dict.pop("edge_labels").cpu().detach().numpy()
+        heads = output_dict.pop("heads").cpu().detach().numpy()
+        mask = output_dict.pop("mask")
+        lengths = get_lengths_from_binary_sequence_mask(mask)
+        edge_labels = []
+        head_indices = []
+        for instance_heads, instance_tags, length in zip(heads, head_tags, lengths):
+            instance_heads = list(instance_heads[1:length])
+            instance_tags = instance_tags[1:length]
+            labels = [self.vocab.get_token_from_index(label, "head_tags")
+                      for label in instance_tags]
+            edge_labels.append(labels)
+            head_indices.append(instance_heads)
+
+        output_dict["predicted_labels"] = edge_labels
+        output_dict["predicted_heads"] = head_indices
         return output_dict
 
 
@@ -327,5 +357,8 @@ class GraphDependencyParser(Model):
                 self.current_epoch += 1
                 self.pass_over_data_just_started = True
             else: #done on dev/test data
-                pass
+                if self.validation_evaluator:
+                    metrics = self.validation_evaluator.eval(self)
+                    for name, val in metrics.items():
+                        r[name] = val
         return r
