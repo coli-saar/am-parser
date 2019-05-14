@@ -39,7 +39,7 @@ class EdgeExistenceLoss(Registrable,ABC):
 
 class EdgeLabelLoss(Registrable,ABC):
 
-    def __init__(self, normalize_wrt_seq_len : bool = True):
+    def __init__(self, normalize_wrt_seq_len : bool = False):
         super().__init__()
         self.normalize_wrt_seq_len = normalize_wrt_seq_len
 
@@ -72,12 +72,9 @@ class EdgeLoss(Registrable):
     """
     Interface for edge loss.
     """
-    def __init__(self, existence_loss: EdgeExistenceLoss, label_loss: EdgeLabelLoss, existence_coef: float = 0.5) -> None:
+    def __init__(self, existence_loss: EdgeExistenceLoss, label_loss: EdgeLabelLoss) -> None:
 
         super().__init__()
-        assert existence_coef <= 1.0
-        self.existence_coef = existence_coef
-        self.label_coef = 1.0 - existence_coef
         self.existence = existence_loss
         self.label = label_loss
 
@@ -102,7 +99,7 @@ class EdgeLoss(Registrable):
         loss : ``torch.Tensor``, required.
             The edge label loss.
         """
-        return self.label_coef * self.label.loss(edge_label_logits, mask, head_tags)
+        return self.label.loss(edge_label_logits, mask, head_tags)
 
     def edge_existence_loss(self, edge_scores: torch.Tensor,
                             head_indices: torch.Tensor,
@@ -127,7 +124,7 @@ class EdgeLoss(Registrable):
         loss : ``torch.Tensor``, required.
             The edge loss.
         """
-        return self.existence_coef * self.existence.loss(edge_scores,head_indices,mask)
+        return self.existence.loss(edge_scores,head_indices,mask)
 
 
 

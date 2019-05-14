@@ -1,1 +1,2 @@
 import graph_dependency_parser.components.dataset_readers.conllu
+import graph_dependency_parser.components.dataset_readers.amconll

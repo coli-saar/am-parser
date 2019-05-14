@@ -8,18 +8,20 @@ import numpy
 
 from allennlp.common.checks import check_dimensions_match, ConfigurationError
 from allennlp.data import Vocabulary
-from allennlp.modules import Seq2SeqEncoder, TextFieldEmbedder, Embedding, InputVariationalDropout
+from allennlp.modules import Seq2SeqEncoder, TextFieldEmbedder, Embedding, InputVariationalDropout, FeedForward
 from allennlp.models.model import Model
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
-from allennlp.nn.util import get_text_field_mask
+from allennlp.nn.util import get_text_field_mask, sequence_cross_entropy_with_logits
 from allennlp.nn.util import get_lengths_from_binary_sequence_mask
-from allennlp.training.metrics import AttachmentScores
+from allennlp.training.metrics import AttachmentScores, SequenceAccuracy, CategoricalAccuracy
 
 import graph_dependency_parser.components.losses
 import graph_dependency_parser.components.edge_models
 
 from graph_dependency_parser.components.cle import  cle_decode
 from graph_dependency_parser.components.evaluation.predictors import  ValidationEvaluator
+from graph_dependency_parser.components.losses.supertagging import SupertaggingLoss
+from graph_dependency_parser.components.supertagger import FragmentSupertagger, LexlabelTagger
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -46,7 +48,11 @@ class GraphDependencyParser(Model):
     edge_model: ``components.edge_models.EdgeModel``, required.
         The edge model to be used.
     loss_function: ``components.losses.EdgeLoss``, required.
-        The loss function to be used.
+        The (edge) loss function to be used.
+    supertagger: ``components.supertagger.FragmentSupertagger``, required.
+        The supertagging model that predicts graph constants (graph fragments + types)
+    loss_function: ``components.losses.EdgeLoss``, required.
+        The (edge) loss function to be used.
     pos_tag_embedding : ``Embedding``, optional.
         Used to embed the ``pos_tags`` ``SequenceLabelField`` we get as input to the model.
     use_mst_decoding_for_validation : ``bool``, optional (default = True).
@@ -67,7 +73,14 @@ class GraphDependencyParser(Model):
                  encoder: Seq2SeqEncoder,
                  edge_model: graph_dependency_parser.components.edge_models.EdgeModel,
                  loss_function: graph_dependency_parser.components.losses.EdgeLoss,
+                 supertagger: FragmentSupertagger,
+                 lexlabeltagger: LexlabelTagger,
+                 supertagger_loss : SupertaggingLoss,
+                 lexlabel_loss : SupertaggingLoss,
+                 loss_mixing : Dict[str,float] = None,
                  pos_tag_embedding: Embedding = None,
+                 lemma_embedding: Embedding = None,
+                 ne_embedding: Embedding = None,
                  use_mst_decoding_for_validation: bool = True,
                  dropout: float = 0.0,
                  input_dropout: float = 0.0,
@@ -80,8 +93,11 @@ class GraphDependencyParser(Model):
 
         self.text_field_embedder = text_field_embedder
         self.encoder = encoder
+        self.loss_mixing = loss_mixing or dict()
 
         self._pos_tag_embedding = pos_tag_embedding or None
+        self._lemma_embedding = lemma_embedding
+        self._ne_embedding = ne_embedding
         self._dropout = InputVariationalDropout(dropout)
         self._input_dropout = Dropout(input_dropout)
         self._head_sentinel = torch.nn.Parameter(torch.randn([1, 1, encoder.get_output_dim()]))
@@ -89,11 +105,27 @@ class GraphDependencyParser(Model):
         representation_dim = text_field_embedder.get_output_dim()
         if pos_tag_embedding is not None:
             representation_dim += pos_tag_embedding.get_output_dim()
+        if self._lemma_embedding is not None:
+            representation_dim += lemma_embedding.get_output_dim()
+        if self._ne_embedding is not None:
+            representation_dim += ne_embedding.get_output_dim()
 
         check_dimensions_match(representation_dim, encoder.get_input_dim(),
                                "text field embedding dim", "encoder input dim")
         check_dimensions_match(encoder.get_output_dim(), edge_model.encoder_dim(),
                                "encoder output dim", "input dim edge model")
+        check_dimensions_match(encoder.get_output_dim(), supertagger.encoder_dim(),
+                               "encoder output dim", "supertagger input dim")
+        check_dimensions_match(encoder.get_output_dim(), lexlabeltagger.encoder_dim(),
+                               "encoder output dim", "lexical label tagger input dim")
+        loss_names = ["edge_existence","edge_label","supertagging","lexlabel"]
+        for loss_name in loss_names:
+            if loss_name not in self.loss_mixing:
+                self.loss_mixing[loss_name] = 1.0
+                logger.info(f"Loss name {loss_name} not found in loss_mixing, using a weight of 1.0")
+        not_contained = set(self.loss_mixing.keys()) - set(loss_names)
+        if len(not_contained):
+            logger.critical(f"The following loss name(s) are unknown: {not_contained}")
 
         self.use_mst_decoding_for_validation = use_mst_decoding_for_validation
 
@@ -103,21 +135,30 @@ class GraphDependencyParser(Model):
         logger.info(f"Found POS tags corresponding to the following punctuation : {punctuation_tag_indices}. "
                     "Ignoring words with these POS tags for evaluation.")
 
-        self._attachment_scores = AttachmentScores()
-        initializer(self)
+        self.supertagger = supertagger
+        self.lexlabeltagger = lexlabeltagger
 
         self.edge_model = edge_model
         self.loss_function = loss_function
 
-        #Being able to detect what state we are in, probably not the best idea.
-        self.current_epoch = 1
-        self.pass_over_data_just_started = True
+        self.supertagger_loss = supertagger_loss
+        self.lexlabel_loss = lexlabel_loss
+
+        self._supertagging_acc = CategoricalAccuracy()
+        self._lexlabel_acc = CategoricalAccuracy()
+        self._attachment_scores = AttachmentScores()
+        initializer(self)
+
 
     @overrides
     def forward(self,  # type: ignore
                 words: Dict[str, torch.LongTensor],
                 pos_tags: torch.LongTensor,
+                lemmas: torch.LongTensor,
+                ner_tags: torch.LongTensor,
                 metadata: List[Dict[str, Any]],
+                supertags: torch.LongTensor = None,
+                lexlabels: torch.LongTensor = None,
                 head_tags: torch.LongTensor = None,
                 head_indices: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
@@ -170,17 +211,27 @@ class GraphDependencyParser(Model):
             A mask denoting the padded elements in the batch.
         """
         embedded_text_input = self.text_field_embedder(words)
+        concatenated_input = [embedded_text_input]
         if pos_tags is not None and self._pos_tag_embedding is not None:
-            embedded_pos_tags = self._pos_tag_embedding(pos_tags)
-            embedded_text_input = torch.cat([embedded_text_input, embedded_pos_tags], -1)
+            concatenated_input.append(self._input_dropout(self._pos_tag_embedding(pos_tags)))
         elif self._pos_tag_embedding is not None:
             raise ConfigurationError("Model uses a POS embedding, but no POS tags were passed.")
+
+        if self._lemma_embedding is not None:
+            concatenated_input.append(self._input_dropout(self._lemma_embedding(lemmas)))
+        if self._ne_embedding is not None:
+            concatenated_input.append(self._input_dropout(self._ne_embedding(ner_tags)))
+        if len(concatenated_input) > 1:
+            embedded_text_input = torch.cat(concatenated_input, -1)
 
         mask = get_text_field_mask(words)
         embedded_text_input = self._input_dropout(embedded_text_input)
         encoded_text = self.encoder(embedded_text_input, mask)
 
-        batch_size, _, encoding_dim = encoded_text.size()
+        encoded_text_without_art_root = self._dropout(encoded_text)
+        mask_without_art_root = mask
+
+        batch_size, seq_len, encoding_dim = encoded_text.size()
 
         head_sentinel = self._head_sentinel.expand(batch_size, 1, encoding_dim)
         # Concatenate the head sentinel onto the sentence representation.
@@ -192,7 +243,12 @@ class GraphDependencyParser(Model):
             head_tags = torch.cat([head_tags.new_zeros(batch_size, 1), head_tags], 1)
         encoded_text = self._dropout(encoded_text)
 
-        edge_existence_scores = self.edge_model.edge_existence(encoded_text,mask)
+        edge_existence_scores = self.edge_model.edge_existence(encoded_text,mask) #shape (batch_size, seq_len, seq_len)
+
+        supertagger_logits = self.supertagger.compute_logits(encoded_text_without_art_root)  # shape (batch_size, seq_len, num_supertags)
+        lexlabel_logits = self.lexlabeltagger.compute_logits(encoded_text_without_art_root)  # shape (batch_size, seq_len, num label tags)
+
+        #Make predictions on data:
 
         if self.training or not self.use_mst_decoding_for_validation:
             predicted_heads = self._greedy_decode_arcs(edge_existence_scores,mask)
@@ -219,9 +275,15 @@ class GraphDependencyParser(Model):
             gold_edge_label_logits = self.edge_model.label_scores(encoded_text, head_indices)
             edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
 
-            arc_nll = self.loss_function.edge_existence_loss(edge_existence_scores,head_indices,mask)
+            edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores,head_indices,mask)
 
-            loss = arc_nll + edge_label_loss
+            supertagging_nll = self.supertagger_loss.loss(supertagger_logits, supertags, mask_without_art_root)
+            lexlabel_nll = self.lexlabel_loss.loss(lexlabel_logits, lexlabels, mask_without_art_root)
+
+            loss = self.loss_mixing["edge_existence"]*edge_existence_loss \
+                   + self.loss_mixing["edge_label"]*edge_label_loss \
+                   + self.loss_mixing["supertagging"]*supertagging_nll \
+                   + self.loss_mixing["lexlabel"]* lexlabel_nll
 
             evaluation_mask = self._get_mask_for_eval(mask[:, 1:], pos_tags)
             # We calculate attachment scores for the whole sentence
@@ -232,14 +294,14 @@ class GraphDependencyParser(Model):
                                     head_indices[:, 1:],
                                     head_tags[:, 1:],
                                     evaluation_mask)
-            output_dict["arc_loss"] = arc_nll
-            output_dict["edge_label_loss"] = edge_label_loss
-            output_dict["loss"] = loss
+            self._supertagging_acc(supertagger_logits, supertags, mask_without_art_root) #compare against gold data
+            self._lexlabel_acc(lexlabel_logits, lexlabels, mask_without_art_root) #compare against gold data
 
-        if self.pass_over_data_just_started:
-            # here we could decide if we want to start collecting info for the decoder.
-            pass
-        self.pass_over_data_just_started = False
+            output_dict["arc_loss"] = edge_existence_loss
+            output_dict["edge_label_loss"] = edge_label_loss
+            output_dict["supertagging_loss"] = supertagging_nll
+            output_dict["lexlabel_loss"] = lexlabel_nll
+            output_dict["loss"] = loss
         return output_dict
 
     @overrides
@@ -351,11 +413,12 @@ class GraphDependencyParser(Model):
     @overrides
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         r = self._attachment_scores.get_metric(reset)
+        r["Supertagging Acc"] = self._supertagging_acc.get_metric(reset)
+        r["Lex Label Acc"] = self._lexlabel_acc.get_metric(reset)
+
         if reset:
             if self.training: #done on the training data
                 pass
-                self.current_epoch += 1
-                self.pass_over_data_just_started = True
             else: #done on dev/test data
                 if self.validation_evaluator:
                     metrics = self.validation_evaluator.eval(self)
