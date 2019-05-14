@@ -51,10 +51,22 @@ class GraphDependencyParser(Model):
         The (edge) loss function to be used.
     supertagger: ``components.supertagger.FragmentSupertagger``, required.
         The supertagging model that predicts graph constants (graph fragments + types)
-    loss_function: ``components.losses.EdgeLoss``, required.
-        The (edge) loss function to be used.
+    lexlabeltagger: ``components.supertagger.LexlabelTagger``, required.
+        The supertagging model that predicts lexical labels for the supertags.
+    supertagger_loss: ``components.losses.supertagging.SupertaggingLoss``, required.
+        The loss function for the supertagging model.
+    lexlabel_loss: ``components.losses.supertagging.SupertaggingLoss``, required.
+        The loss function for the lexical label tagger.
+    loss_mixing : Dict[str,float] = None,
+        The mixing coefficients for the different losses. Valid loss names are "edge_existence",
+        "edge_label","supertagging" and "lexlabel".
+
     pos_tag_embedding : ``Embedding``, optional.
         Used to embed the ``pos_tags`` ``SequenceLabelField`` we get as input to the model.
+    lemma_embedding : ``Embedding``, optional.
+        Used to embed the ``lemmas`` ``SequenceLabelField`` we get as input to the model.
+    ne_embedding : ``Embedding``, optional.
+        Used to embed the ``ner_labels`` ``SequenceLabelField`` we get as input to the model.
     use_mst_decoding_for_validation : ``bool``, optional (default = True).
         Whether to use Edmond's algorithm to find the optimal minimum spanning tree during validation.
         If false, decoding is greedy.
@@ -66,6 +78,8 @@ class GraphDependencyParser(Model):
         Used to initialize the model parameters.
     regularizer : ``RegularizerApplicator``, optional (default=``None``)
         If provided, will be used to calculate the regularization penalty during training.
+    validation_evaluator: ``ValidationEvaluator``, optional (default=``None``)
+        If provided, will be used to compute external validation metrics after each epoch.
     """
     def __init__(self,
                  vocab: Vocabulary,
