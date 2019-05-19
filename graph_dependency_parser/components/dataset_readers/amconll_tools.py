@@ -35,8 +35,14 @@ class AMSentence:
         """Zero-based indexing."""
         return self.words[i]
 
-    def get_tokens(self) -> List[str]:
-        return [word.token for word in self.words]
+    def get_tokens(self, shadow_art_root) -> List[str]:
+        r = [word.token for word in self.words]
+        if shadow_art_root and r[-1] == "ART-ROOT":
+            r[-1] = "."
+        return r
+
+    def get_replacements(self) -> List[str]:
+        return [word.replacement for word in self.words]
 
     def get_pos(self) -> List[str]:
         return [word.pos_tag for word in self.words]
@@ -57,7 +63,18 @@ class AMSentence:
         return [word.head for word in self.words]
 
     def get_edge_labels(self) -> List[str]:
-        return [word.label for word in self.words]
+        return [word.label if word.label != "_" else "IGNORE" for word in self.words] #this is a hack :(, which we need because the dev data contains _
+
+    @staticmethod
+    def get_bottom_supertag() -> str:
+        return "_--TYPE--_"
+
+    @staticmethod
+    def split_supertag(supertag : str) -> Tuple[str,str]:
+        return tuple(supertag.split("--TYPE--",maxsplit=1))
+
+    def attributes_to_list(self) -> List[str]:
+        return [ f"#{key}:{val}" for key,val in self.attributes.items()]
 
     def check_validity(self):
         """Checks if representation makes sense, doesn't do AM algebra type checking"""
@@ -66,7 +83,7 @@ class AMSentence:
             assert entry.head in range(len(self.words) + 1), f"head of {entry} is not in sentence range"
         has_root = any(w.label == "ROOT" and w.head == 0 for w in self.words)
         if not has_root:
-            assert all(w.label == "IGNORE" and w.head == 0 for w in self.words), f"Sentence doesn't have a root but seems annotated with trees:\n {self}"
+            assert all((w.label == "IGNORE" or w.label=="_") and w.head == 0 for w in self.words), f"Sentence doesn't have a root but seems annotated with trees:\n {self}"
 
     def __str__(self):
         r = []

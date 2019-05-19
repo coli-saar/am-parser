@@ -36,6 +36,7 @@ def forward_on_instances(model,
     -------
     A list of the models output for each instance.
     """
+    data_iterator.index_with(model.vocab)
     with torch.no_grad():
         return_val: List[Dict[str, numpy.ndarray]] = []
         cuda_device = model._get_prediction_device()

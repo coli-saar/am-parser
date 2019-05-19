@@ -32,7 +32,8 @@ class Supertagger(Model):
         """
         return self.output_layer(self.mlp(encoded_text))
 
-    def top_k_supertags(self, logits: torch.Tensor, k : int) -> torch.Tensor:
+    @staticmethod
+    def top_k_supertags(logits: torch.Tensor, k : int) -> torch.Tensor:
         """
         Finds the top k supertags for every word (and every sentence in the batch).
         Does not include scores for supertags.
@@ -41,7 +42,10 @@ class Supertagger(Model):
         :return: tensor of shape (batch_size, seq_len, k)
         """
         assert k > 0, "Number of supertags must be positive"
-        return torch.argsort(logits,descending=True,dim=2)[:,:,:k]
+        #shape (batch_size, seq_len, k)
+        top_k = torch.argsort(logits,descending=True,dim=2)[:,:,:k]
+        
+        return top_k
 
     def encoder_dim(self):
         return self._encoder_dim

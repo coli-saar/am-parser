@@ -64,7 +64,7 @@ class AMConllDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
-        tokens = TextField([Token(w) for w in am_sentence.get_tokens()], self._token_indexers)
+        tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens
         fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
         fields["ner_tags"] = SequenceLabelField(am_sentence.get_ner(), tokens, label_namespace="ner_labels")
@@ -74,7 +74,7 @@ class AMConllDatasetReader(DatasetReader):
         fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace="head_tags")
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
 
-        fields["metadata"] = MetadataField({"words": am_sentence.words, "pos": am_sentence.get_pos(), "position_in_corpus" : position_in_corpus})
+        fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes, "position_in_corpus" : position_in_corpus})
         return Instance(fields)
 
     @staticmethod

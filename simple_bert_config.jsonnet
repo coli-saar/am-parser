@@ -1,27 +1,29 @@
-local num_epochs = 20;
+local num_epochs = 30;
 local device = 1;
-local pos_dim = 50;
-local lemma_dim = 50;
-local ner_dim = 32;
+local pos_dim = 32;
+local lemma_dim = 64;
+local ner_dim = 16;
 
 
 local eval_commands = import 'eval_commands.libsonnet';
 
-local elmo_path = "/local/mlinde/elmo/";
 local encoder_output_dim = 512;
 local final_encoder_output_dim = 2 * encoder_output_dim;
 
-#local train_data = "data/EDS/train/train.amconll";
+#local train_data = "data/SemEval/2015/DM/train/train.amconll";
+#local train_data = "data/SemEval/2015/DM/gold-dev/gold-dev.amconll";
 local train_data = "data/AMR/2015/train/train.amconll";
 local dev_data = "data/AMR/2015/gold-dev/gold-dev.amconll";
-#local dev_data = "data/EDS/gold-dev/gold-dev.amconll";
+#local dev_data = "data/SemEval/2015/DM/gold-dev/gold-dev.amconll";
 
+local bert_model = "bert-large-uncased";
 
 local dataset_reader = {
         "type": "amconll",
         "token_indexers": {
-            "elmo": {
-              "type": "elmo_characters"
+            "bert": {
+              "type": "bert-pretrained",
+              "pretrained_model": bert_model,
             }
         }
       };
@@ -49,8 +51,8 @@ local data_iterator = {
         "edge_model" : {
             "type" : "kg_edges",
             "encoder_dim" : final_encoder_output_dim,
-            "label_dim": 400,
-            "edge_dim": 400,
+            "label_dim": 300,
+            "edge_dim": 300,
             #"activation" : "tanh",
             "dropout": 0.0,
         },
@@ -100,13 +102,13 @@ local data_iterator = {
 
         "text_field_embedder": {
             "type": "basic",
+            "allow_unmatched_keys" : true,
+            "embedder_to_indexer_map": {
+                "bert": ["bert", "bert-offsets"] },
             "token_embedders": {
-                "elmo" : {
-                    "type": "elmo_token_embedder",
-                        "options_file": elmo_path+"elmo_2x4096_512_2048cnn_2xhighway_options.json",
-                        "weight_file": elmo_path+"elmo_2x4096_512_2048cnn_2xhighway_weights.hdf5",
-                        "do_layer_norm": false,
-                        "dropout": 0.0
+                "bert" : {
+                    "type": "bert-pretrained",
+                        "pretrained_model" : bert_model,
                     },
              }
         },
@@ -126,7 +128,7 @@ local data_iterator = {
         "supertagger_loss" : { }, #for now use defaults
         "lexlabel_loss" : { },
 
-         #optional: set validation evaluator that is called after each epoch.
+          #optional: set validation evaluator that is called after each epoch.
         "validation_evaluator": {
             "system_input" : "data/AMR/2015/dev/dev.amconll",
             "gold_file": "dev",
