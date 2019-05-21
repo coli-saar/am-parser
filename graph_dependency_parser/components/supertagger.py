@@ -55,7 +55,7 @@ class Supertagger(Model):
 
 class FragmentSupertagger(Supertagger):
     """
-    Convience class to hide the label namespace from the person who write the configuration file.
+    Convenience class to hide the label namespace from the person who write the configuration file.
     """
     def __init__(self,vocab: Vocabulary,
                  mlp : FeedForward,
@@ -65,7 +65,7 @@ class FragmentSupertagger(Supertagger):
 
 class LexlabelTagger(Supertagger):
     """
-    Convience class to hide the label namespace from the person who write the configuration file.
+    Convenience class to hide the label namespace from the person who write the configuration file.
     """
     def __init__(self,vocab: Vocabulary,
                  mlp : FeedForward,
