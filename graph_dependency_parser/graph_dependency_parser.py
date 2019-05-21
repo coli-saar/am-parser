@@ -491,8 +491,8 @@ class GraphDependencyParser(Model):
     @overrides
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         r = self._attachment_scores.get_metric(reset)
-        r["Supertagging Acc"] = self._supertagging_acc.get_metric(reset)
-        r["Lex Label Acc"] = self._lexlabel_acc.get_metric(reset)
+        r["Supertagging_Acc"] = self._supertagging_acc.get_metric(reset)
+        r["Lex_Label_Acc"] = self._lexlabel_acc.get_metric(reset)
 
         if reset: #epoch done
             if self.training: #done on the training data
