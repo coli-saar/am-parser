@@ -116,7 +116,7 @@ def find_root(heads : List[int], best_supertags : List[int], label_scores:np.arr
                     heads[e-1] = new_root_id
     else:
         if len(heads) == 1:  # single word sentence
-            new_root_id = 0
+            new_root_id = 1 #1-based
         else:
             attached_to_0 = list(head_dict[0])
             print("WARNING: choosing root node arbitrarily!")
