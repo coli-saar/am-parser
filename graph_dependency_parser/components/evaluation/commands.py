@@ -45,21 +45,22 @@ class BashEvaluationCommand(BaseEvaluationCommand):
         :param gold_file:
         :return: a dictionary that maps metric names to their values
         """
-        cmd = self.command.format(system_output=system_output, gold_file=gold_file)
-        with subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE) as proc:
-            result = bytes.decode(proc.stdout.read())  # output of shell commmand as string
-            result_lines = result.split("\n")
-            if self.show_output:
-                print(result)
-            metrics = dict()
-            for metric_name, (line_number,regex) in self.result_regex.items():
-                m = re.search(regex, result_lines[line_number])
-                if m:
-                    val = float(m.group("value"))
-                    metrics[metric_name] = val
-            if self.show_output:
-                print(metrics)
-            return metrics
+        with TemporaryDirectory() as direc:
+            cmd = self.command.format(system_output=system_output, gold_file=gold_file, tmp=direc)
+            with subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE) as proc:
+                result = bytes.decode(proc.stdout.read())  # output of shell commmand as string
+                result_lines = result.split("\n")
+                if self.show_output:
+                    print(result)
+                metrics = dict()
+                for metric_name, (line_number,regex) in self.result_regex.items():
+                    m = re.search(regex, result_lines[line_number])
+                    if m:
+                        val = float(m.group("value"))
+                        metrics[metric_name] = val
+                if self.show_output:
+                    print(metrics)
+                return metrics
 
 
 
@@ -110,7 +111,7 @@ class BashEvaluationCommand(BaseEvaluationCommand):
                 lines = f.readlines()
                 for line in lines:
                     name, score = line.split(": ")
-                    metrics["AMR-"+self.amr_year+" " + name] = 100 * float(score)
+                    metrics[name] = 100 * float(score)
             if self.show_output:
                 print (metrics)
             return metrics

@@ -30,6 +30,7 @@ class DMEdges(EdgeModel):
                  encoder_dim: int,
                  label_dim: int,
                  edge_dim: int,
+                 edge_label_namespace: str,
                  dropout: float,
                  tag_feedforward: FeedForward = None,
                  arc_feedforward: FeedForward = None) -> None:
@@ -44,6 +45,8 @@ class DMEdges(EdgeModel):
             The dimension of the MLPs used for dependency tag prediction.
         edge_dim : ``int``, required.
             The dimension of the MLPs used for head arc prediction.
+        edge_label_namespace: str,
+                The namespace of the edge labels: a combination of the task name + _head_tags
         tag_feedforward : ``FeedForward``, optional, (default = None).
             The feedforward network used to produce tag representations.
             By default, a 1 layer feedforward network with an elu activation is used.
@@ -66,7 +69,7 @@ class DMEdges(EdgeModel):
                                                      edge_dim,
                                                      use_input_biases=True)
 
-        num_labels = vocab.get_vocab_size("head_tags") #= edge labels
+        num_labels = vocab.get_vocab_size(edge_label_namespace)
 
         self.head_tag_feedforward = tag_feedforward or \
                                     FeedForward(encoder_dim, 1,
@@ -127,6 +130,8 @@ class DMEdges(EdgeModel):
 
         Parameters
         ----------
+        encoded_text: (batch_size, sequence_length, encoder_output_dim)
+
         head_indices : ``torch.Tensor``, required.
             A tensor of shape (batch_size, sequence_length). The indices of the heads
             for every word (predicted or gold).

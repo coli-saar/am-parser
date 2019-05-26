@@ -57,7 +57,7 @@ class AMDecoder:
         """
         Add a new sentence to our todo list of sentences to parse.
         In the following, let N be the length of the sentence, L the number of different labels
-        :param root: index of the root of dependency tree
+        :param root: index of the root of dependency tree, 1-based
         :param heads: a numpy array of length N, the head of every word.
         :param label_scores: a numpy array for edge label scores with dimensions (N+1) x L. label_scores[i,l] represents the score for the incoming edge to i having label l
         :param lexlabels: a list of of lexical labels (strings) that will be used for the words
@@ -100,12 +100,15 @@ class AMDecoder:
         if self.giveupat:
             print("Will give up after",self.giveupat,"s when still not successful")
         print("Using",kbest,"best supertags")
+        t1 = time()
         if threads > 1:
             with mp.Pool(threads) as pool:
                 r = list(pool.starmap(self.call_viterbi,self.sents))
         else:
             tqdm_sents = tqdm.tqdm(self.sents)
             r = [ self.call_viterbi(s[0], tqdm_obj=tqdm_sents) for s in tqdm_sents]
+        t2 = time()
+        print("Parsing with fixed-tree decoder took",round(t2-t1,3),"seconds.")
         write_conll(self.output_file,r)
         self.sents = []
 
@@ -177,9 +180,12 @@ class AMDecoder:
         
         #~ print(t)
         #fill chart with complete items (leaves)
+        encountered_root = False
         max_arity = 0
         for sub_t in reversed(list(t.postorder())): 
             i,w = sub_t.node
+            if i == new_root_id:
+                encountered_root = True
             if w.typ == "ROOT-TYPE":
                 continue
             if len(sub_t.children) > 0: #fill agenda
@@ -194,8 +200,10 @@ class AMDecoder:
                 for item in self.get_items(w, kbest):
                     chart[i][amtypes.typ_to_str(item.type)] = (item.type, item.score)
                     backpointer[i][amtypes.typ_to_str(item.type)] = ([(i, item.type)], [])
-        #print()
-        #print("Agenda",agenda)
+        if not encountered_root:
+            print("Didn't encounter root when constructing the agenda, something's wrong :( ","root",new_root_id)
+            print("tree",head_dict,t)
+            print("sentence",  str(conll_sentence))
         counter = 0
 
         cache = amtypes.CombinationCache()
@@ -275,7 +283,17 @@ class AMDecoder:
         #print(chart)
         #print("new root id", new_root_id)
         #print(head_dict)
-        best_entry = max(chart[new_root_id].values(), key = lambda entry: (-amtypes.number_of_open_sources(entry[0]), entry[1])) #most important: few open sources, 2nd: highest score
+        try:
+            best_entry = max(chart[new_root_id].values(), key = lambda entry: (-amtypes.number_of_open_sources(entry[0]), entry[1])) #most important: few open sources, 2nd: highest score
+        except KeyError as e:
+            print(e)
+            print("Didn't find an item for the root of the AM dependency tree. This must not happen :/")
+            print(head_dict)
+            print(t)
+            print("\n".join([str(e) for e in conll_sentence]))
+            print([self.get_items(entry, kbest) for entry in conll_sentence[1:]])
+            print("Skipping sentence")
+            return conll_sentence
         #Look up backpointers
         local_types,edges = backpointer[new_root_id][amtypes.typ_to_str(best_entry[0])]
         has_a_local_type = set()

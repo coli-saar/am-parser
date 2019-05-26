@@ -19,6 +19,7 @@ class KGEdges(EdgeModel):
                  label_dim:int,
                  edge_dim:int,
                  dropout: float,
+                 edge_label_namespace: str,
                  activation : Activation = None) -> None:
         """
             Parameters
@@ -31,6 +32,8 @@ class KGEdges(EdgeModel):
                 The dimension of the hidden layer of the MLP used for predicting the edge labels.
             edge_dim : ``int``, required.
                 The dimension of the hidden layer of the MLP used for predicting edge existence.
+            edge_label_namespace: str,
+                The namespace of the edge labels: a combination of the task name + _head_tags
             activation : ``Activation``, optional, (default = tanh).
                 The activation function used in the MLPs.
             dropout : ``float``, optional, (default = 0.0)
@@ -53,7 +56,7 @@ class KGEdges(EdgeModel):
         self.arc_out_layer = torch.nn.Linear(edge_dim, 1, bias=False)  # K&G don't use a bias for the output layer
 
         #edge labels:
-        num_labels = vocab.get_vocab_size("head_tags") # = edge labels
+        num_labels = vocab.get_vocab_size(edge_label_namespace)
 
         #same trick again
         self.head_label_feedforward = torch.nn.Linear(encoder_dim, label_dim)

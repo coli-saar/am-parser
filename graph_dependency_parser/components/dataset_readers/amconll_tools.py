@@ -93,6 +93,10 @@ class AMSentence:
             r.append("\t".join([str(x) for x in [i] + list(w)]))
         return "\n".join(r)
 
+    def is_annotated(self):
+        return not all((w.label == "_" or w.label == "IGNORE") and w.head == 0 for w in self.words)
+
+
 
 def parse_amconll(fil) -> Iterable[AMSentence]:
     """

@@ -33,25 +33,34 @@ class AMConllDatasetReader(DatasetReader):
         super().__init__(lazy)
         self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
 
-    @overrides
-    def _read(self, file_path: str):
+    def _read_one_file(self, formalism:str, file_path: str):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
 
         with open(file_path, 'r') as amconll_file:
             logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-
             for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
-                yield self.text_to_instance(i,am_sentence)
+                yield self.text_to_instance(formalism,i,am_sentence)
+
+    @overrides
+    def _read(self, file_paths: List[List[str]]):
+        for per_formalism in file_paths:
+            assert len(per_formalism)==2, f"list per formalism must have length two and must be structured as [task_name, path_to_data], got {per_formalism}"
+            formalism, path = per_formalism
+            for instance in self._read_one_file(formalism, path):
+                yield instance
 
     @overrides
     def text_to_instance(self,  # type: ignore
+                         formalism: str,
                          position_in_corpus : int,
                          am_sentence: AMSentence) -> Instance:
         # pylint: disable=arguments-differ
         """
         Parameters
         ----------
+        formalism : str.
+            The formalism of this instance (e.g. DM, PSD, ...)
         position_in_corpus : ``int``, required.
             The index of this sentence in the corpus.
         am_sentence : ``AMSentence``, required.
@@ -69,12 +78,14 @@ class AMConllDatasetReader(DatasetReader):
         fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
         fields["ner_tags"] = SequenceLabelField(am_sentence.get_ner(), tokens, label_namespace="ner_labels")
         fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
-        fields["supertags"] = SequenceLabelField(am_sentence.get_supertags(), tokens, label_namespace="supertag_labels")
-        fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace="lex_labels")
-        fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace="head_tags")
+        fields["supertags"] = SequenceLabelField(am_sentence.get_supertags(), tokens, label_namespace=formalism+"_supertag_labels")
+        fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
+        fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace=formalism+"_head_tags") #edge labels
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
 
-        fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes, "position_in_corpus" : position_in_corpus})
+        fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
+                                            "formalism": formalism, "position_in_corpus" : position_in_corpus,
+                                            "is_annotated" : am_sentence.is_annotated()})
         return Instance(fields)
 
     @staticmethod

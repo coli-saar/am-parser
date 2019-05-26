@@ -291,9 +291,9 @@ def main(arguments):
     if single_score:
         (precision, recall, best_f_score) = compute_f(total_match_num, total_test_num, total_gold_num)
         if pr_flag:
-            print "Precision: %.3f" % precision
-            print "Recall: %.3f" % recall
-        print "F-score: %.3f" % best_f_score
+            print "Precision: %.4f" % precision
+            print "Recall: %.4f" % recall
+        print "F-score: %.4f" % best_f_score
     args.f[0].close()
     args.f[1].close()
 

@@ -51,23 +51,3 @@ class Supertagger(Model):
         return self._encoder_dim
 
 
-
-
-class FragmentSupertagger(Supertagger):
-    """
-    Convenience class to hide the label namespace from the person who write the configuration file.
-    """
-    def __init__(self,vocab: Vocabulary,
-                 mlp : FeedForward,
-                 regularizer: Optional[RegularizerApplicator] = None ):
-        super().__init__(vocab=vocab,mlp=mlp,regularizer=regularizer,label_namespace="supertag_labels")
-
-
-class LexlabelTagger(Supertagger):
-    """
-    Convenience class to hide the label namespace from the person who write the configuration file.
-    """
-    def __init__(self,vocab: Vocabulary,
-                 mlp : FeedForward,
-                 regularizer: Optional[RegularizerApplicator] = None ):
-        super().__init__(vocab=vocab,mlp=mlp,regularizer=regularizer,label_namespace="lex_labels")
