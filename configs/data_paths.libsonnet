@@ -1,6 +1,7 @@
 local ud_prefix = "data/UD/corenlp/";
 
 {
+    "UD_banks": ["EWT","GUM","LinES","ParTUT"],
     "train_data" : {
         "DM" : "data/SemEval/2015/DM/train/train.amconll",
         "PAS" : "data/SemEval/2015/PAS/train/train.amconll",

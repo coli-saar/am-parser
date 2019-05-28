@@ -1,5 +1,5 @@
 local k = 6;
-local give_up = 6000; #60 minutes
+local give_up = 1200; #20 minutes
 local eval_commands = import 'eval_commands.libsonnet';
 
 

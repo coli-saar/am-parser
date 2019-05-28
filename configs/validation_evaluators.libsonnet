@@ -28,13 +28,13 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2015",
         "system_input" : "data/AMR/2015/dev/dev.amconll",
         "gold_file": "dev",
-        "use_from_epoch" : 1,
+        "use_from_epoch" : 4,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k,
-                "threads" : 4,
+                "threads" : 2,
                 "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                 "evaluation_command" : eval_commands['commands']['AMR-2015']
         }
@@ -46,37 +46,37 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/dev/dev.amconll",
         "gold_file": "dev",
-        "use_from_epoch" : 1,
+        "use_from_epoch" : 4,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k,
-                "threads" : 4,
+                "threads" : 2,
                 "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                 "evaluation_command" : eval_commands['commands']['AMR-2017']
         }
 
   },
 
-    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",1,1),
+    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",1,4),
 
-    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",6,1),
+    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",2,4),
 
-    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",6,1),
+    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",2,1),
 
     "EDS" :  {
         "type": "standard_evaluator",
         "formalism" : "EDS",
         "system_input" : "data/EDS/dev/dev.amconll",
         "gold_file": "data/EDS/dev/dev-gold",
-        "use_from_epoch" : 1,
+        "use_from_epoch" : 4,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k,
-                "threads" : 4,
+                "threads" : 2,
                 "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                 "evaluation_command" : eval_commands['commands']['EDS']
         }
