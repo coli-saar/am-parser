@@ -39,6 +39,8 @@ import logging
 import os
 from typing import List, Tuple
 
+import random
+
 from comet_ml import Experiment
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
@@ -50,9 +52,6 @@ from allennlp.common.util import prepare_environment, prepare_global_logging, cl
 from allennlp.models.archival import archive_model, CONFIG_NAME
 from allennlp.models.model import Model, _DEFAULT_WEIGHTS
 from allennlp.training.util import create_serialization_dir, evaluate
-
-from graph_dependency_parser.components.evaluation.predictors import Evaluator, StandardEvaluator
-from graph_dependency_parser.train.amtrainer import AMTrainer, TrainerPieces
 
 import json
 import _jsonnet
@@ -110,9 +109,14 @@ parser.add_argument('--file-friendly-logging',
                        help='outputs tqdm status on separate lines and slows tqdm refresh rate')
 
 args = parser.parse_args()
-
 params = Params.from_file(args.param_path,args.overrides)
+random_seed, numpy_seed, pytorch_seed = random.randint(0,999999999),random.randint(0,999999999),random.randint(0,999999999)
+params["random_seed"] = random_seed
+params["numpy_seed"] = numpy_seed
+params["pytorch_seed"] = pytorch_seed
 prepare_environment(params)
+from graph_dependency_parser.components.evaluation.predictors import Evaluator, StandardEvaluator
+from graph_dependency_parser.train.amtrainer import AMTrainer, TrainerPieces
 serialization_dir = args.serialization_dir
 create_serialization_dir(params,serialization_dir , args.recover, args.force)
 stdout_handler = prepare_global_logging(serialization_dir, args.file_friendly_logging)
@@ -159,6 +163,9 @@ if args.comet is not None:
     code += "\n\n#=============Full details=============\n\n"
     code += _jsonnet.evaluate_file(args.param_path)
     experiment.set_code(code)
+    experiment.log_parameter("random_seed",random_seed) #random_seed, numpy_seed, pytorch_seed
+    experiment.log_parameter("numpy_seed",numpy_seed) #random_seed, numpy_seed, pytorch_seed
+    experiment.log_parameter("pytorch_seed",pytorch_seed) #random_seed, numpy_seed, pytorch_seed
 else:
     experiment = None
 
