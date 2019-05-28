@@ -92,6 +92,8 @@ parser.add_argument('--project',
                        default=None,
                        help='name of comet.ml project')
 
+parser.add_argument('--tags', nargs='+', help='Tags used for comet.ml. Usage: "--tags foo bar" will add two tags')
+
 parser.add_argument('-f', '--force',
                        action='store_true',
                        required=False,
@@ -150,6 +152,8 @@ params.assert_empty('base train command')
 
 if args.comet is not None:
     experiment = Experiment(api_key=args.comet, workspace=args.workspace, project_name=args.project,parse_args=False,auto_output_logging=None)
+    if args.tags:
+        experiment.add_tags(args.tags)
     with open(args.param_path) as fil:
         code = "".join(fil.readlines())
     code += "\n\n#=============Full details=============\n\n"
