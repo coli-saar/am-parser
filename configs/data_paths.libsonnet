@@ -20,7 +20,7 @@ local ud_prefix = "data/UD/corenlp/";
         "PAS" : "data/SemEval/2015/PAS/gold-dev/gold-dev.amconll",
         "PSD" : "data/SemEval/2015/PSD/gold-dev/gold-dev.amconll",
         "AMR-2015" : "data/AMR/2015/gold-dev/gold-dev.amconll",
-        "AMR-2017" : "data/AMR/2015/gold-dev/gold-dev.amconll", #that one is the same dev set as AMR-2015.
+        "AMR-2017" : "data/AMR/2017/gold-dev/gold-dev.amconll",
         "EDS" : "data/EDS/gold-dev/gold-dev.amconll",
 
         #UD:
