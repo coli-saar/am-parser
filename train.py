@@ -40,7 +40,7 @@ import os
 from typing import List, Tuple
 
 import random
-
+import socket
 from comet_ml import Experiment
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
@@ -163,6 +163,11 @@ if args.comet is not None:
     code += "\n\n#=============Full details=============\n\n"
     code += _jsonnet.evaluate_file(args.param_path)
     experiment.set_code(code)
+    code_data = json.loads(_jsonnet.evaluate_file(args.param_path))
+    experiment.log_parameter("bert","bert" in code_data["dataset_reader"]["token_indexers"])
+    experiment.log_parameter("corpora",code_data["iterator"]["formalisms"])
+    experiment.log_parameter("encoder",code_data["model"]["encoder"]["type"])
+    experiment.log_parameter("hostname",socket.gethostname())
     experiment.log_parameter("random_seed",random_seed) #random_seed, numpy_seed, pytorch_seed
     experiment.log_parameter("numpy_seed",numpy_seed) #random_seed, numpy_seed, pytorch_seed
     experiment.log_parameter("pytorch_seed",pytorch_seed) #random_seed, numpy_seed, pytorch_seed
