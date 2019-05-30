@@ -4,7 +4,7 @@ local eval_commands = import 'eval_commands.libsonnet';
 
 
 local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
-        ["id", { #prefix used for evaluation metric
+        [name+"_id", { #prefix used for evaluation metric
             "type": "standard_evaluator",
             "formalism" : name,
             "system_input" : "data/SemEval/2015/"+name+"/test.id/test.id.amconll",
@@ -18,7 +18,7 @@ local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
                     "give_up": give_up,
                     "evaluation_command" : eval_commands['commands'][name]
             }
-        }],["ood",{ #prefix used for evaluation metric
+        }],[name+"_ood",{ #prefix used for evaluation metric
                 "type": "standard_evaluator",
                 "formalism" : name,
                 "system_input" : "data/SemEval/2015/"+name+"/test.ood/test.ood.amconll",
@@ -39,7 +39,7 @@ local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
 #Defines test set evaluators for the formalisms
 #Since we have in-domain and out-of-domain test sets, each formalism gets a list of evaluators!
 function (dataset_reader, data_iterator) {
-  "AMR-2015" :  [ ["",{ #prefix used for evaluation metric
+  "AMR-2015" :  [ ["AMR-2015",{ #prefix used for evaluation metric
         "type": "standard_evaluator",
         "formalism" : "AMR-2015",
         "system_input" : "data/AMR/2015/test/test.amconll",
@@ -55,7 +55,7 @@ function (dataset_reader, data_iterator) {
         }
 
   }]],
-    "AMR-2017" :  [ ["",{ #prefix used for evaluation metric
+    "AMR-2017" :  [ ["AMR-2017",{ #prefix used for evaluation metric
         "type": "standard_evaluator",
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/test/test.amconll",
@@ -72,14 +72,14 @@ function (dataset_reader, data_iterator) {
 
   }]],
 
-    "DM" : SDP_evaluator(dataset_reader, data_iterator,"DM",1),
+    "DM" : SDP_evaluator(dataset_reader, data_iterator,"DM",6),
 
     "PAS" : SDP_evaluator(dataset_reader, data_iterator,"PAS",6),
 
     "PSD" : SDP_evaluator(dataset_reader, data_iterator,"PSD",6),
 
     "EDS" :  [
-        ["",{
+        ["EDS",{
         "type": "standard_evaluator",
         "formalism" : "EDS",
         "system_input" : "data/EDS/test/test.amconll",

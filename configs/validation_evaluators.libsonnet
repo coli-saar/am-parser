@@ -28,7 +28,7 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2015",
         "system_input" : "data/AMR/2015/dev/dev.amconll",
         "gold_file": "dev",
-        "use_from_epoch" : 10,
+        "use_from_epoch" : 15,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
@@ -46,7 +46,7 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/dev/dev.amconll",
         "gold_file": "dev",
-        "use_from_epoch" : 10,
+        "use_from_epoch" : 15,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
