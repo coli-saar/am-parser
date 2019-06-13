@@ -1,29 +1,43 @@
+#CHECKLIST:
+
+# Tasks?
+# Main task?
+# Freda?
+# Evaluate on test?
+# Evaluate on the right test corpora?
+
 local num_epochs = 40;
-local device = 1;
+local device = 0;
 local pos_dim = 32;
 local lemma_dim = 64;
 local ner_dim = 16;
 
-local validation_evaluators = import 'configs/validation_evaluators.libsonnet';
+local validation_evaluators = import '../../../configs/validation_evaluators.libsonnet';
 
-local test_evaluators = import 'configs/test_evaluators.libsonnet';
+local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
 
-local data_paths = import 'configs/data_paths.libsonnet';
+local data_paths = import '../../../configs/data_paths.libsonnet';
 
-local eval_commands = import 'configs/eval_commands.libsonnet';
+local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local UD_banks = data_paths["UD_banks"];
 
-local task_models = import 'configs/task_models.libsonnet';
+local task_models = import '../../../configs/task_models.libsonnet';
 
 local bert_model = "bert-large-uncased";
-local encoder_output_dim = 128; #encoder output dim, per direction, so total will be twice as large
+
+local encoder_output_dim = 256; #encoder output dim, per direction, so total will be twice as large
+
+#=========FREDA=========
 local use_freda = 0; #0 = no, 1 = yes
+#=======================
+
 local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encoder_output_dim; #freda again doubles output dimension
 
-
+#============TASKS==============
 local my_tasks = ["DM"];
 local main_task = "DM"; #what validation metric to pay attention to.
+#===============================
 
 local dataset_reader = {
         "type": "amconll",
@@ -34,12 +48,12 @@ local dataset_reader = {
             }
         }
       };
+
 local data_iterator = {
         "type": "same_formalism",
         "batch_size": 64,
         "formalisms" : my_tasks
     };
-
 
 
 {
@@ -48,7 +62,7 @@ local data_iterator = {
      "vocabulary" : {
             "min_count" : {
             "lemmas" : 7
-                }
+     }
      },
     "model": {
         "type": "graph_dependency_parser",
@@ -102,15 +116,17 @@ local data_iterator = {
     "train_data_path": [ [task_name, data_paths["train_data"][task_name]] for task_name in my_tasks],
     "validation_data_path": [ [task_name,data_paths["gold_dev_data"][task_name]] for task_name in my_tasks],
 
+
+    #=========================EVALUATE ON TEST=================================
     "evaluate_on_test" : true,
     "test_evaluators" : [test_evaluators(dataset_reader, data_iterator)[main_task]], #when training is done, call evaluation on test sets with best model as described here.
+    #==========================================================================
 
     "trainer": {
         "type" : "am-trainer",
         "num_epochs": num_epochs,
         "patience" : 10,
         "cuda_device": device,
-        "grad_clipping": 5.0,
         "optimizer": {
             "type": "adam",
         },

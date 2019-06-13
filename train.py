@@ -165,6 +165,7 @@ if args.comet is not None:
     experiment.set_code(code)
     code_data = json.loads(_jsonnet.evaluate_file(args.param_path))
     experiment.log_parameter("bert","bert" in code_data["dataset_reader"]["token_indexers"])
+    experiment.log_parameter("cuda_device",cuda_device)
     experiment.log_parameter("corpora",code_data["iterator"]["formalisms"])
     experiment.log_parameter("encoder",code_data["model"]["encoder"]["type"])
     experiment.log_parameter("hostname",socket.gethostname())

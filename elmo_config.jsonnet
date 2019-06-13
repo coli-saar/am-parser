@@ -1,4 +1,4 @@
-local num_epochs = 45;
+local num_epochs = 40;
 local device = 1;
 local pos_dim = 32;
 local lemma_dim = 64;
@@ -110,7 +110,7 @@ local task(name) = { #defines the part of the model that is specific for each ta
             "type" : if use_freda == 1 then "freda_split" else "shared_split_encoder",
             "formalisms" : my_tasks,
             "formalisms_without_tagging": UD_banks,
-            #"task_dropout" : 0.2,
+            "task_dropout" : 0.0,
             "encoder": {
                 "type": "stacked_bidirectional_lstm",
                 "num_layers": 1,

@@ -23,7 +23,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Run the am-parser on a specified amconll file in order to annotate it, doesn't perform evaluation.")
 
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
-parser.add_argument('formalism', type=str, required=True, help='name of formalism (must be included in the model)')
+parser.add_argument('formalism', type=str, help='name of formalism (must be included in the model)')
 parser.add_argument('input_file', type=str, help='path to the file containing the evaluation data')
 parser.add_argument('output_file', type=str, help='path to where output shall be written')
 

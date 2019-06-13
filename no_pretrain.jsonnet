@@ -1,4 +1,4 @@
-local num_epochs = 1;
+local num_epochs = 40;
 local device = 1;
 local pos_dim = 32;
 local lemma_dim = 64;
@@ -13,15 +13,17 @@ local data_paths = import 'configs/data_paths.libsonnet';
 
 local eval_commands = import 'configs/eval_commands.libsonnet';
 
-local UD_banks = ["EWT","GUM","LinES","ParTUT"];
+local UD_banks = data_paths["UD_banks"];
+
+local task_models = import 'configs/task_models.libsonnet';
 
 local encoder_output_dim = 128; #encoder output dim, per direction, so total will be twice as large
 local use_freda = 0; #0 = no, 1 = yes
 local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encoder_output_dim; #freda again doubles output dimension
 
 
-local my_tasks = ["AMR-2017"];# + UD_banks;
-local main_task = "AMR-2017"; #what validation metric to pay attention to.
+local my_tasks = ["EDS"];
+local main_task = "EDS"; #what validation metric to pay attention to.
 
 local dataset_reader =  {
         "type": "amconll",
@@ -36,63 +38,10 @@ local dataset_reader =  {
 local data_iterator = {
         "type": "same_formalism",
         "batch_size": 64,
-        "formalisms" : my_tasks
+        "formalisms" : my_tasks,
+        "biggest_batch_first" : true
     };
 
-
-local task(name) = { #defines the part of the model that is specific for each task.
-    name : name,
-    "dropout": 0.3,
-
-    "edge_model" : {
-            "type" : "kg_edges",
-            "encoder_dim" : final_encoder_output_dim,
-            "label_dim": 256,
-            "edge_dim": 256,
-            #"activation" : "tanh",
-            "dropout": 0.0,
-            "edge_label_namespace" : name+"_head_tags"
-        },
-         "supertagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [1024],
-                "dropout" : [0.4],
-                "activations" : "tanh"
-            },
-            "label_namespace": name+"_supertag_labels"
-
-        },
-        "lexlabeltagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [1024],
-                "dropout" : [0.4],
-                "activations" : "tanh"
-            },
-            "label_namespace":name+"_lex_labels"
-
-        },
-
-        #LOSS:
-        "loss_mixing" : {
-            "edge_existence" : 1.0,
-            "edge_label": 1.0,
-            "supertagging": if std.count(UD_banks,name) > 0 then null else 1.0, #disable supertagging for UD
-            "lexlabel": if std.count(UD_banks,name) > 0 then null else 1.0
-        },
-        "loss_function" : {
-            "existence_loss" : { "type" : "kg_edge_loss", "normalize_wrt_seq_len": false},
-            "label_loss" : {"type" : "dm_label_loss" , "normalize_wrt_seq_len": false}
-        },
-
-        "supertagger_loss" : { "normalize_wrt_seq_len": false },
-        "lexlabel_loss" : { "normalize_wrt_seq_len": false },
-
-        "validation_evaluator": validation_evaluators(dataset_reader, data_iterator)[name]
-};
 
 {
     "dataset_reader": dataset_reader,
@@ -106,14 +55,14 @@ local task(name) = { #defines the part of the model that is specific for each ta
     "model": {
         "type": "graph_dependency_parser",
 
-        "tasks" : [task(task_name) for task_name in my_tasks],
+        "tasks" : [task_models(task_name,dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss") for task_name in my_tasks],
 
         "input_dropout": 0.3,
         "encoder": {
             "type" : if use_freda == 1 then "freda_split" else "shared_split_encoder",
             "formalisms" : my_tasks,
             "formalisms_without_tagging": UD_banks,
-            #"task_dropout" : 0.2,
+            "task_dropout" : 0.0, #only relevant for freda
             "encoder": {
                 "type": "stacked_bidirectional_lstm",
                 "num_layers": 2, #TWO LAYERS, we don't use sesame street.
