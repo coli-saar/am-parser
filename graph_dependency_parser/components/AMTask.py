@@ -162,7 +162,9 @@ class AMTask(Model):
 
         output_dict = {
             "heads": predicted_heads,
+            "edge_existence_scores" : edge_existence_scores,
             "label_logits": edge_label_logits,  # shape (batch_size, seq_len, num edge labels)
+            "full_label_logits" : self.edge_model.full_label_scores(encoded_text_parsing), #these are mostly required for the projective decoder
             "mask": mask,
             "words": [meta["words"] for meta in metadata],
             "attributes": [meta["attributes"] for meta in metadata],
@@ -245,6 +247,8 @@ class AMTask(Model):
         """
         best_supertags = output_dict.pop("best_supertags").cpu().detach().numpy()
         supertag_scores = output_dict.pop("supertag_scores") # shape (batch_size, seq_len, num supertags)
+        full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
+        edge_existence_scores = output_dict.pop("edge_existence_scores").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
         k = 10
         if self.validation_evaluator: #retrieve k supertags from validation evaluator.
             if isinstance(self.validation_evaluator.predictor,AMconllPredictor):
@@ -260,12 +264,15 @@ class AMTask(Model):
         output_dict.pop("encoded_text_tagging") #don't need that
         lengths = get_lengths_from_binary_sequence_mask(mask)
 
-        #here we collect things:
+        #here we collect things, in the end we will have one entry for each sentence:
         all_edge_label_logits = []
         all_supertags = []
         head_indices = []
         roots = []
         all_predicted_lex_labels = []
+        all_full_label_logits = []
+        all_edge_existence_scores = []
+        all_supertag_scores = []
 
         #we need the following to identify the root
         root_edge_label_id = self.vocab.get_token_index("ROOT",namespace=self.name+"_head_tags")
@@ -286,9 +293,13 @@ class AMTask(Model):
             #(un)squeeze: fake batch dimension
             all_edge_label_logits.append(label_logits[1:length,:])
 
+            all_full_label_logits.append(full_label_logits[i,:length, :length,:])
+            all_edge_existence_scores.append(edge_existence_scores[i,:length, :length])
+
             #calculate supertags for this sentence:
+            all_supertag_scores.append(supertag_scores[i,1:length,:]) #new shape (sent length, num supertags)
             supertags_for_this_sentence = []
-            for word in range(1,length): #TODO allow only ART-ROOT supertags at ART-ROOT
+            for word in range(1,length):
                 supertags_for_this_word = []
                 for top_k in top_k_supertags[i,word]:
                     fragment, typ = AMSentence.split_supertag(self.vocab.get_token_from_index(top_k, namespace=self.name+"_supertag_labels"))
@@ -307,6 +318,9 @@ class AMTask(Model):
         output_dict["root"] = roots
         output_dict["label_logits"] = all_edge_label_logits
         output_dict["predicted_heads"] = head_indices
+        output_dict["full_label_logits"] = all_full_label_logits
+        output_dict["edge_existence_scores"] = all_edge_existence_scores
+        output_dict["supertag_scores"] = all_supertag_scores
         return output_dict
 
 

@@ -65,6 +65,13 @@ class AMSentence:
     def get_edge_labels(self) -> List[str]:
         return [word.label if word.label != "_" else "IGNORE" for word in self.words] #this is a hack :(, which we need because the dev data contains _
 
+    def set_lexlabels(self, labels : List[str]) -> "AMSentence":
+        assert len(labels) == len(self.words), f"number of lexical labels must agree with number of words but got {len(labels)} and {len(self.words)}"
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, labels[i],
+                                word.typ, word.head, word.label, word.aligned)
+                           for i,word in enumerate(self.words)],self.attributes)
+
+
     @staticmethod
     def get_bottom_supertag() -> str:
         return "_--TYPE--_"

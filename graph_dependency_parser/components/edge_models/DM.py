@@ -166,3 +166,22 @@ class DMEdges(EdgeModel):
         head_tag_logits = self.tag_bilinear(selected_head_tag_representations,
                                             child_tag_representation)
         return head_tag_logits
+
+    def full_label_scores(self, encoded_text:torch.Tensor) -> torch.Tensor:
+        """
+        Computes edge label scores for all edges for a batch of sentences.
+
+        Parameters
+        ----------
+         encoded_text : torch.Tensor, required
+            The input sentence, with artifical root node (head sentinel) added in the beginning of
+            shape (batch_size, sequence length, encoding dim)
+
+        Returns
+        -------
+        edge_label_logits : ``torch.Tensor``
+            A tensor of shape (batch_size, sequence_length,sequence_length, num_edge_labels),
+            representing logits for predicting a distribution over edge labels
+            for each edge. [i,j,k,l] is the the score for edge j->k being labeled l in sentence i
+        """
+        raise NotImplementedError("full_label_scores is not yet implemented for the Dozat&Manning edge model")

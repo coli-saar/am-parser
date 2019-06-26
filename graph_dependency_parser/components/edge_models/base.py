@@ -38,3 +38,23 @@ class EdgeModel(Model):
         :return: the output dim of the encoder used, must match encoding dim in edge_existence
         """
         raise NotImplementedError()
+
+    @abstractmethod
+    def full_label_scores(self, encoded_text:torch.Tensor) -> torch.Tensor:
+        """
+        Computes edge label scores for all edges for a batch of sentences.
+
+        Parameters
+        ----------
+         encoded_text : torch.Tensor, required
+            The input sentence, with artifical root node (head sentinel) added in the beginning of
+            shape (batch_size, sequence length, encoding dim)
+
+        Returns
+        -------
+        edge_label_logits : ``torch.Tensor``
+            A tensor of shape (batch_size, sequence_length,sequence_length, num_edge_labels),
+            representing logits for predicting a distribution over edge labels
+            for each edge. [i,j,k,l] is the the score for edge j->k being labeled l in sentence i
+        """
+        raise NotImplementedError()

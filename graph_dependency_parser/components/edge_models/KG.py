@@ -153,3 +153,38 @@ class KGEdges(EdgeModel):
         edge_label_logits = self.label_out_layer(combined)
 
         return edge_label_logits
+
+    def full_label_scores(self, encoded_text:torch.Tensor) -> torch.Tensor:
+        """
+        Computes edge label scores for all edges for a batch of sentences.
+
+        Parameters
+        ----------
+         encoded_text : torch.Tensor, required
+            The input sentence, with artifical root node (head sentinel) added in the beginning of
+            shape (batch_size, sequence length, encoding dim)
+
+        Returns
+        -------
+        edge_label_logits : ``torch.Tensor``
+            A tensor of shape (batch_size, sequence_length,sequence_length, num_edge_labels),
+            representing logits for predicting a distribution over edge labels
+            for each edge. [i,j,k,l] is the the score for edge j->k being labeled l in sentence i
+        """
+        # shape (batch_size, sequence_length, label_representation_dim)
+        head_label_representation = self._dropout(self.head_label_feedforward(encoded_text))
+        child_label_representation = self._dropout(self.child_label_feedforward(encoded_text))
+
+        bs,sl,label_dim = head_label_representation.size()
+
+        #now repeat the token representations to form a matrix:
+        #shape (batch_size, sequence_length, sequence_length, label_representation_dim)
+        heads = head_label_representation.repeat(1,sl,1).reshape(bs,sl,sl,label_dim) #heads in one direction
+        deps = child_label_representation.repeat(1, sl, 1).reshape(bs, sl, sl, label_dim).transpose(1,2) #deps in the other direction
+
+        # shape (batch_size, sequence_length, sequence_length, label_representation_dim)
+        combined = self.activation(heads + deps) #now the feedforward layer that takes every pair of vectors for tokens is complete.
+        #combined now represents the activations in the hidden layer of the MLP.
+        edge_scores = self.label_out_layer(combined).squeeze(3) #now through output layer
+
+        return edge_scores #shape (batch_size, sequence_length,sequence_length, num_edge_labels)
