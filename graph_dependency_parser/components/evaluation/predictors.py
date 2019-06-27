@@ -126,7 +126,7 @@ class AMconllPredictor(Predictor):
         for pred in predictions:
             attributes = pred["attributes"]
             am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
-            sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner()))
+            sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
         decoder.decode(self.threads,self.k,self.give_up)
 

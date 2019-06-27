@@ -168,6 +168,7 @@ class AMTask(Model):
             "mask": mask,
             "words": [meta["words"] for meta in metadata],
             "attributes": [meta["attributes"] for meta in metadata],
+            "token_ranges" : [meta["token_ranges"] for meta in metadata],
             "encoded_text_parsing": encoded_text_parsing,
             "encoded_text_tagging": encoded_text_tagging,
             "position_in_corpus": [meta["position_in_corpus"] for meta in metadata],

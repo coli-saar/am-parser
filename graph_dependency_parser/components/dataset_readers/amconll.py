@@ -85,6 +85,7 @@ class AMConllDatasetReader(DatasetReader):
 
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
+                                            "token_ranges" : am_sentence.get_ranges(),
                                             "is_annotated" : am_sentence.is_annotated()})
         return Instance(fields)
 

@@ -59,7 +59,7 @@ function (dataset_reader, data_iterator) {
 
   },
 
-    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,15),
+    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,0),
 
     "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,20),
 
@@ -85,7 +85,27 @@ function (dataset_reader, data_iterator) {
      "EWT" : { "type" :  "dummy_evaluator" },
      "GUM" : { "type" :  "dummy_evaluator" },
      "LinES" : { "type" :  "dummy_evaluator" },
-     "ParTUT" : { "type" :  "dummy_evaluator" }
+     "ParTUT" : { "type" :  "dummy_evaluator" },
+
+     #MRP
+
+      "MRP-DM" :  {
+        "type": "standard_evaluator",
+        "formalism" : "MRP-DM",
+        "system_input" : "data/MRP/DM/dev/dev.amconll",
+        "gold_file": "data/MRP/DM/dev/dev.mrp",
+        "use_from_epoch" : 1,
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : 4,
+                "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
+                "evaluation_command" : eval_commands['commands']['MRP-DM']
+        }
+
+  },
 
 
 }

@@ -62,7 +62,7 @@ class AMDecoder:
         :param label_scores: a numpy array for edge label scores with dimensions (N+1) x L. label_scores[i,l] represents the score for the incoming edge to i having label l
         :param lexlabels: a list of of lexical labels (strings) that will be used for the words
         :param supertagpreds: a list of lists. For each word, this list contains triples (log probability, graph fragment as string, AM type as string) and must contain an entry for \bot (represented by _)
-        :param sentence: a list of tuples in the shape: (form,replacement,lemma,pos,ne)
+        :param sentence: a list of tuples in the shape: (form,replacement,lemma,pos,ne, token_range)
         :param attributes: a list of sentence-wide attributes, e.g. ["raw:This is the untokenized sentence"]
         :return: None
         """
@@ -75,8 +75,8 @@ class AMDecoder:
         conllsent.append(root_entry)
         assert len(sentence) == len(lexlabels)
         assert len(sentence) == len(supertagpreds)
-        for i,(form,replacement,lemma,pos,ne) in enumerate(sentence):
-            entry = ConllEntry(i+1,form,replacement,lemma,pos,ne,"_",lexlabels[i],"_",0,"IGNORE",True)
+        for i,(form,replacement,lemma,pos,ne, token_range) in enumerate(sentence):
+            entry = ConllEntry(i+1,form,replacement,lemma,pos,ne,"_",lexlabels[i],"_",0,"IGNORE",True,token_range)
             entry.pred_parent_id = heads[i]
             if not any(triple[2] == "_" for triple in supertagpreds[i]):
                 raise ValueError("The supertag prediction for word "+str(i+1)+" has no entry for bottom (represented by _). This is required.")
