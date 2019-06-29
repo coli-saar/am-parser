@@ -20,6 +20,23 @@ local sdp_evaluator(dataset_reader, data_iterator, name, threads, from_epoch) = 
 
 };
 
+local mrp_evaluator(dataset_reader, data_iterator, name) = {
+        "type": "standard_evaluator",
+        "formalism" : "MRP-"+name,
+        "system_input" : "data/MRP/"+name+"/dev/dev.amconll",
+        "gold_file": "data/MRP/"+name+"/dev/dev.mrp",
+        "use_from_epoch" : 1,
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : 4,
+                "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
+                "evaluation_command" : eval_commands['commands']['MRP-'+name]
+        }
+};
+
 
 #Defines validation evaluators for the formalisms
 function (dataset_reader, data_iterator) {
@@ -89,23 +106,9 @@ function (dataset_reader, data_iterator) {
 
      #MRP
 
-      "MRP-DM" :  {
-        "type": "standard_evaluator",
-        "formalism" : "MRP-DM",
-        "system_input" : "data/MRP/DM/dev/dev.amconll",
-        "gold_file": "data/MRP/DM/dev/dev.mrp",
-        "use_from_epoch" : 1,
-        "predictor" : {
-                "type" : "amconll_predictor",
-                "dataset_reader" : dataset_reader, #same dataset_reader as above.
-                "data_iterator" : data_iterator, #same bucket iterator also for validation.
-                "k" : k,
-                "threads" : 4,
-                "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
-                "evaluation_command" : eval_commands['commands']['MRP-DM']
-        }
+      "MRP-DM" :  mrp_evaluator(dataset_reader, data_iterator, "DM"),
+      "MRP-PSD" :  mrp_evaluator(dataset_reader, data_iterator, "PSD")
 
-  },
 
 
 }
