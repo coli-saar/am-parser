@@ -107,7 +107,9 @@ function (dataset_reader, data_iterator) {
      #MRP
 
       "MRP-DM" :  mrp_evaluator(dataset_reader, data_iterator, "DM"),
-      "MRP-PSD" :  mrp_evaluator(dataset_reader, data_iterator, "PSD")
+      "MRP-PSD" :  mrp_evaluator(dataset_reader, data_iterator, "PSD"),
+
+      "MRP-EDS" :  mrp_evaluator(dataset_reader, data_iterator, "EDS")
 
 
 

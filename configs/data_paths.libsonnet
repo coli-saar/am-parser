@@ -16,7 +16,8 @@ local ud_prefix = "data/UD/corenlp/";
         "ParTUT": ud_prefix+"ParTUT/train/train.amconll",
 
         "MRP-DM" : "data/MRP/DM/train/train.amconll",
-        "MRP-PSD" : "data/MRP/PSD/train/train.amconll"
+        "MRP-PSD" : "data/MRP/PSD/train/train.amconll",
+        "MRP-EDS" : "data/MRP/EDS/train/train.amconll"
     },
     "gold_dev_data" : { #gold AM dependency trees for (a subset of) the dev data
         "DM" : "data/SemEval/2015/DM/gold-dev/gold-dev.amconll",
@@ -33,7 +34,8 @@ local ud_prefix = "data/UD/corenlp/";
         "ParTUT": ud_prefix+"ParTUT/dev/dev.amconll",
 
         "MRP-DM" : "data/MRP/DM/gold-dev/gold-dev.amconll",
-        "MRP-PSD" : "data/MRP/PSD/gold-dev/gold-dev.amconll"
+        "MRP-PSD" : "data/MRP/PSD/gold-dev/gold-dev.amconll",
+        "MRP-EDS" : "data/MRP/EDS/gold-dev/gold-dev.amconll"
     }
 }
 
