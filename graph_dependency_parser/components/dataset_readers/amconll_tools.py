@@ -111,6 +111,23 @@ class AMSentence:
         return not all((w.label == "_" or w.label == "IGNORE") and w.head == 0 for w in self.words)
 
 
+def from_raw_text(words: List[str], add_art_root : bool, attributes: Dict) -> AMSentence:
+    """
+    Create an AMSentence from raw text, without token ranges and stuff
+    :param words:
+    :param add_art_root:
+    :param attributes:
+    :return:
+    """
+    entries = []
+    for i, word in zip(range(1,len(words)+1), words):
+        e = Entry(word,"_","_","_","O","_","_","_",0,"IGNORE",True,None)
+        entries.append(e)
+    if add_art_root:
+        entries.append(Entry("ART-ROOT","_","ART-ROOT","ART-ROOT","ART-ROOT","_","_","_",0,"IGNORE",True,None))
+    sentence = AMSentence(entries, attributes)
+    sentence.check_validity()
+    return sentence
 
 def parse_amconll(fil) -> Iterable[AMSentence]:
     """
