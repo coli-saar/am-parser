@@ -13,8 +13,9 @@ import torch.optim.lr_scheduler
 
 from allennlp.common import Params
 from allennlp.common.checks import ConfigurationError
-from allennlp.common.util import (dump_metrics, gpu_memory_mb, parse_cuda_device, peak_memory_mb,
+from allennlp.common.util import (dump_metrics, gpu_memory_mb, peak_memory_mb,
                                   get_frozen_and_tunable_parameter_names, lazy_groups_of)
+from allennlp.common.checks import  parse_cuda_device
 from allennlp.common.tqdm import Tqdm
 from allennlp.data.instance import Instance
 from allennlp.data.iterators.data_iterator import DataIterator, TensorDict

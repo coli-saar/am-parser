@@ -7,7 +7,7 @@ Apart from the edge models, the are also two different loss functions, a softmax
 
 ### Requirements
 - Python 3.7
-- AllenNLP (tested with version 0.8.3 and Pytorch 1.1)
+- AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
 
