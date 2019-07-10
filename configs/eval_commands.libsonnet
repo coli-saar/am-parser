@@ -94,7 +94,7 @@ local sdp_regexes = {
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",
         "MRP-EDS" : "+MRP-EDS_smatch_f",
-        "MRP-AMR" : "+MRP-EDS_smatch_f"
+        "MRP-AMR" : "+MRP-AMR_smatch_f"
 
     }
 

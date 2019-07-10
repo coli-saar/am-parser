@@ -404,7 +404,7 @@ class AMTask(Model):
             new_mask = new_mask * (1 - label_mask)
         return new_mask
 
-    def metrics(self, parser_model, reset: bool = False) -> Dict[str, float]:
+    def metrics(self, parser_model, reset: bool = False, model_path=None) -> Dict[str, float]:
         """
         Is called by a GraphDependencyParser
         :param parser_model: a GraphDependencyParser
@@ -417,7 +417,7 @@ class AMTask(Model):
                 self.current_epoch += 1
             else: #done on dev/test data
                 if self.validation_evaluator:
-                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch)
+                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch,model_path)
                     for name, val in metrics.items():
                         r[name] = val
         return r

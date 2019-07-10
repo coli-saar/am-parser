@@ -449,7 +449,7 @@ class AMTrainer(TrainerBase):
 
         return val_loss, batches_this_epoch
 
-    def train(self, experiment=None) -> Dict[str, Any]:
+    def train(self, experiment=None, model_path=None) -> Dict[str, Any]:
         """
         Trains the supplied model with the supplied parameters.
         """
@@ -496,7 +496,8 @@ class AMTrainer(TrainerBase):
                 with torch.no_grad():
                     # We have a validation set, so compute all the metrics on it.
                     val_loss, num_batches = self._validation_loss()
-                    val_metrics = training_util.get_metrics(self.model, val_loss, num_batches, reset=True)
+                    val_matrics = self.model.get_metrics(reset=True, model_path = model_path)
+                    val_metrics["loss"] = float(val_loss / num_batches) if num_batches > 0 else 0.0
 
                     # Check validation metric for early stopping
                     if self._validation_metric in val_metrics:
