@@ -130,12 +130,14 @@ class AMconllPredictor(Predictor):
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
         decoder.decode(self.threads,self.k,self.give_up)
 
+
 class Evaluator(Registrable):
     """
     For use in configuration files. Abstract class that only defines what an evaluator should look like.
     """
     def eval(self, model, epoch) -> Dict[str,float]:
         raise NotImplementedError()
+
 
 @Evaluator.register("standard_evaluator")
 class StandardEvaluator(Evaluator):
@@ -155,6 +157,7 @@ class StandardEvaluator(Evaluator):
             return dict()
         self.predictor.set_model(model)
         return self.predictor.parse_and_eval(self.formalism, self.system_input, self.gold_file)
+
 
 @Evaluator.register("dummy_evaluator")
 class DummyEvaluator(Evaluator):

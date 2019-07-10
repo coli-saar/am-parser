@@ -74,6 +74,12 @@ local sdp_regexes = {
                         #["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
         },
 
+        "MRP-AMR" : {
+        "type" : "json_evaluation_command",
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup external_eval_tools/2019rerun/MRP_first_run/ --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --gold {gold_file} {tmp}/output.mrp'],
+                        ]
+        },
 
     },
 
@@ -87,7 +93,8 @@ local sdp_regexes = {
 
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",
-        "MRP-EDS" : "+MRP-EDS_smatch_f"
+        "MRP-EDS" : "+MRP-EDS_smatch_f",
+        "MRP-AMR" : "+MRP-EDS_smatch_f"
 
     }
 
