@@ -178,7 +178,7 @@ else:
     experiment = None
 
 try:
-    metrics = trainer.train(experiment)
+    metrics = trainer.train(experiment, model_path = serialization_dir)
 except KeyboardInterrupt:
     # if we have completed an epoch, try to create a model archive.
     if os.path.exists(os.path.join(serialization_dir, _DEFAULT_WEIGHTS)):
