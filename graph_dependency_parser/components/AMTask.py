@@ -48,6 +48,7 @@ class AMTask(Model):
                  lexlabeltagger: Supertagger,
                  supertagger_loss : SupertaggingLoss,
                  lexlabel_loss : SupertaggingLoss,
+                 output_null_lex_label : bool = True,
                  loss_mixing : Dict[str,float] = None,
                  dropout : float = 0.0,
                  validation_evaluator: Optional[Evaluator] = None,
@@ -63,6 +64,7 @@ class AMTask(Model):
         self.loss_function = loss_function
         self.loss_mixing = loss_mixing or dict()
         self.validation_evaluator = validation_evaluator
+        self.output_null_lex_label = output_null_lex_label
 
         self._dropout = InputVariationalDropout(dropout)
 
@@ -178,7 +180,15 @@ class AMTask(Model):
             output_dict["supertag_scores"] = supertagger_logits # shape (batch_size, seq_len, num supertags)
             output_dict["best_supertags"] = Supertagger.top_k_supertags(supertagger_logits, 1).squeeze(2) # shape (batch_size, seq_len)
         if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
-            output_dict["lexlabels"] = Supertagger.top_k_supertags(lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
+            if not self.output_null_lex_label:
+                bottom_lex_label_index = self.vocab.get_token_index("_", namespace=self.name + "_lex_labels")
+                lexlabel_mask = torch.ones_like(lexlabel_logits) # shape (batch_size, seq_len, num label tags)
+                lexlabel_mask[:,:,bottom_lex_label_index] = 0
+                masked_lexlabel_logits = lexlabel_logits * lexlabel_mask  # shape (batch_size, seq_len, num label tags)
+            else:
+                masked_lexlabel_logits = lexlabel_logits
+
+            output_dict["lexlabels"] = Supertagger.top_k_supertags(masked_lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
 
         is_annotated = metadata[0]["is_annotated"]
         if any( metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
