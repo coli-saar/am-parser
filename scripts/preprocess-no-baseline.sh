@@ -28,7 +28,6 @@ fi
 
 
 
-cd ..
 
 rawAMRCorpus=$maindir/corpus # folder containing the raw corpus as if just downloaded from the website
 
@@ -75,10 +74,10 @@ trainMinuteLimit=600                                         # limit for generat
 devMinuteLimit=20                                            # limit for geneating NN dev data
 threads=1
 memLimit=6G
-posTagger="data/english-bidirectional-distsim.tagger"
-nerTagger="data/english.conll.4class.distsim.crf.ser.gz"
-PCFG="data/englishPCFG.txt"
-wordnet="data/wordnet/dict/"
+posTagger="resources/english-bidirectional-distsim.tagger"
+nerTagger="resources/english.conll.4class.distsim.crf.ser.gz"
+PCFG="resources/englishPCFG.txt"
+wordnet="resources/wordnet/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
 
 # raw training data, preprocess, alto format.
