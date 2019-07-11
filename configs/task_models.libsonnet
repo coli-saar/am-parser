@@ -5,9 +5,14 @@ local validation_evaluators = import 'validation_evaluators.libsonnet';
 local data_paths = import 'data_paths.libsonnet';
 local UD_banks = data_paths["UD_banks"];
 
+#those graph banks where it is desired to have lexical labels that are _
+local OUTPUT_NULL_LEX_LABEL = ["DM","PSD","PAS"];
+
 function(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_model, edge_loss, label_loss) {
     "name" : name,
     "dropout": 0.3,
+
+    "output_null_lex_label" : std.count(OUTPUT_NULL_LEX_LABEL,name) > 0,
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",

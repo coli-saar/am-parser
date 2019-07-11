@@ -1,7 +1,7 @@
 from collections import Counter, OrderedDict, UserList
 
 class ConllEntry:
-    def __init__(self, id, form, replacement, lemma, pos, ne, delex_supertag, lex_label, typ, parent_id, edge_label, aligned=True):
+    def __init__(self, id, form, replacement, lemma, pos, ne, delex_supertag, lex_label, typ, parent_id, edge_label, aligned=True, token_range=None):
         self.aligned = aligned
         self.id = id
         self.form = form
@@ -20,18 +20,22 @@ class ConllEntry:
         self.pred_parent_id = None
         self.pred_edge_label = None
 
+        self.token_range = token_range
+
         
     def getTag(self):
         return (self.delex_supertag, self.typ)
     
     
     def copy(self):
-        e = ConllEntry(self.id, self.form, self.replacement, self.lemma, self.pos, self.ne, self.delex_supertag, self.lex_label, self.typ, self.parent_id, self.edge_label, self.aligned)
+        e = ConllEntry(self.id, self.form, self.replacement, self.lemma, self.pos, self.ne, self.delex_supertag, self.lex_label, self.typ, self.parent_id, self.edge_label, self.aligned, self.token_range)
         e.supertags = self.supertags
         return e
 
     def __str__(self):
         values = [str(self.id), self.form, self.replacement, self.lemma, self.pos, self.ne, self.delex_supertag, self.lex_label, str(self.typ), str(self.pred_parent_id), self.pred_edge_label, str(self.aligned)]
+        if self.token_range is not None:
+            values.append(self.token_range)
         return '\t'.join(['_' if v is None else v for v in values])
 
 
@@ -51,7 +55,7 @@ class ConllSent(UserList):
     def get_attrs(self):
         return self.attrs
     def copy(self):
-        n = ConllSent()
+        n = ConllSent(self.heads,self.label_scores,self.root)
         n.attrs = list(self.attrs)
         for e in self:
             n.append(e.copy())

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Iterable, Dict, Tuple
+from typing import List, Iterable, Dict, Tuple, Union
 
 from allennlp.common import Params, Registrable
 from allennlp.data import DatasetReader, DataIterator
@@ -54,7 +54,7 @@ class Predictor (Registrable):
         """
         raise NotImplementedError()
 
-    def parse_and_eval(self, formalism:str, input_file : str, gold_file: str) -> Dict[str,float]:
+    def parse_and_eval(self, formalism:str, input_file : str, gold_file: str, filename :Union[str, None]) -> Dict[str,float]:
         """
         Given an input file and a gold standard file, parses the input, saves the output in a temporary directory
         and calls the evaluation command
@@ -64,10 +64,14 @@ class Predictor (Registrable):
         :return: a dictionary with evaluation metrics as delivered by evaluation_command
         """
         assert self.evaluation_command, "parse_and_eval needs evaluation_command to be given"
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            filname = tmpdirname+"/prediction"
-            self.parse_and_save(formalism, input_file, filname)
-            return self.evaluation_command.evaluate(filname,gold_file)
+        if not filename:
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                filename = tmpdirname+"/prediction"
+                self.parse_and_save(formalism, input_file, filename)
+                return self.evaluation_command.evaluate(filename,gold_file)
+        else:
+            self.parse_and_save(formalism, input_file, filename)
+            return self.evaluation_command.evaluate(filename, gold_file)
 
     @classmethod
     def from_config(cls, config_file : str, serialization_dir : str) -> "Predictor":
@@ -126,16 +130,18 @@ class AMconllPredictor(Predictor):
         for pred in predictions:
             attributes = pred["attributes"]
             am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
-            sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner()))
+            sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
         decoder.decode(self.threads,self.k,self.give_up)
+
 
 class Evaluator(Registrable):
     """
     For use in configuration files. Abstract class that only defines what an evaluator should look like.
     """
-    def eval(self, model, epoch) -> Dict[str,float]:
+    def eval(self, model, epoch,model_path=None) -> Dict[str,float]:
         raise NotImplementedError()
+
 
 @Evaluator.register("standard_evaluator")
 class StandardEvaluator(Evaluator):
@@ -150,14 +156,19 @@ class StandardEvaluator(Evaluator):
         self.predictor = predictor
         self.use_from_epoch = use_from_epoch
 
-    def eval(self,model, epoch) -> Dict[str, float]:
+    def eval(self,model, epoch, model_path=None) -> Dict[str, float]:
         if epoch < self.use_from_epoch:
             return dict()
         self.predictor.set_model(model)
-        return self.predictor.parse_and_eval(self.formalism, self.system_input, self.gold_file)
+        if model_path:
+            filename = model_path + "/" + "dev_epoch_"+str(epoch)+".amconll"
+            return self.predictor.parse_and_eval(self.formalism, self.system_input, self.gold_file, filename=filename)
+        else: #use temporary directory
+            return self.predictor.parse_and_eval(self.formalism, self.system_input, self.gold_file,None)
+
 
 @Evaluator.register("dummy_evaluator")
 class DummyEvaluator(Evaluator):
 
-    def eval(self,model, epoch) -> Dict[str, float]:
+    def eval(self,model, epoch,model_path=None) -> Dict[str, float]:
         return dict()

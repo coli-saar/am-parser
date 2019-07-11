@@ -18,13 +18,14 @@ class AgendaItem:
     """
     Represents a parse item that lives on the agenda.
     """
-    def __init__(self,index,unproc_children,type,score,local_types,subtree):
+    def __init__(self,index,unproc_children,type,score,local_types,subtree, is_art_root):
         self.index = index
         self.unproc_children = unproc_children
         self.type = type
         self.score = score
         self.local_types = local_types
         self.subtree = subtree
+        self.is_art_root = is_art_root
     def __str__(self):
         return "AgendaItem({},{},{},{},{},{})".format(self.index,self.unproc_children,self.type,self.score,self.local_types,self.subtree)
     def __repr__(self):
@@ -35,6 +36,7 @@ class AgendaItem:
         return True
     def __lt__(self,other):
         return True
+
 
 
 class AMDecoder:
@@ -62,7 +64,7 @@ class AMDecoder:
         :param label_scores: a numpy array for edge label scores with dimensions (N+1) x L. label_scores[i,l] represents the score for the incoming edge to i having label l
         :param lexlabels: a list of of lexical labels (strings) that will be used for the words
         :param supertagpreds: a list of lists. For each word, this list contains triples (log probability, graph fragment as string, AM type as string) and must contain an entry for \bot (represented by _)
-        :param sentence: a list of tuples in the shape: (form,replacement,lemma,pos,ne)
+        :param sentence: a list of tuples in the shape: (form,replacement,lemma,pos,ne, token_range)
         :param attributes: a list of sentence-wide attributes, e.g. ["raw:This is the untokenized sentence"]
         :return: None
         """
@@ -75,8 +77,8 @@ class AMDecoder:
         conllsent.append(root_entry)
         assert len(sentence) == len(lexlabels)
         assert len(sentence) == len(supertagpreds)
-        for i,(form,replacement,lemma,pos,ne) in enumerate(sentence):
-            entry = ConllEntry(i+1,form,replacement,lemma,pos,ne,"_",lexlabels[i],"_",0,"IGNORE",True)
+        for i,(form,replacement,lemma,pos,ne, token_range) in enumerate(sentence):
+            entry = ConllEntry(i+1,form,replacement,lemma,pos,ne,"_",lexlabels[i],"_",0,"IGNORE",True,token_range)
             entry.pred_parent_id = heads[i]
             if not any(triple[2] == "_" for triple in supertagpreds[i]):
                 raise ValueError("The supertag prediction for word "+str(i+1)+" has no entry for bottom (represented by _). This is required.")
@@ -136,13 +138,14 @@ class AMDecoder:
         ms = []
         types_used = []
         null_item = None
+        is_art_root = entry.form == "ART-ROOT"
         for (s,delex,typ) in entry.supertags:
             t = self.parse_am_type(typ)
             if not t in types_used:
-                ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[]))
+                ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root))
                 types_used.append(t)
             if t == self.parse_am_type("_"):
-                null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[])
+                null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root)
         best_ones = ms[0:kbest]
         if null_item is None:
             raise ValueError("It looks like there was no prediction for the type \\bot (written _ here) provided")
@@ -192,7 +195,7 @@ class AMDecoder:
                 max_arity = max(max_arity,sub_t.max_arity())
                 a = []
                 for item in self.get_items(w, kbest):
-                    a.append(AgendaItem(i,head_dict[i],item.type,item.score,[(i,item.type)],[]))
+                    a.append(AgendaItem(i,head_dict[i],item.type,item.score,[(i,item.type)],[],w.form == "ART-ROOT"))
                 agenda.append(a)
             else: #fill chart
                 chart[i] = dict()
@@ -239,6 +242,8 @@ class AMDecoder:
                     for child_t, child_score in chart[unprocessed].values():
                         child_t_str = amtypes.typ_to_str(child_t)
                         for op,source in cache.combinations(it.type, it_type_str, child_t, child_t_str):
+                            if it.is_art_root and op =="MOD_": #at ART-ROOT: only allow APP operations with sources starting with art-snt
+                                continue
                             counter += 1
                             if op+source in self.rel2i:
                                 edgescore = label_scores[unprocessed-1,self.rel2i[op+source]]
@@ -250,7 +255,7 @@ class AMDecoder:
                             sub_bp = backpointer[unprocessed][child_t_str]
                             if op == "APP_": #type only changes for apply operations
                                 new_type = amtypes.simulate_app(it.type, source)
-                            new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)])
+                            new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)],it.is_art_root)
 
                             typ_str = amtypes.typ_to_str(new_it.type)
                             if len(new_it.unproc_children) == 0:

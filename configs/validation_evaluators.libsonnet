@@ -20,6 +20,23 @@ local sdp_evaluator(dataset_reader, data_iterator, name, threads, from_epoch) = 
 
 };
 
+local mrp_evaluator(dataset_reader, data_iterator, name) = {
+        "type": "standard_evaluator",
+        "formalism" : "MRP-"+name,
+        "system_input" : "data/MRP/"+name+"/dev/dev.amconll",
+        "gold_file": "data/MRP/"+name+"/dev/dev.mrp",
+        "use_from_epoch" : 1,
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : 4,
+                "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
+                "evaluation_command" : eval_commands['commands']['MRP-'+name]
+        }
+};
+
 
 #Defines validation evaluators for the formalisms
 function (dataset_reader, data_iterator) {
@@ -59,7 +76,7 @@ function (dataset_reader, data_iterator) {
 
   },
 
-    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,15),
+    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,0),
 
     "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,20),
 
@@ -85,7 +102,32 @@ function (dataset_reader, data_iterator) {
      "EWT" : { "type" :  "dummy_evaluator" },
      "GUM" : { "type" :  "dummy_evaluator" },
      "LinES" : { "type" :  "dummy_evaluator" },
-     "ParTUT" : { "type" :  "dummy_evaluator" }
+     "ParTUT" : { "type" :  "dummy_evaluator" },
+
+     #MRP
+
+      "MRP-DM" :  mrp_evaluator(dataset_reader, data_iterator, "DM"),
+      "MRP-PSD" :  mrp_evaluator(dataset_reader, data_iterator, "PSD"),
+
+      "MRP-EDS" :  mrp_evaluator(dataset_reader, data_iterator, "EDS"),
+
+      "MRP-AMR" :  {
+          "type": "standard_evaluator",
+            "formalism" : "MRP-AMR",
+            "system_input" : "data/MRP/AMR/gold-dev/gold-dev.amconll",
+            "gold_file": "data/MRP/AMR/gold-dev/gold-dev.mrp",
+            "use_from_epoch" : 1,
+            "predictor" : {
+                    "type" : "amconll_predictor",
+                    "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                    "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                    "k" : k,
+                    "threads" : 4,
+                    "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
+                    "evaluation_command" : eval_commands['commands']['MRP-AMR']
+            }
+        }
+
 
 
 }

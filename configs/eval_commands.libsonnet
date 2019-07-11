@@ -1,5 +1,6 @@
-local ALTO_PATH = "/local/mlinde/alto-2.3-SNAPSHOT-jar-with-dependencies.jar";
+local ALTO_PATH = "/local/mlinde/am-tools/build/libs/am-tools-all.jar";
 
+local MTOOL = "/local/mlinde/mtool/main.py";
 local base_directory = "/local/mlinde/am-parser";
 
 local tool_dir = base_directory + "/external_eval_tools/";
@@ -48,7 +49,37 @@ local sdp_regexes = {
             "amr_year" : "2017",
             "tool_dir" : tool_dir + "2019rerun",
             "alto_path" : ALTO_PATH,
-        }
+        },
+
+        "MRP-DM" : {
+        "type" : "json_evaluation_command",
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["sdp",'python3 '+MTOOL+' --read mrp --score sdp --gold {gold_file} {tmp}/output.mrp'],
+                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
+        },
+
+        "MRP-PSD" : {
+        "type" : "json_evaluation_command",
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["sdp",'python3 '+MTOOL+' --read mrp --score sdp --gold {gold_file} {tmp}/output.mrp'],
+                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
+        },
+
+        "MRP-EDS" : {
+        "type" : "json_evaluation_command",
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["edm",'python3 '+MTOOL+' --read mrp --score edm --gold {gold_file} {tmp}/output.mrp'],
+                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --limit 2 --gold {gold_file} {tmp}/output.mrp'],
+                        ]
+                        #["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
+        },
+
+        "MRP-AMR" : {
+        "type" : "json_evaluation_command",
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup external_eval_tools/2019rerun/MRP_first_run/ --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --gold {gold_file} {tmp}/output.mrp'],
+                        ]
+        },
 
     },
 
@@ -58,7 +89,12 @@ local sdp_regexes = {
         "PSD": "+PSD_F",
         "EDS": "+EDS_Smatch_F",
         "AMR-2015": "+AMR-2015_F-score",
-        "AMR-2017": "+AMR-2017_F-score"
+        "AMR-2017": "+AMR-2017_F-score",
+
+        "MRP-DM" : "+MRP-DM_mrp_all_f",
+        "MRP-PSD" : "+MRP-PSD_mrp_all_f",
+        "MRP-EDS" : "+MRP-EDS_smatch_f",
+        "MRP-AMR" : "+MRP-AMR_smatch_f"
 
     }
 

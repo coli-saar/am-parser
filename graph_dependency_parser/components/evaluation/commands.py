@@ -6,6 +6,9 @@ from typing import List, Iterable, Dict, Tuple
 from allennlp.common import Params, Registrable
 import subprocess
 import re
+import json
+
+from graph_dependency_parser.components.utils import flatten, merge_dicts
 
 
 class BaseEvaluationCommand(ABC, Registrable):
@@ -115,3 +118,49 @@ class BashEvaluationCommand(BaseEvaluationCommand):
             if self.show_output:
                 print (metrics)
             return metrics
+
+
+@BaseEvaluationCommand.register("json_evaluation_command")
+class JsonEvaluationCommand(BaseEvaluationCommand):
+    """
+    An evaluation command that can be configured with jsonnet files.
+    Executes a bash command, taps into the output and returns metrics extracted using json.
+    """
+    def __init__(self, commands : List[List[str]], show_output: bool = True) -> None:
+        """
+        Sets up an evaluator.
+        :param commands: a list of pairs of (metric_prefix, command) that will get executed. Use {system_output} and {gold_file} and {tmp} as placeholders.
+        {tmp} points to a private temporary directory. if metric_prefix is the empty string, no metric will be saved.
+        :param if output of evaluation command should be printed.
+        """
+        self.commands = commands
+        for cmd in self.commands:
+            assert len(cmd) == 2, "Should get a tuple of [metric_prefix, command] but got "+str(cmd)
+        self.show_output = show_output
+
+    def evaluate(self, system_output: str, gold_file: str) -> Dict[str, float]:
+        """
+        Calls the bash commands and extracts metrics for
+        :param system_output:
+        :param gold_file:
+        :return: a dictionary that maps metric names to their values
+        """
+        metrics = dict()
+        with TemporaryDirectory() as direc:
+            for prefix,cmd in self.commands:
+                cmd = cmd.format(system_output=system_output, gold_file=gold_file, tmp=direc)
+                with subprocess.Popen([cmd], shell=True, stdout=subprocess.PIPE) as proc:
+                    result = bytes.decode(proc.stdout.read())  # output of shell commmand as string
+                    if self.show_output:
+                        print(result)
+                    if prefix:
+                        try:
+                            result_json = json.loads(result)
+                            metrics = merge_dicts(metrics, prefix, flatten(result_json))
+                        except json.decoder.JSONDecodeError: #probably not intended for us
+                            if self.show_output:
+                                print("<-- not well-formed json, ignoring")
+
+        if self.show_output:
+            print(metrics)
+        return metrics

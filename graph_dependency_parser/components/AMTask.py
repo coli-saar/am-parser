@@ -48,6 +48,7 @@ class AMTask(Model):
                  lexlabeltagger: Supertagger,
                  supertagger_loss : SupertaggingLoss,
                  lexlabel_loss : SupertaggingLoss,
+                 output_null_lex_label : bool = True,
                  loss_mixing : Dict[str,float] = None,
                  dropout : float = 0.0,
                  validation_evaluator: Optional[Evaluator] = None,
@@ -63,6 +64,7 @@ class AMTask(Model):
         self.loss_function = loss_function
         self.loss_mixing = loss_mixing or dict()
         self.validation_evaluator = validation_evaluator
+        self.output_null_lex_label = output_null_lex_label
 
         self._dropout = InputVariationalDropout(dropout)
 
@@ -168,6 +170,7 @@ class AMTask(Model):
             "mask": mask,
             "words": [meta["words"] for meta in metadata],
             "attributes": [meta["attributes"] for meta in metadata],
+            "token_ranges" : [meta["token_ranges"] for meta in metadata],
             "encoded_text_parsing": encoded_text_parsing,
             "encoded_text_tagging": encoded_text_tagging,
             "position_in_corpus": [meta["position_in_corpus"] for meta in metadata],
@@ -177,7 +180,15 @@ class AMTask(Model):
             output_dict["supertag_scores"] = supertagger_logits # shape (batch_size, seq_len, num supertags)
             output_dict["best_supertags"] = Supertagger.top_k_supertags(supertagger_logits, 1).squeeze(2) # shape (batch_size, seq_len)
         if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
-            output_dict["lexlabels"] = Supertagger.top_k_supertags(lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
+            if not self.output_null_lex_label:
+                bottom_lex_label_index = self.vocab.get_token_index("_", namespace=self.name + "_lex_labels")
+                lexlabel_mask = torch.ones_like(lexlabel_logits) # shape (batch_size, seq_len, num label tags)
+                lexlabel_mask[:,:,bottom_lex_label_index] = 0
+                masked_lexlabel_logits = lexlabel_logits * lexlabel_mask  # shape (batch_size, seq_len, num label tags)
+            else:
+                masked_lexlabel_logits = lexlabel_logits
+
+            output_dict["lexlabels"] = Supertagger.top_k_supertags(masked_lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
 
         is_annotated = metadata[0]["is_annotated"]
         if any( metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
@@ -403,7 +414,7 @@ class AMTask(Model):
             new_mask = new_mask * (1 - label_mask)
         return new_mask
 
-    def metrics(self, parser_model, reset: bool = False) -> Dict[str, float]:
+    def metrics(self, parser_model, reset: bool = False, model_path=None) -> Dict[str, float]:
         """
         Is called by a GraphDependencyParser
         :param parser_model: a GraphDependencyParser
@@ -416,7 +427,7 @@ class AMTask(Model):
                 self.current_epoch += 1
             else: #done on dev/test data
                 if self.validation_evaluator:
-                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch)
+                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch,model_path)
                     for name, val in metrics.items():
                         r[name] = val
         return r

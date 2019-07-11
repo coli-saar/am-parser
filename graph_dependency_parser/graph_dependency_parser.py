@@ -248,9 +248,9 @@ class GraphDependencyParser(Model):
 
 
     @overrides
-    def get_metrics(self, reset: bool = False) -> Dict[str, float]:
+    def get_metrics(self, reset: bool = False, model_path = None) -> Dict[str, float]:
         r = dict()
         for name,task in self.tasks.items():
-            for metric, val in task.metrics(parser_model=self, reset=reset).items():
+            for metric, val in task.metrics(parser_model=self, reset=reset, model_path=model_path).items():
                 r[name+"_"+metric] = val
         return r
