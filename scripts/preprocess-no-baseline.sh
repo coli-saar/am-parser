@@ -80,15 +80,18 @@ PCFG="resources/englishPCFG.txt"
 wordnet="resources/wordnet/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
 
+# disable use of conceptnet by replacing this with 'conceptnet=""'
+conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
+
 # raw training data, preprocess, alto format.
-preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet -pos $posTagger >>$log 2>&1"
+preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
 printf "preprocessing training set and putting it into Alto-readable format\n"
 printf "preprocessing training set and putting it into Alto-readable format\n" >> $log
 echo $preprocessTrainCMD >> $log
 eval $preprocessTrainCMD
 
 # TODO same for nndev
-preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet -pos $posTagger >>$log 2>&1"
+preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
 printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n"
 printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n" >> $log
 echo $preprocessNNDevCMD >> $log
