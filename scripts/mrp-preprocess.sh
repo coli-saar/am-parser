@@ -85,17 +85,19 @@ conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
 #conceptnet=""
 
 # MRP companion data; disable use by replacing this with 'companion=""'
-companion="--companion $maindir/companion.conllu"
+train_companion="--companion $maindir/companion/training.conllu"
+dev_companion="--companion $maindir/companion/dev.conllu"
+test_companion="--companion $maindir/companion/test.conllu"
 
 # raw training data, preprocess, alto format.
-preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger $companion >>$log 2>&1"
+preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet $train_companion >>$log 2>&1"
 printf "preprocessing training set and putting it into Alto-readable format\n"
 printf "preprocessing training set and putting it into Alto-readable format\n" >> $log
 echo $preprocessTrainCMD >> $log
 eval $preprocessTrainCMD
 
 # TODO same for nndev
-preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet $conceptnet -pos $posTagger $companion >>$log 2>&1"
+preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet $conceptnet  $dev_companion >>$log 2>&1"
 printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n"
 printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n" >> $log
 echo $preprocessNNDevCMD >> $log
@@ -103,7 +105,7 @@ eval $preprocessNNDevCMD
 
 
 # get the dependency trees for the training set
-trainCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $trainAltodata/$NNdataCorpusName -li $trainMinuteLimit -o $trainNNdata -t $threads -pos $posTagger $companion >>$log 2>&1"
+trainCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $trainAltodata/$NNdataCorpusName -li $trainMinuteLimit -o $trainNNdata -t $threads -pos $posTagger $train_companion >>$log 2>&1"
 printf "\ngenerating dependency trees for the train set\n"
 printf "\ngenerating dependency trees for the train set\n" >> $log
 echo $trainCMD >> $log
@@ -121,7 +123,7 @@ printf "\nmoving words2labelsLookup.txt to $trainNNdata\n"
 cp $trainNNdata/words2labelsLookup.txt $trainAltodata
 
 #get the dependency trees for the dev set
-devCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $devAltodata/$NNdataCorpusName -li $devMinuteLimit -o $devNNdata -t $threads -v $trainNNdata -pos $posTagger  >>$log 2>&1"
+devCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $devAltodata/$NNdataCorpusName -li $devMinuteLimit -o $devNNdata -t $threads -v $trainNNdata $dev_companion  >>$log 2>&1"
 printf "\ngenerating dependency trees for the dev set, using graph strings from the training set\n"
 printf "\ngenerating dependency trees for the dev set, using graph strings from the training set\n" >> $log
 echo $devCMD >> $log
@@ -132,28 +134,28 @@ eval $devCMD
 # Raw dev and test to Alto format
 
 # dev set
-devRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess $companion --amrcorpus $rawAMRCorpus/dev/ --output $evalDevAltodata >>$log 2>&1"
+devRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/dev/ --output $evalDevAltodata $dev_companion >>$log 2>&1"
 printf "\nconverting dev set to Alto format for evaluation\n"
 printf "\nconverting dev set to Alto format for evaluation\n" >> $log
 echo $devRawCMD >> $log
 eval $devRawCMD
 
 # test set
-testRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess $companion --amrcorpus $rawAMRCorpus/test/ --output $testAltodata  >>$log 2>&1"
+testRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/test/ --output $testAltodata $test_companion >>$log 2>&1"
 printf "\nconverting test set to Alto format for evaluation\n"
 printf "\nconverting test set to Alto format for evaluation\n" >> $log
 echo $testRawCMD >> $log
 eval $testRawCMD
 
 # dev eval input data preprocessing
-devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData $evalDevAltodata $evalDevNNdata $posTagger $nerTagger >>$log 2>&1"
+devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata $dev_companion --ner-model $nerTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for dev data\n"
 printf "\ngenerating evaluation input (full corpus) for dev data\n" >> $log
 echo $devEvalCMD  >> $log
 eval $devEvalCMD
 
 # test eval input data preprocessing
-testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData $testAltodata $testNNdata $posTagger $nerTagger >>$log 2>&1"
+testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata $test_companion --ner-model $nerTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for test data\n"
 printf "\ngenerating evaluation input (full corpus) for test data\n" >> $log
 echo $testEvalCMD  >> $log
