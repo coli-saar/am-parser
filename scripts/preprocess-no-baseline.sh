@@ -82,6 +82,7 @@ wordnet="resources/wordnet/dict/"
 
 # disable use of conceptnet by replacing this with 'conceptnet=""'
 conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
+#conceptnet=""
 
 # raw training data, preprocess, alto format.
 preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
@@ -128,14 +129,14 @@ eval $devCMD
 # Raw dev and test to Alto format
 
 # dev set
-devRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess $rawAMRCorpus/dev/ $evalDevAltodata >>$log 2>&1"
+devRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/dev/ --output $evalDevAltodata >>$log 2>&1"
 printf "\nconverting dev set to Alto format for evaluation\n"
 printf "\nconverting dev set to Alto format for evaluation\n" >> $log
 echo $devRawCMD >> $log
 eval $devRawCMD
 
 # test set
-testRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess $rawAMRCorpus/test/ $testAltodata  >>$log 2>&1"
+testRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/test/ --output $testAltodata  >>$log 2>&1"
 printf "\nconverting test set to Alto format for evaluation\n"
 printf "\nconverting test set to Alto format for evaluation\n" >> $log
 echo $testRawCMD >> $log
