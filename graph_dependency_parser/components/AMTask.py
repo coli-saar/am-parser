@@ -182,9 +182,8 @@ class AMTask(Model):
         if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
             if not self.output_null_lex_label:
                 bottom_lex_label_index = self.vocab.get_token_index("_", namespace=self.name + "_lex_labels")
-                lexlabel_mask = torch.ones_like(lexlabel_logits) # shape (batch_size, seq_len, num label tags)
-                lexlabel_mask[:,:,bottom_lex_label_index] = 0
-                masked_lexlabel_logits = lexlabel_logits * lexlabel_mask  # shape (batch_size, seq_len, num label tags)
+                masked_lexlabel_logits = lexlabel_logits.clone().detach() # shape (batch_size, seq_len, num label tags)
+                masked_lexlabel_logits [:,:,bottom_lex_label_index] = - 1e20
             else:
                 masked_lexlabel_logits = lexlabel_logits
 
