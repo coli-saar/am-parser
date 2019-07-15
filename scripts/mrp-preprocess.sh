@@ -168,6 +168,18 @@ mv $trainNNdata/vocab*  $outputPath/nnData/vocab/
 cp $evalDevAltodata/raw.amr $evalDevNNdata/goldAMR.txt
 cp $testAltodata/raw.amr $testNNdata/goldAMR.txt
 
+#Create amconll file for training set
+devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $trainNNdata -o $outputPath $train_companion >>$log 2>&1"
+printf "\nGenerate amconll for training data\n"
+eval $devamconllCMD
+mv $outputPath/corpus.amconll $outputPath/train.amconll
+
+#Create amconll file for dev set
+devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $devNNdata -o $outputPath $dev_companion >>$log 2>&1"
+printf "\nGenerate amconll for (gold) dev data\n"
+eval $devamconllCMD
+mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
+
 
 
 printf "\neverything is in $outputPath\n"
