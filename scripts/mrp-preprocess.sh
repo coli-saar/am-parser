@@ -148,14 +148,14 @@ echo $testRawCMD >> $log
 eval $testRawCMD
 
 # dev eval input data preprocessing
-devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata $dev_companion --ner-model $nerTagger >>$log 2>&1"
+devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata $dev_companion >>$log 2>&1" #  --stanford-ner-model $nerTagger
 printf "\ngenerating evaluation input (full corpus) for dev data\n"
 printf "\ngenerating evaluation input (full corpus) for dev data\n" >> $log
 echo $devEvalCMD  >> $log
 eval $devEvalCMD
 
 # test eval input data preprocessing
-testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata $test_companion --ner-model $nerTagger >>$log 2>&1"
+testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata $test_companion  >>$log 2>&1" # --stanford-ner-model $nerTagger
 printf "\ngenerating evaluation input (full corpus) for test data\n"
 printf "\ngenerating evaluation input (full corpus) for test data\n" >> $log
 echo $testEvalCMD  >> $log
