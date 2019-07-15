@@ -186,7 +186,8 @@ def main():
             assert(len(line) > lenstart+3)  # {"id": "x"}
             graphno += 1
             # add filename to original id 
-            newl = line[:lenstart] + filename + separator + line[lenstart:]
+            #newl = line[:lenstart] + filename + separator + line[lenstart:]
+            newl = line
             # write new graph dev or train file
             if graphno in graphnumbers_for_dev:
               devout.write(newl)  # todo: do I need to add "\n" ?

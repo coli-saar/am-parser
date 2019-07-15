@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Put this file in scripts/, sister to your main corpus directory
 
 usage="Preprocess the corpus.\n\n
 

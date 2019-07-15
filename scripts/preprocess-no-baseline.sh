@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Put this file in scripts/, sister to your main corpus directory
+
 
 usage="Preprocess the corpus.\n\n
 
@@ -143,14 +143,14 @@ echo $testRawCMD >> $log
 eval $testRawCMD
 
 # dev eval input data preprocessing
-devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData $evalDevAltodata $evalDevNNdata $posTagger $nerTagger >>$log 2>&1"
+devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata --ner-model $nerTagger --tagger-model $posTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for dev data\n"
 printf "\ngenerating evaluation input (full corpus) for dev data\n" >> $log
 echo $devEvalCMD  >> $log
 eval $devEvalCMD
 
 # test eval input data preprocessing
-testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData $testAltodata $testNNdata $posTagger $nerTagger >>$log 2>&1"
+testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata --ner-model $nerTagger --tagger-model $posTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for test data\n"
 printf "\ngenerating evaluation input (full corpus) for test data\n" >> $log
 echo $testEvalCMD  >> $log
