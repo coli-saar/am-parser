@@ -180,6 +180,16 @@ printf "\nGenerate amconll for (gold) dev data\n"
 eval $devamconllCMD
 mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
 
+#Create empty amconll for (actual) dev set, also called evalDev
+emptyDevAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $evalDevNNdata -o $outputPath --prefix dev $dev_companion >>$log 2>&1"
+printf "\nGenerate empty amconll dev data\n"
+eval $emptyDevAmconllCMD
+
+#Create empty amconll for test set
+emptyTestAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $testNNdata -o $outputPath --prefix test $test_companion >>$log 2>&1"
+printf "\nGenerate empty amconll test data\n"
+eval $emptyTestAmconllCMD
+
 
 
 printf "\neverything is in $outputPath\n"
