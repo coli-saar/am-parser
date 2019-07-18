@@ -73,7 +73,7 @@ for filename in os.listdir(mrp_dir):
                     version = mrp_dict["version"]
                     time = mrp_dict["time"]
                     for token_file in os.listdir(tokenized_dir):
-                        print(token_file)
+                        # print(token_file)
                         if token_file[:3] == filename[:3]:
                             companion_data = json.load(open(tokenized_dir+token_file, encoding='utf-8'))
 

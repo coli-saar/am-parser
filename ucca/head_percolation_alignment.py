@@ -22,5 +22,5 @@ def percolate(edge_dict, priority_queue, label_dict):
                                 edge_dict[(s,v)] = edge_dict[(s,t)]
                                 del edge_dict[(s, t)]
                         #print(alignment_dict)
-                        print('-'*40)
+                        #print('-'*40)
     return alignment_dict

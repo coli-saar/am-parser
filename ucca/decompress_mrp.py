@@ -47,5 +47,6 @@ with open(out, 'w+') as outfile:
                     mrp_nodes.append({'id':node})
             mrp_post_processed['nodes'] = mrp_nodes
             mrp_post_processed['edges'] = get_edges(decompressed)
+            mrp_post_processed['input'] = input
             outfile.write(json.dumps(mrp_post_processed))
             outfile.write('\n')
