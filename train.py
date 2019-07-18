@@ -162,6 +162,8 @@ if args.comet is not None:
         code = "".join(fil.readlines())
     code += "\n\n#=============Full details=============\n\n"
     code += _jsonnet.evaluate_file(args.param_path)
+    code += "\n\n#=============IMPORTANT: overwritten options============\n\n"
+    code += args.overrides
     experiment.set_code(code)
     code_data = json.loads(_jsonnet.evaluate_file(args.param_path))
     experiment.log_parameter("bert","bert" in code_data["dataset_reader"]["token_indexers"])
