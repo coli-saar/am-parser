@@ -3,7 +3,9 @@
 def percolate(edge_dict, priority_queue, label_dict):
     alignment_dict = {v:[] for (u,v) in edge_dict.keys() if label_dict[v] != 'Non-Terminal'}
     while len(edge_dict.keys()) > 0:
-        print(edge_dict.keys())
+        #print(edge_dict.keys())
+        #print(label_dict)
+        #print(alignment_dict)
         for category in priority_queue:
             for u, v in list(edge_dict.keys()):
                 if label_dict[u] != 'Non-Terminal' and label_dict[v] != 'Non-Terminal':
@@ -19,6 +21,6 @@ def percolate(edge_dict, priority_queue, label_dict):
                             if t == u:
                                 edge_dict[(s,v)] = edge_dict[(s,t)]
                                 del edge_dict[(s, t)]
-                        print(alignment_dict)
+                        #print(alignment_dict)
                         print('-'*40)
     return alignment_dict

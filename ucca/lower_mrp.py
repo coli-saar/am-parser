@@ -1,10 +1,10 @@
 import sys
 import json
-from eliminate_h_top import add_h
 from get_edges_from_mrp import get_id2lex, get_mrp_edges
 from process_c import decompress_c
 from convert_irtg_to_mrp import get_edges, get_tops
 from test_compression_vis import update_id_labels
+from move_edges import lower_edge
 
 
 
@@ -19,7 +19,6 @@ def get_terminal_nodes(mrp_dict):
 
 mrp = sys.argv[1]
 out = sys.argv[2]
-
 with open(out, 'w+') as outfile:
     with open(mrp) as infile:
         for line in infile:
@@ -34,18 +33,20 @@ with open(out, 'w+') as outfile:
             node_ids = get_id2lex(mrp_dict)
             edges = get_mrp_edges(mrp_dict)
             decompressed = decompress_c(edges, node_ids)
-            decompressed = add_h(decompressed)
+            lowered = lower_edge(decompressed)
             mrp_post_processed['id'] = id
             mrp_post_processed['framework'] = framework
             mrp_post_processed['flavor'] = flavor
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
-            node_ids = update_id_labels(decompressed, node_ids)
+            node_ids = update_id_labels(lowered, node_ids)
+            print(node_ids)
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():
                 if node_ids[node] == 'Non-Terminal':
                     mrp_nodes.append({'id':node})
             mrp_post_processed['nodes'] = mrp_nodes
+            print(mrp_nodes)
             mrp_post_processed['edges'] = get_edges(decompressed)
             outfile.write(json.dumps(mrp_post_processed))
             outfile.write('\n')

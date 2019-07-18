@@ -38,11 +38,11 @@ def get_neighbours(node, edge_dict):
     neighbours = [ev for (eu, ev) in edge_dict.keys() if eu == node]
     return neighbours
 
-def node_to_token_index(mrp_companion, mrp_dict, id2lex_dict, mrp_sent_id):
+def node_to_token_index(mrp_companion, mrp_dict, id_lex_dict, mrp_sent_id):
     node_to_index = {}
     do_second_iteration = False
-    for node in id2lex_dict.keys():
-        if id2lex_dict[node] != 'Non-Terminal':
+    for node in id_lex_dict.keys():
+        if id_lex_dict[node] != 'Non-Terminal':
             for mrp_node in mrp_dict['nodes']:
                 if mrp_node['id'] == node:
                     if 'anchors' in mrp_node:
