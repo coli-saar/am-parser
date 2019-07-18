@@ -6,17 +6,18 @@ import random
 
 from edge_to_irtg import edge2irtg
 from get_edges_from_mrp import get_id2lex, get_mrp_edges
-from convert_irtg_to_mrp import get_edges, get_mrp_edges, get_nodes, get_tops, irtg2mrp
+from convert_irtg_to_mrp import get_edges, get_input, get_mrp_edges, get_nodes, get_tops, irtg2mrp
 from eliminate_h_top import eliminate_h
 from a_star_mrp import *
 from process_c import *
 from head_percolation_alignment import percolate
+from move_edges import raise_edge
 
 mrp_dir = sys.argv[1]
 tokenized_dir = sys.argv[2]
 outdir = sys.argv[3]
 
-priority_queue = 'L LR LA H P S A N C D T E R F G Q U'.split()
+priority_queue = 'L L-r L-l LR LA H H-l H-r P P-l P-r S S-l S-r A N C D T E R F G Q U'.split()
 #priority_dict = {label:index for (index, label) in enumerate(labels)}
 non_deducible = ["id", "flavour", "framework", "version", "time"]
 
@@ -60,7 +61,6 @@ data = []
 errors = 0
 total = 0
 for filename in os.listdir(mrp_dir):
-    if not filename.startswith('.'):
         with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
             for line in infile:
                 total += 1
@@ -72,11 +72,10 @@ for filename in os.listdir(mrp_dir):
                     framework = mrp_dict["framework"]
                     version = mrp_dict["version"]
                     time = mrp_dict["time"]
+                    print(id)
                     for token_file in os.listdir(tokenized_dir):
-                        print(token_file)
                         if token_file[:3] == filename[:3]:
                             companion_data = json.load(open(tokenized_dir+token_file, encoding='utf-8'))
-
                             if id not in companion_data.keys():
                                 continue
                             else:
@@ -87,10 +86,16 @@ for filename in os.listdir(mrp_dir):
                                 edges = eliminate_h(edges)
                                 labels = get_id2lex(mrp_dict)
                                 compressed_edges = compress_c_edge(edges)
-                                compressed_labels = update_id_labels(compressed_edges, labels)
-                                irtg_format_compressed = edge2irtg(compressed_edges, labels)
-                                node_tokens = node_to_token_index(companion_data, mrp_dict, compressed_labels, id)
-                                aligned = percolate(compressed_edges, priority_queue, compressed_labels)
+                                raised = raise_edge(compressed_edges, 'E', ['L', 'H', 'P', 'S'])
+                                raised = raise_edge(raised, 'U', ['L', 'H', 'P', 'S'])
+                                raised = raise_edge(raised, 'F', ['L', 'H', 'P', 'S'])
+                                raised = raise_edge(raised, 'D', ['L', 'H', 'P', 'S'])
+                                updated_id_labels = update_id_labels(raised, labels)
+                                irtg_format_raised = edge2irtg(raised, labels)
+                                print('IRTG')
+                                print(irtg_format_raised)
+                                node_tokens = node_to_token_index(companion_data, mrp_dict, updated_id_labels, id)
+                                aligned = percolate(raised, priority_queue, updated_id_labels)
                                 alignments = ''
                                 for alignment in aligned.keys():
                                     for node in aligned[alignment]:
@@ -99,7 +104,7 @@ for filename in os.listdir(mrp_dir):
                                                 node = node[:-6]
                                         alignments += str(node) + '|'
                                     alignments += str(alignment)+'!' + '||' + str(node_tokens[alignment]) + '||' + '1.0 '
-                                data.append((id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_compressed))
+                                data.append((id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_raised))
                 except:
                     errors += 1
 

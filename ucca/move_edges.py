@@ -5,7 +5,7 @@ from nltk.tokenize.moses import MosesDetokenizer
 #TODO: maybe implement a node/edge class and add methods for getting sisters, daughter and parent
 
 
-def lower_edge(edge_dict, edge_label_to_lower, priority_where_to_lower, mark = False):
+def lower_edge(edge_dict):
     '''
     Input:
     edge_dict: dictionary of edges (graph)
@@ -14,28 +14,20 @@ def lower_edge(edge_dict, edge_label_to_lower, priority_where_to_lower, mark = F
     '''
     to_lower = []
     for (u, v) in list(edge_dict.keys()):
-        if edge_dict[(u,v)] == edge_label_to_lower:
+        if '_' in edge_dict[(u,v)]:
             to_lower.append((u, v))
     for (u, v) in to_lower:
-        #check if it's already attached next to a C node (compressed or otherwise)
-        sisters = {}
         for (s, t) in list(edge_dict.keys()):
-            if s == u:
-                sisters[(s, t)] = edge_dict[(s, t)]
-        if ("Q" in sisters.values() or "E" in sisters.values() or "F" in sisters.values() or "R" in sisters.values()): #and not ("P" in sisters.values() or "S" in sisters.values()):
-            pass
-            #if the edge has sister edges with the above labels, then it attaches to a C, and therefore cannot be lowered any more
-        else:
-            for label in priority_where_to_lower:
-                for (q, r) in list(sisters.keys()):
-                    if sisters[(q, r)] == label:
-                        edge_dict[(r, v)] = edge_dict[(u, v)]
+            if s==u:
+                if '-' in edge_dict[(s,t)]:
+                    if edge_dict[(s,t)].split('-')[0] == edge_dict[(u,v)].split('_')[1]:
+                        edge_dict[(t, v)] = edge_dict[(u,v)][0]
                         del edge_dict[(u, v)]
-                        if mark == True:
-                            edge_dict[(q, r)] = edge_dict[(q, r)] + "-lowered_thru"
+    for (u,v) in edge_dict.keys():
+        edge_dict[(u,v)] = edge_dict[(u,v)][0]
     return edge_dict
 
-def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = False, seek_marks = False):
+def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = True, seek_marks = False):
         '''
         Input:
         edge_dict: dictionary of edges (graph)
@@ -58,25 +50,25 @@ def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = F
                             edge_dict[(s, v)] = edge_dict[(u, v)]
                             del edge_dict[(u,v)]
                             if mark == True:
-                                if 'lowered_thru' in edge_dict[(s, t)]:
+                                if '-l' in edge_dict[(s, t)]:
                                     edge_dict[(s, t)] = edge_dict[(s, t)][0]
                                     break
                                 else:
-                                    edge_dict[(s, t)] = edge_dict[(s, t)] +'-raised_thru'
+                                    edge_dict[(s, t)] = edge_dict[(s, t)] +'-r'
                                     break
             else:
                 for label in priority_where_to_raise:
                     for (s, t) in list(parents.keys()):
                         if t == u:
                             if parents[(s, t)] == label[0]:
-                                edge_dict[(s, v)] = edge_dict[(u, v)]
+                                edge_dict[(s, v)] = edge_dict[(u, v)] + '_'+label
                                 del edge_dict[(u,v)]
                                 if mark == True:
-                                    if 'lowered_thru' in edge_dict[(s, t)]:
+                                    if '-l' in edge_dict[(s, t)]:
                                         edge_dict[(s, t)] = edge_dict[(s, t)][0]
                                         break
                                     else:
-                                        edge_dict[(s, t)] = edge_dict[(s, t)] + "-raised_thru"
+                                        edge_dict[(s, t)] = edge_dict[(s, t)] + "-r"
                                         break
                 break
         return edge_dict

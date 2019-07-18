@@ -136,29 +136,26 @@ def decompress_c(edge_dict, label_dict):
     uncompressed dicts, with similar surface structure as the original uncompressed edge dict
     but instead of the original names of the nodes, we use NONTERMINAL + counter as a node id
     '''
-    n = max([i for i in label_dict.keys() if label_dict[i] == 'Non-Terminal'])
-    for (u, v) in list(edge_dict.keys()):
-        daughters = []
-        for (s, t) in list(edge_dict.keys()):
-            if s == v:
-                daughters.append(edge_dict[(s, t)])
-        if ("Q" in daughters or "E" in daughters or "F" in daughters or "R" in daughters) and not ("C" in daughters or "P" in daughters or "S" in daughters):
-            compressed = v
-            #if mappings == None:
-            for (q, r) in list(edge_dict.keys()):
-                if q == compressed:
-                    #edge_dict[("NONTERMINAL" + str(counter), r)] = edge_dict[q, r]
-                    edge_dict[(n), r] = edge_dict[(q, r)]
-                    del edge_dict[(q, r)]
-                    edge_dict[(n, compressed)] = 'C'
-                elif r == compressed:
-                    #edge_dict[(q, "NONTERMINAL" + str(counter))] = edge_dict[q, r]
-                    edge_dict[(q, n)] = edge_dict[(q, r)]
-                    del edge_dict[(q, r)]
-                    edge_dict[(n, compressed)] = 'C'
-            n+=1
+    n = max([i for i in label_dict.keys() if type(i) == int and label_dict[i] == 'Non-Terminal'])
+    contracted = []
     for (u,v) in list(edge_dict.keys()):
-        if type(v) == tuple:
+        if label_dict[u] != 'Non-Terminal':
+            if u not in contracted:
+                contracted.append(u)
+    for node in contracted:
+        n += 1
+        if type(node) != tuple:
+            for (u, v) in list(edge_dict.keys()):
+                if v == node:
+                    edge_dict[u, n] = edge_dict[(u, v)]
+                    del edge_dict[(u, v)]
+                    edge_dict[(n, v)] = 'C'
+                elif u == node:
+                    edge_dict[(n, v)] = edge_dict[(u, v)]
+                    del edge_dict[(u, v)]
+                    #IF BUG COMMENT OUT NEXT LINE
+                    edge_dict[(n, node)] = 'C'
+        elif type(v) == tuple:
             uncontracted = list(zip(v, v[1:]))
             edge_dict[(u, v[0])] = edge_dict[(u,v)]
             del edge_dict[(u,v)]

@@ -25,3 +25,19 @@ def eliminate_h(edge_dict):
                             edge_dict[new_edge] = edge_dict[(u,v)]
                             del edge_dict[(u,v)]
     return edge_dict
+
+def add_h(edge_dict):
+    roots = get_roots(edge_dict)
+    print(roots)
+    #print(roots)
+    if len(roots) == 1:
+        for root in roots:
+            daughter_edges = []
+            for (u,v) in edge_dict.keys():
+                if u == root:
+                    daughter_edges.append((u,v))
+            if not any([edge_dict[(u,v)] for (u, v) in daughter_edges if edge_dict[(u,v)] == 'H']):
+                n = max([u for (u,v) in edge_dict.keys() if type(u) == int])
+                n = n+1
+                edge_dict[(n, root)] = 'H'
+    return edge_dict

@@ -14,9 +14,12 @@ def get_id2lex(mrp_dict):
     id_to_lex = {}
     #print(sent_indexed)
     for node in mrp_dict["nodes"]:
-        if node['label'] != 'Non-Terminal':
-            spans = []
-            node_id = node["id"]
+        #if node['label'] != 'Non-Terminal':
+        #print(node)
+        #print(id_to_lex)
+        spans = []
+        node_id = node["id"]
+        if 'anchors' in node.keys() and node['anchors']:
             for anchor in node["anchors"]:
                 spans.append(anchor["from"])
                 spans.append(anchor["to"])
@@ -46,7 +49,6 @@ def get_id2lex(mrp_dict):
                 id_to_lex[node_id] = lex
         else:
             id_to_lex[node_id] = "Non-Terminal"
-    #print(id_to_lex)
     return id_to_lex
 
 

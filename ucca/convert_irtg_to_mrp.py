@@ -1,9 +1,7 @@
 from get_edges_from_mrp import test, get_id2lex, get_mrp_edges
-from nltk.tokenize.moses import MosesDetokenizer
 import re
 
-detokenizer = MosesDetokenizer()
-
+'''
 def get_input(edge_dict, label_dict):
     input = []
     terminal_ids = [id for id in label_dict.keys() if type(id) == int]
@@ -16,7 +14,7 @@ def get_input(edge_dict, label_dict):
             pass
     input_tokenized = detokenizer.detokenize(input, return_str = True)
     return input_tokenized
-
+'''
 def get_nodes(label_dict, input):
     nodes = []
     for node in label_dict.keys():
