@@ -73,10 +73,9 @@ for filename in os.listdir(mrp_dir):
                     version = mrp_dict["version"]
                     time = mrp_dict["time"]
                     for token_file in os.listdir(tokenized_dir):
-                        # print(token_file)
+                        #print(token_file)
                         if token_file[:3] == filename[:3]:
                             companion_data = json.load(open(tokenized_dir+token_file, encoding='utf-8'))
-
                             if id not in companion_data.keys():
                                 continue
                             else:
@@ -104,10 +103,12 @@ for filename in os.listdir(mrp_dir):
                     errors += 1
 
 
+train_mrp = []
+dev_mrp = []
 train_test_boundary = int((len(data)*80)/100)
 random.Random(1).shuffle(data)
 training = data[:train_test_boundary]
-test = data[train_test_boundary:]
+dev = data[train_test_boundary:]
 
 print('percentage of training data skipped:')
 print(errors/total)
@@ -136,9 +137,9 @@ with open(outdir+'training.txt', 'w') as outfile:
         outfile.write(irtg_format_compressed)
         outfile.write('\n\n')
 
-with open(outdir+'test.txt', 'w') as outfile:
+with open(outdir+'dev.txt', 'w') as outfile:
     outfile.write(header)
-    for (id, flavor, framework,version,time, spans, input,tokens, alignments, irtg_format_compressed) in test:
+    for (id, flavor, framework,version,time, spans, input,tokens, alignments, irtg_format_compressed) in dev:
         outfile.write(id)
         outfile.write('\n')
         outfile.write(str(flavor))
@@ -159,3 +160,34 @@ with open(outdir+'test.txt', 'w') as outfile:
         outfile.write('\n')
         outfile.write(irtg_format_compressed)
         outfile.write('\n\n')
+
+train_mrp = []
+dev_mrp = []
+
+for filename in os.listdir(mrp_dir):
+    if not filename.startswith('.'):
+        with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
+            for line in infile:
+                try:
+                    mrp_dict =json.loads(line)
+                    id = mrp_dict['id']
+                    for data in dev:
+                        if id in data:
+                            dev.remove(data)
+                            dev_mrp.append(mrp_dict)
+                        else:
+                            train_mrp.append(mrp_dict)
+                            train.remove(data)
+                except:
+                    pass
+
+
+with open(outdir + 'train.mrp', 'w') as outfile:
+    for mrp in train_mrp:
+        outfile.write(mrp)
+        outfile.write('\n')
+
+with open(outdir + 'dev.mrp', 'w') as outfile:
+    for mrp in dev_mrp:
+        outfile.write(mrp)
+        outfile.write('\n')
