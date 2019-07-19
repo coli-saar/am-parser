@@ -41,7 +41,7 @@ with open(mrp_data_path,encoding='utf8', errors='ignore') as infile:
         mrp_dict = json.loads(line)
         id = mrp_dict["id"]
         print(id)
-        edges = get_mrp_edges(mrp_dict)
+        edges = get_mrp_edges(mrp_dict, get_remote = True)
         edges = eliminate_h(edges)
         labels = get_id2lex(mrp_dict)
         compressed_edges = compress_c_edge(edges)
