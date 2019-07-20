@@ -19,8 +19,6 @@ def get_nodes(label_dict, input):
     nodes = []
     for node in label_dict.keys():
         if label_dict[node] in input.lower().split():
-            #print(label_dict[node])
-            #print(input.split())
             if ' ' not in label_dict[node]:
                 node_anchor_dict = {}
                 span_regex = re.compile(re.escape(label_dict[node]))
@@ -44,7 +42,6 @@ def get_nodes(label_dict, input):
             node_anchor_dict = {}
             node_anchor_dict['id']=node
             nodes.append(node_anchor_dict)
-    #print(nodes)
     return nodes
 
 def get_tops(edge_dict):

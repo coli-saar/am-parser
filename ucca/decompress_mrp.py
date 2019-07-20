@@ -27,7 +27,7 @@ with open(out, 'w+') as outfile:
             mrp_dict = json.loads(line)
             input = mrp_dict['input']
             id = mrp_dict['id']
-            #print(id)
+            print(id)
             framework = mrp_dict['framework']
             flavor = mrp_dict['flavor']
             time = mrp_dict['time']
@@ -41,6 +41,7 @@ with open(out, 'w+') as outfile:
             mrp_post_processed['flavor'] = flavor
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
+            mrp_post_processed['tops'] = get_tops(decompressed)
             node_ids = update_id_labels(decompressed, node_ids)
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():

@@ -40,10 +40,7 @@ def compress_chained(edge_dict, chained_c_edges, coordinated_c_edges):
 
 
 def compress_chained_cs(edge_dict, chained_c_edges, coordinated_c_edges):
-    #print(chained_c_edges)
-    #print(coordinated_c_edges)
     keep = [(u, v) for (u,v) in chained_c_edges if (u,v) in coordinated_c_edges and len([(s, t) for (s, t) in chained_c_edges if s == v])]
-    #print(keep)
     for edge in chained_c_edges:
         if edge in coordinated_c_edges:
             if edge not in keep:
@@ -61,14 +58,11 @@ def compress_chained_cs(edge_dict, chained_c_edges, coordinated_c_edges):
         for other_chain in chained_c_edges:
             if other_chain not in coordinated_c_edges and type(other_chain) != list:
                 if chain[-1] == other_chain[0] and chain!= other_chain:
-                    print('TEST')
                     new_chain = (chain[0],)+ (other_chain,)
-                    print(new_chain)
                     chained_c_edges.append(new_chain)
                     if chain in chained_c_edges:
                         chained_c_edges.remove(chain)
                     if other_chain in chained_c_edges:
-                        print(other_chain)
                         chained_c_edges.remove(other_chain)
         for chain in chained_c_edges:
             for link in chain:
