@@ -110,6 +110,9 @@ class AMSentence:
     def is_annotated(self):
         return not all((w.label == "_" or w.label == "IGNORE") and w.head == 0 for w in self.words)
 
+    def __len__(self):
+        return len(self.words)
+
 
 def from_raw_text(words: List[str], add_art_root : bool, attributes: Dict) -> AMSentence:
     """
@@ -129,7 +132,8 @@ def from_raw_text(words: List[str], add_art_root : bool, attributes: Dict) -> AM
     sentence.check_validity()
     return sentence
 
-def parse_amconll(fil) -> Iterable[AMSentence]:
+
+def parse_amconll(fil, validate:bool = True) -> Iterable[AMSentence]:
     """
     Reads a file and returns a generator over AM sentences.
     :param fil:
@@ -145,7 +149,8 @@ def parse_amconll(fil) -> Iterable[AMSentence]:
             # sentence finished
             if len(entries) > 0:
                 sent = AMSentence(entries, attributes)
-                sent.check_validity()
+                if validate:
+                    sent.check_validity()
                 yield sent
             new_sentence = True
 
