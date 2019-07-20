@@ -1,6 +1,11 @@
 import os.path
 from typing import Dict
 import argparse
+
+
+import sys
+sys.path.append("..") # Adds higher directory to python modules path.
+
 import graph_dependency_parser.components.dataset_readers.amconll_tools as amconll_tools
 
 optparser = argparse.ArgumentParser(add_help=True,
@@ -16,20 +21,22 @@ with open(opts.file1) as f1:
         sents1 : Dict[str,amconll_tools.AMSentence] = { sent.attributes["id"] : sent for sent in amconll_tools.parse_amconll(f1,validate=False) }
         sents2 : Dict[str,amconll_tools.AMSentence] = { sent.attributes["id"] : sent for sent in amconll_tools.parse_amconll(f2,validate=False) }
 
+ids = sorted(set(sents1.keys()) & set(sents2.keys()), key=lambda id: len(sents1[id]))
 with open(os.path.join(opts.direc,os.path.basename(opts.file1)),"w") as of1:
-    with open(os.path.join(opts.direc, os.path.basename(opts.file2)), "w") as of2:
-        for id in sorted(set(sents1.keys()) & set(sents2.keys()), key=lambda id: len(sents1[id])):
-            if sents1[id].get_tokens(shadow_art_root=False) != sents2[id].get_tokens(shadow_art_root=False) :
-                print("Skipping",id,"because MaltEval would complain that text is different")
-                continue
-            for i,e in enumerate(sents1[id]):
-                of1.write(str(i+1)+"\t"+"\t".join([e.token, e.lexlabel, e.fragment, e.typ,"_",str(e.head),e.label,"_","_"]))
-                of1.write("\n")
+    for id in ids:
+        if sents1[id].get_tokens(shadow_art_root=False) != sents2[id].get_tokens(shadow_art_root=False) :
+            print("Skipping",id,"because MaltEval would complain that text is different")
+            continue
+        for i,e in enumerate(sents1[id]):
+            of1.write(str(i+1)+"\t"+"\t".join([e.token, e.lexlabel, e.fragment, e.typ,"_",str(e.head),e.label,"_","_"]))
             of1.write("\n")
+        of1.write("\n")
 
-            for i,e in enumerate(sents2[id]):
-                of2.write(str(i+1)+"\t"+"\t".join([e.token, e.lexlabel, e.fragment, e.typ,"_",str(e.head),e.label,"_","_"]))
-                of2.write("\n")
+with open(os.path.join(opts.direc, os.path.basename(opts.file2)), "w") as of2:
+    for id in ids:
+        for i,e in enumerate(sents2[id]):
+            of2.write(str(i+1)+"\t"+"\t".join([e.token, e.lexlabel, e.fragment, e.typ,"_",str(e.head),e.label,"_","_"]))
             of2.write("\n")
+        of2.write("\n")
 
 

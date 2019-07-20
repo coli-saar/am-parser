@@ -85,6 +85,7 @@ CMD = MTOOL_COMMAND+ " --read mrp --trace --gold "+ gold_file + " "+opts.mtool+"
 
 with subprocess.Popen([CMD], shell=True, stdout=subprocess.PIPE) as proc:
     result = bytes.decode(proc.stdout.read())  # output of shell commmand as string
+    print(result)
     result = json.loads(result)
     scores = result["scores"]
     for id in scores:
