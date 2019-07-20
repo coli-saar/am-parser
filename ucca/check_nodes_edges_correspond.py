@@ -17,7 +17,3 @@ with open(corpus) as infile:
         for (u, v) in edges.keys():
             node_mentions_in_edges.add(u)
             node_mentions_in_edges.add(v)
-        print(nodes)
-        print(node_mentions_in_edges)
-        print(node_mentions_in_edges.difference(nodes))
-        print('___________________________________________')

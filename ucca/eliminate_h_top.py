@@ -2,7 +2,6 @@ from a_star_mrp import get_roots
 
 def eliminate_h(edge_dict):
     roots = get_roots(edge_dict)
-    #print(roots)
     if len(roots) == 1:
         for root in roots:
             daughter_edges = []
@@ -28,8 +27,6 @@ def eliminate_h(edge_dict):
 
 def add_h(edge_dict):
     roots = get_roots(edge_dict)
-    print(roots)
-    #print(roots)
     if len(roots) == 1:
         for root in roots:
             daughter_edges = []

@@ -138,6 +138,7 @@ def decompress_c(edge_dict, label_dict):
     '''
     #n = max([i for i in label_dict.keys() if type(i) == int and label_dict[i] == 'Non-Terminal'])
     n = max([i for i in label_dict.keys()])
+    print(label_dict.keys())
     contracted = []
     for (u,v) in list(edge_dict.keys()):
         if label_dict[u] != 'Non-Terminal':
