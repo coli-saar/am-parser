@@ -137,7 +137,12 @@ def decompress_c(edge_dict, label_dict):
     but instead of the original names of the nodes, we use NONTERMINAL + counter as a node id
     '''
     #n = max([i for i in label_dict.keys() if type(i) == int and label_dict[i] == 'Non-Terminal'])
-    n = max([i for i in label_dict.keys()])
+    print(label_dict)
+    labels = [label for label in label_dict.keys()]
+    if len(labels) > 0:
+        n = max([i for i in label_dict.keys()])
+    else:
+        n = 1
     contracted = []
     for (u,v) in list(edge_dict.keys()):
         if label_dict[u] != 'Non-Terminal':

@@ -28,7 +28,7 @@ def eliminate_h(edge_dict):
 
 def add_h(edge_dict):
     roots = get_roots(edge_dict)
-    print(roots)
+    #print(roots)
     #print(roots)
     if len(roots) == 1:
         for root in roots:
