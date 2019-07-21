@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
 
-import graph_dependency_parser #important import
+import graph_dependency_parser.graph_dependency_parser
+import graph_dependency_parser.important_imports
 import argparse
 
 parser = argparse.ArgumentParser(description="Run the am-parser on a specified amconll file in order to annotate it, doesn't perform evaluation.")
@@ -109,7 +110,7 @@ embedding_sources: Dict[str, str] = (json.loads(args.embedding_sources_mapping)
 if args.extend_vocab:
     logger.info("Vocabulary is being extended with test instances.")
     logger.info("Reading evaluation data from %s", evaluation_data_path)
-    instances = dataset_reader.read(evaluation_data_path)
+    instances = dataset_reader.read([[args.formalism, evaluation_data_path]])
     model.vocab.extend_from_instances(Params({}), instances=instances)
     model.extend_embedder_vocab(embedding_sources)
 

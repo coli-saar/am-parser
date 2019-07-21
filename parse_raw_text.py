@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
 
-import graph_dependency_parser #important import
+import graph_dependency_parser.graph_dependency_parser
+import graph_dependency_parser.important_imports
 import argparse
 
 parser = argparse.ArgumentParser(description="Run the am-parser on a specified amconll file in order to annotate it, doesn't perform evaluation.")
