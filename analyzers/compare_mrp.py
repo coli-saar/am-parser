@@ -53,9 +53,10 @@ def is_interesting(instance):
     # instance might look like this:
     # this comes from the mrp --trace output and might look different for different evaluation metrics (here you see --score mrp):
     # {"tops": {"g": 1, "s": 1, "c": 1}, "labels": {"g": 6, "s": 6, "c": 6}, "properties": {"g": 1, "s": 1, "c": 1}, "anchors": {"g": 0, "s": 0, "c": 0}, "edges": {"g": 6, "s": 6, "c": 5}
-    if instance["labels"]["g"] > 15:
+    if instance["labels"]["g"] > 16:
         return False
-    if fscore(instance["edges"]) < 0.6 and instance["edges"]["s"] > 0:
+    interested_in = "labels"
+    if fscore(instance[interested_in]) < 0.8 and (instance[interested_in]["s"] > 0 or instance[interested_in]["g"] > 0 ):
         return True
     # ~ for subtask in instance:
         # ~ if fscore(instance[subtask]) < 0.6 and instance[subtask]["s"] > 0:
@@ -63,7 +64,14 @@ def is_interesting(instance):
     return False
     
 
-
+def populate_with_ids(filename, ids):
+    graphs = dict()
+    with open(filename) as f:
+        for line in f:
+            graph = json.loads(line)
+            if graph["id"] in ids:
+                graphs[graph["id"]] = line
+    return graphs
 
 
 optparser = argparse.ArgumentParser(add_help=True, 
@@ -85,7 +93,6 @@ CMD = MTOOL_COMMAND+ " --read mrp --trace --gold "+ gold_file + " "+opts.mtool+"
 
 with subprocess.Popen([CMD], shell=True, stdout=subprocess.PIPE) as proc:
     result = bytes.decode(proc.stdout.read())  # output of shell commmand as string
-    print(result)
     result = json.loads(result)
     scores = result["scores"]
     for id in scores:
@@ -93,16 +100,30 @@ with subprocess.Popen([CMD], shell=True, stdout=subprocess.PIPE) as proc:
         if interest:
             interesting_ids.append(id)
 
-for id in interesting_ids:
-    print(id)
-    if opts.viz:
-        with TemporaryDirectory() as direc:
-            os.system(MTOOL_COMMAND+ " --read mrp --write dot --id "+id +" "+ file1 + " "+  direc+"/f1.dot")
-            os.system("dot -Tpng "+direc+"/f1.dot -o"+ direc+"/f1.png")
+file_1_graphs = populate_with_ids(file1,interesting_ids)
+gold_graphs = populate_with_ids(gold_file,interesting_ids)
 
-            os.system(MTOOL_COMMAND+ " --read mrp --write dot --id "+id +" "+ gold_file + " "+  direc+"/f2.dot")
-            os.system("dot -Tpng "+direc+"/f2.dot -o"+ direc+"/f2.png")
-            os.system("montage "+direc+"/f1.png"+" " +direc+"/f2.png -geometry +0+0 x:")
+with TemporaryDirectory() as direc:
+    for id in interesting_ids:
+        print(id)
+        if opts.viz:
+            gold_graph = json.loads(gold_graphs[id])
+            if "input" in gold_graph:
+                print(gold_graph["input"])
+            f1mrp = os.path.join(direc,"f1.mrp")
+            with open(f1mrp,"w") as f:
+                f.write(file_1_graphs[id])
+            f2mrp = os.path.join(direc,"f2.mrp")
+            with open(f2mrp,"w") as f:
+                f.write(gold_graphs[id])
+            os.system(MTOOL_COMMAND+ " --read mrp --normalize all --write dot "+ f1mrp + " "+  os.path.join(direc,"f1.dot"))
+            os.system("dot -Tpng "+os.path.join(direc,"f1.dot")+" -o"+ os.path.join(direc,"f1.png"))
+
+            os.system(MTOOL_COMMAND+ " --read mrp --normalize all --write dot "+ f2mrp + " "+  os.path.join(direc,"f2.dot"))
+            os.system("dot -Tpng "+os.path.join(direc,"f2.dot")+" -o"+ os.path.join(direc,"f2.png"))
+            viz_cmd = "montage "+os.path.join(direc,"f1.png")+" " +os.path.join(direc,"f2.png")+" -geometry +0+0 x:"
+            with subprocess.Popen([viz_cmd], shell=True) as proc:
+                pass
         
     
         
