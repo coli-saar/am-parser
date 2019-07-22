@@ -27,7 +27,7 @@ with open(out, 'w+') as outfile:
             mrp_dict = json.loads(line)
             input = mrp_dict['input']
             id = mrp_dict['id']
-            print(id)
+            #print(id)
             framework = mrp_dict['framework']
             flavor = mrp_dict['flavor']
             time = mrp_dict['time']
