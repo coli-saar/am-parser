@@ -6,7 +6,8 @@ local data_paths = import 'data_paths.libsonnet';
 local UD_banks = data_paths["UD_banks"];
 
 #those graph banks where it is desired to have lexical labels that are _
-local OUTPUT_NULL_LEX_LABEL = ["DM","PSD","PAS"];
+#or more general: including a graphbank in this list will always make the parser return the most likely lexical label
+local OUTPUT_NULL_LEX_LABEL = ["DM","PSD","PAS","MRP-UCCA"];
 
 function(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_model, edge_loss, label_loss) {
     "name" : name,

@@ -58,7 +58,9 @@ import _jsonnet
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-import graph_dependency_parser #important import
+import graph_dependency_parser.graph_dependency_parser
+import graph_dependency_parser.important_imports
+
 
 parser = argparse.ArgumentParser(description='Run the training of an am-parser.')
 

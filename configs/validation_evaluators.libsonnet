@@ -114,8 +114,8 @@ function (dataset_reader, data_iterator) {
       "MRP-AMR" :  {
           "type": "standard_evaluator",
             "formalism" : "MRP-AMR",
-            "system_input" : "data/MRP/AMR/gold-dev/gold-dev.amconll",
-            "gold_file": "data/MRP/AMR/gold-dev/gold-dev.mrp",
+            "system_input" : "data/MRP/AMR/first_legal/dev/dev.amconll",
+            "gold_file": "data/MRP/AMR/first_legal/dev/dev.mrp",
             "use_from_epoch" : 1,
             "predictor" : {
                     "type" : "amconll_predictor",
@@ -125,6 +125,23 @@ function (dataset_reader, data_iterator) {
                     "threads" : 4,
                     "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                     "evaluation_command" : eval_commands['commands']['MRP-AMR']
+            }
+        },
+
+        "MRP-UCCA" :  {
+          "type": "standard_evaluator",
+            "formalism" : "MRP-UCCA",
+            "system_input" : "data/MRP/UCCA/very_first/gold-dev/gold-dev.amconll",
+            "gold_file": "data/MRP/UCCA/very_first/gold-dev/all_ucca.mrp",
+            "use_from_epoch" : 14,
+            "predictor" : {
+                    "type" : "amconll_predictor",
+                    "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                    "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                    "k" : k,
+                    "threads" : 4,
+                    "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
+                    "evaluation_command" : eval_commands['commands']['MRP-UCCA']
             }
         }
 

@@ -69,7 +69,7 @@ class BashEvaluationCommand(BaseEvaluationCommand):
 
 
 @BaseEvaluationCommand.register("amr_evaluation_command")
-class BashEvaluationCommand(BaseEvaluationCommand):
+class AMREvaluationCommand(BaseEvaluationCommand):
     """
     An evaluation command for AMR that can be configured with jsonnet files.
     """
