@@ -60,7 +60,7 @@ errors = 0
 total = 0
 for filename in os.listdir(mrp_dir):
     if not filename.startswith('.'):
-        print(filename)
+        #print(filename)
         with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
             for line in infile:
                 total += 1
@@ -80,9 +80,8 @@ for filename in os.listdir(mrp_dir):
                                 continue
                             else:
                                 spans = ' '.join(list(companion_data[id]["spans"].keys()))
-                                #spans = sorted(spans, key = lambda x:int(x.split(':')[0]))
                                 tokens = companion_data[id]['tokenization']
-                                edges = get_mrp_edges(mrp_dict)
+                                edges = get_mrp_edges(mrp_dict, get_remote =True)
                                 edges = eliminate_h(edges)
                                 labels = get_id2lex(mrp_dict)
                                 compressed_edges = compress_c_edge(edges)
@@ -161,43 +160,3 @@ with open(outdir+'dev.txt', 'w') as outfile:
         outfile.write(irtg_format_compressed)
         outfile.write('\n\n')
 print('written dev.txt')
-
-train_ids = [i[0] for i in training]
-training = None
-dev_ids = [i[0] for i in dev]
-dev = None
-
-train_mrp = []
-dev_mrp = []
-for filename in os.listdir(mrp_dir):
-    if not filename.startswith('.'):
-        with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
-            for id in train_ids:
-                for line in infile:
-                    mrp_dict = json.loads(line)
-                    if id == mrp_dict['id']:
-                        train_mrp.append(line)
-print('appended train')
-
-for filename in os.listdir(mrp_dir):
-    if not filename.startswith('.'):
-        with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
-            for id in dev_ids:
-                for line in infile:
-                    mrp_dict = json.loads(line)
-                    if id == mrp_dict['id']:
-                        dev_mrp.append(line)
-print('appended dev')
-print('sanity check: number of examples in dev data')
-print(len(dev_mrp))
-with open(outdir + 'train.mrp', 'w') as outfile:
-    for mrp in train_mrp:
-        outfile.write(json.dumps(mrp))
-        outfile.write('\n')
-print('written train.mrp')
-with open(outdir + 'dev.mrp', 'w') as outfile:
-    for mrp in dev_mrp:
-        outfile.write(json.dumps(mrp))
-        outfile.write('\n')
-print('written dev.mrp')
-print('Done!')
