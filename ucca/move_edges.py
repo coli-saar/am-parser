@@ -27,7 +27,7 @@ def lower_edge(edge_dict):
         edge_dict[(u,v)] = edge_dict[(u,v)][0]
     return edge_dict
 
-def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = True, seek_marks = False):
+def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = True, seek_marks = False, label_dict):
         '''
         Input:
         edge_dict: dictionary of edges (graph)
@@ -36,7 +36,7 @@ def raise_edge(edge_dict, edge_label_to_raise, priority_where_to_raise, mark = T
         '''
         to_raise = []
         for (u, v) in list(edge_dict.keys()):
-            if edge_dict[(u,v)] == edge_label_to_raise:
+            if edge_dict[(u,v)] == edge_label_to_raise and label_dict[u] != 'Non-Terminal':
                 to_raise.append((u, v))
         for (u, v) in to_raise:
             parents = {}
