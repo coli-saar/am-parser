@@ -38,6 +38,14 @@ def update_id_labels(edge_dict, label_dict):
     return label_dict
 
 
+def reverse_dict(d):
+    """
+    reverses key-value mapping
+    """
+    r = dict()
+    for k,v in d.items():
+        r[v] = k
+    return r
 
 
 header = """###IRTG unannotated corpus file, v1.0
@@ -79,7 +87,8 @@ for filename in os.listdir(mrp_dir):
                             if id not in companion_data.keys():
                                 continue
                             else:
-                                spans = ' '.join(list(companion_data[id]["spans"].keys()))
+                                span_dict = reverse_dict(companion_data[id]["spans"]) #keys tokens, values token ranges
+                                spans = ' '.join([span_dict[position] for position in sorted(span_dict.keys())])
                                 tokens = companion_data[id]['tokenization']
                                 edges = get_mrp_edges(mrp_dict, get_remote =True)
                                 edges = eliminate_h(edges)
