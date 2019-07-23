@@ -2,6 +2,10 @@ local k = 6;
 local eval_commands = import 'eval_commands.libsonnet';
 local give_up = 15; #15 seconds
 
+local data_paths = import 'data_paths.libsonnet';
+local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
+local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
+
 local sdp_evaluator(dataset_reader, data_iterator, name, threads, from_epoch) = {
         "type": "standard_evaluator",
         "formalism" : name,
@@ -25,7 +29,7 @@ local mrp_evaluator(dataset_reader, data_iterator, name) = {
         "formalism" : "MRP-"+name,
         "system_input" : "data/MRP/"+name+"/dev/dev.amconll",
         "gold_file": "data/MRP/"+name+"/dev/dev.mrp",
-        "use_from_epoch" : 10,
+        "use_from_epoch" : 1,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
@@ -114,8 +118,8 @@ function (dataset_reader, data_iterator) {
       "MRP-AMR" :  {
           "type": "standard_evaluator",
             "formalism" : "MRP-AMR",
-            "system_input" : "data/MRP/AMR/first_legal/dev/dev.amconll",
-            "gold_file": "data/MRP/AMR/first_legal/dev/dev.mrp",
+            "system_input" : "data/MRP/AMR/"+MRP_AMR_SUBPATH+"/dev/dev.amconll",
+            "gold_file": "data/MRP/AMR/"+MRP_AMR_SUBPATH+"/dev/dev.mrp",
             "use_from_epoch" : 1,
             "predictor" : {
                     "type" : "amconll_predictor",
@@ -131,8 +135,8 @@ function (dataset_reader, data_iterator) {
         "MRP-UCCA" :  {
           "type": "standard_evaluator",
             "formalism" : "MRP-UCCA",
-            "system_input" : "data/MRP/UCCA/very_first/dev/dev.amconll",
-            "gold_file": "data/MRP/UCCA/very_first/dev/dev.mrp",
+            "system_input" : "data/MRP/UCCA/"+MRP_UCCA_SUBPATH+"/dev/dev.amconll",
+            "gold_file": "data/MRP/UCCA/"+MRP_UCCA_SUBPATH+"/dev/dev.mrp",
             "use_from_epoch" : 25,
             "predictor" : {
                     "type" : "amconll_predictor",

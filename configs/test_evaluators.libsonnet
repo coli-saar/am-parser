@@ -2,6 +2,10 @@ local k = 6;
 local give_up = 1800; #30 minutes
 local eval_commands = import 'eval_commands.libsonnet';
 
+local data_paths = import 'data_paths.libsonnet';
+local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
+local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
+
 
 local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
         [name+"_id", { #prefix used for evaluation metric
@@ -121,7 +125,7 @@ function (dataset_reader, data_iterator) {
      "MRP-EDS" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-EDS","EDS", 4,give_up),
      "MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 16, 300),
 
-     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/first_legal", 16, 300)
+     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 300)
 
 
 }
