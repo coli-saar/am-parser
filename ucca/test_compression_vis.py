@@ -8,9 +8,11 @@ import sys
 
 infile = sys.argv[1]
 def update_id_labels(edge_dict, label_dict):
-    for (u,v) in edge_dict.keys():
+    for (u,v) in list(edge_dict.keys()):
         if type(u) == str:
-            label_dict[u] = u
+            label_dict[int(u.split('<')[0])] = '<root>'
+            edge_dict[(int(u.split('<')[0]), v)] = edge_dict[(u,v)]
+            del edge_dict[(u,v)]
         elif u - 1111 >= 0:
             if int(str(u)[:-4]) in label_dict.keys():
                 label_dict[u] = label_dict[int(str(u)[:-4])]
@@ -19,9 +21,9 @@ def update_id_labels(edge_dict, label_dict):
     label_dict_nodes = list(label_dict.keys())
     for edge in edge_dict.keys():
         for node in edge:
-            if node not in label_dict.keys():
+            if node not in label_dict.keys() and type(node) != str:
                 label_dict[node] = 'Non-Terminal'
-    return label_dict
+    return label_dict, edge_dict
 
 
 

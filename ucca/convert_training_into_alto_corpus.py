@@ -3,6 +3,7 @@ import json
 import collections
 import os
 import random
+from tqdm import tqdm
 
 from edge_to_irtg import edge2irtg
 from get_edges_from_mrp import get_id2lex, get_mrp_edges
@@ -38,14 +39,6 @@ def update_id_labels(edge_dict, label_dict):
     return label_dict
 
 
-def reverse_dict(d):
-    """
-    reverses key-value mapping
-    """
-    r = dict()
-    for k,v in d.items():
-        r[v] = k
-    return r
 
 
 header = """###IRTG unannotated corpus file, v1.0
@@ -70,7 +63,7 @@ for filename in os.listdir(mrp_dir):
     if not filename.startswith('.'):
         #print(filename)
         with open(mrp_dir + filename,encoding='utf8', errors='ignore') as infile:
-            for line in infile:
+            for line in tqdm(infile):
                 total += 1
                 try:
                     mrp_dict = json.loads(line)
@@ -87,10 +80,9 @@ for filename in os.listdir(mrp_dir):
                             if id not in companion_data.keys():
                                 continue
                             else:
-                                span_dict = reverse_dict(companion_data[id]["spans"]) #keys tokens, values token ranges
-                                spans = ' '.join([span_dict[position] for position in sorted(span_dict.keys())])
+                                spans = ' '.join(list(companion_data[id]["spans"].keys()))
                                 tokens = companion_data[id]['tokenization']
-                                edges = get_mrp_edges(mrp_dict, get_remote =True)
+                                edges = get_mrp_edges(mrp_dict, get_remote =False)
                                 edges = eliminate_h(edges)
                                 labels = get_id2lex(mrp_dict)
                                 compressed_edges = compress_c_edge(edges)
@@ -105,6 +97,9 @@ for filename in os.listdir(mrp_dir):
                                             if '<root>' in node:
                                                 node = node[:-6]
                                         alignments += str(node) + '|'
+                                    if id =='057386-0002':
+                                        print(node_tokens)
+                                        print(node_tokens[alignment])
                                     alignments += str(alignment)+'!' + '||' + str(node_tokens[alignment]) + '||' + '1.0 '
                                 data.append((id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_compressed))
                 except:
