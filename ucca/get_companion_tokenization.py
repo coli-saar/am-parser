@@ -19,10 +19,10 @@ for filename in os.listdir(companion_data_dir):
                 token = re.sub(r'[–—−]', '-', token).lower()
                 if "’" in token:
                     token = token.replace("’", "'")
-                if "”" in token:
-                    token = token.replace("”", '"')
-                if "“" in token:
-                    token = token.replace("“", '"')
+                #if "”" in token:
+                #    token = token.replace("”", '"')
+                #if "“" in token:
+                #    token = token.replace("“", '"')
                 if "…" in token:
                     token = token.replace("…", "...")
                 #if '-' in token:

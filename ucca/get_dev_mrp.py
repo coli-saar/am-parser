@@ -11,7 +11,7 @@ with open(mrp_everything) as mrp_in:
     for line in mrp_in:
         mrp = json.loads(line)
         id = mrp['id']
-        mrp_stored[id] = [mrp]
+        mrp_stored[id] = mrp
 
 #dev_stored = {}
 dev_string = ''

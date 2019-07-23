@@ -11,7 +11,9 @@ from move_edges import lower_edge
 def get_terminal_nodes(mrp_dict):
     nodes = []
     for node in mrp_dict['nodes']:
-        if node['label'] != 'Non-Terminal':
+        #if node['label'] != 'Non-Terminal':
+        #    nodes.append(node)
+        if 'anchors' in node.keys():
             nodes.append(node)
     return nodes
 
@@ -32,21 +34,22 @@ with open(out, 'w+') as outfile:
             version = mrp_dict['version']
             node_ids = get_id2lex(mrp_dict)
             edges = get_mrp_edges(mrp_dict)
-            decompressed = decompress_c(edges, node_ids)
-            lowered = lower_edge(decompressed)
+            node_ids, edges = update_id_labels(edges, node_ids)
+            lowered = lower_edge(edges)
+            decompressed = decompress_c(lowered, node_ids)
             mrp_post_processed['id'] = id
             mrp_post_processed['framework'] = framework
             mrp_post_processed['flavor'] = flavor
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
-            node_ids = update_id_labels(lowered, node_ids)
-            print(node_ids)
+            mrp_post_processed['input'] = input
+            node_ids, lowered = update_id_labels(lowered, node_ids)
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():
                 if node_ids[node] == 'Non-Terminal':
                     mrp_nodes.append({'id':node})
             mrp_post_processed['nodes'] = mrp_nodes
-            print(mrp_nodes)
-            mrp_post_processed['edges'] = get_edges(decompressed)
+            mrp_post_processed['edges'] = get_edges(lowered)
+            print(mrp_post_processed['edges'])
             outfile.write(json.dumps(mrp_post_processed))
             outfile.write('\n')
