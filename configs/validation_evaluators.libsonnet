@@ -25,7 +25,7 @@ local mrp_evaluator(dataset_reader, data_iterator, name) = {
         "formalism" : "MRP-"+name,
         "system_input" : "data/MRP/"+name+"/dev/dev.amconll",
         "gold_file": "data/MRP/"+name+"/dev/dev.mrp",
-        "use_from_epoch" : 1,
+        "use_from_epoch" : 10,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
@@ -131,15 +131,15 @@ function (dataset_reader, data_iterator) {
         "MRP-UCCA" :  {
           "type": "standard_evaluator",
             "formalism" : "MRP-UCCA",
-            "system_input" : "data/MRP/UCCA/very_first/gold-dev/gold-dev.amconll",
-            "gold_file": "data/MRP/UCCA/very_first/gold-dev/all_ucca.mrp",
-            "use_from_epoch" : 14,
+            "system_input" : "data/MRP/UCCA/very_first/dev/dev.amconll",
+            "gold_file": "data/MRP/UCCA/very_first/dev/dev.mrp",
+            "use_from_epoch" : 25,
             "predictor" : {
                     "type" : "amconll_predictor",
                     "dataset_reader" : dataset_reader, #same dataset_reader as above.
                     "data_iterator" : data_iterator, #same bucket iterator also for validation.
                     "k" : k,
-                    "threads" : 4,
+                    "threads" : 8,
                     "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                     "evaluation_command" : eval_commands['commands']['MRP-UCCA']
             }

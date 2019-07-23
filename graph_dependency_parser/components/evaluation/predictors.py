@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from typing import List, Iterable, Dict, Tuple, Union
 
@@ -172,3 +173,33 @@ class DummyEvaluator(Evaluator):
 
     def eval(self,model, epoch,model_path=None) -> Dict[str, float]:
         return dict()
+
+@Evaluator.register("empty_mrp_evaluator")
+class EmptyMRPEvaluator(Evaluator):
+    """
+    A wrapper around a predictor that remembers system input.
+    """
+    def __init__(self, formalism:str, system_input : str, predictor : Predictor, postprocessing : List[str]) -> None:
+        """
+
+        :param formalism:
+        :param system_input:
+        :param predictor:
+        :param postprocessing: a list of strings with postprocessing commands, you can use {system_output} as a placeholder
+        """
+        self.postprocessing = postprocessing
+        self.formalism = formalism
+        self.system_input = system_input
+        self.predictor = predictor
+
+    def eval(self,model, epoch, model_path=None) -> Dict[str, float]:
+        self.predictor.set_model(model)
+        if model_path:
+            filename = model_path + "/" + "test_"+str(self.formalism)+".amconll"
+            self.predictor.parse_and_save(self.formalism, self.system_input, filename)
+            for cmd in self.postprocessing:
+                cmd = cmd.format(system_output=filename)
+                os.system(cmd)
+            return dict()
+        else: #use temporary directory
+            raise ValueError("Need to get model_path!")
