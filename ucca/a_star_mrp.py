@@ -52,6 +52,10 @@ def node_to_token_index(mrp_companion, mrp_dict, id_lex_dict, mrp_sent_id):
                         for span in mrp_companion[mrp_sent_id]['spans'].keys():
                             if span == span_of_first:
                                 node_to_index[node] = mrp_companion[mrp_sent_id]['spans'][span]
+    for node in mrp_dict['nodes']:
+        for anchor in node["anchors"]:
+            spans.append(anchor["from"])
+            spans.append(anchor["to"])
     if do_second_iteration == True:
         mrp_spans = []
         companion_spans = []

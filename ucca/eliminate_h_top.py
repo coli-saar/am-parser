@@ -37,4 +37,5 @@ def add_h(edge_dict):
                 n = max([u for (u,v) in edge_dict.keys() if type(u) == int])
                 n = n+1
                 edge_dict[(n, root)] = 'H'
+                #print(edge_dict)
     return edge_dict

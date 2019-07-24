@@ -14,7 +14,7 @@ from process_c import *
 from head_percolation_alignment import percolate
 from move_edges import raise_edge
 from get_mrp_from_intermediate import get_mrp
-from utils import number_edges
+from utils import number_edges, node_to_token_index_mod
 
 mrp_dir = sys.argv[1]
 tokenized_dir = sys.argv[2]
@@ -80,7 +80,6 @@ for filename in os.listdir(mrp_dir):
                     mrp_dict = json.loads(line)
                     input = mrp_dict["input"]
                     id = mrp_dict["id"]
-                    #print(id)
                     flavor = mrp_dict["flavor"]
                     framework = mrp_dict["framework"]
                     version = mrp_dict["version"]
@@ -94,7 +93,7 @@ for filename in os.listdir(mrp_dir):
                                 span_dict = reverse_dict(companion_data[id]["spans"]) #keys tokens, values token ranges
                                 spans = ' '.join([span_dict[position] for position in sorted(span_dict.keys())])
                                 tokens = companion_data[id]['tokenization']
-                                edges = get_mrp_edges(mrp_dict, get_remote =False)
+                                edges = get_mrp_edges(mrp_dict, get_remote =True)
                                 edges = eliminate_h(edges)
                                 labels = get_id2lex(mrp_dict)
                                 compressed_edges = compress_c_edge(edges)
@@ -114,9 +113,8 @@ for filename in os.listdir(mrp_dir):
                                 raised_q = raise_edge(raised_t, 'Q', ['L', 'H', 'P', 'S', 'T', 'Q', 'E', 'F', 'D'], label_dict=labels)
                                 updated_id_labels = update_id_labels(raised_q, labels)
                                 irtg_format_raised = edge2irtg(raised_q, updated_id_labels)
-                                node_tokens = node_to_token_index(companion_data, mrp_dict, updated_id_labels, id)
-                                if id =='057386-0002':
-                                    print(node_tokens)
+                                #node_tokens = node_to_token_index(companion_data, mrp_dict, updated_id_labels, id)
+                                node_tokens = node_to_token_index_mod(companion_data, mrp_dict, updated_id_labels, id)
                                 #print(node_tokens)
                                 aligned = percolate(raised_q, priority_queue, updated_id_labels)
                                 alignments = ''
@@ -127,12 +125,7 @@ for filename in os.listdir(mrp_dir):
                                                 node = node[:-6]
                                         alignments += str(node) + '|'
                                     alignments += str(alignment)+'!' + '||' + str(node_tokens[alignment]) + '||' + '1.0 '
-                                if id =='057386-0002':
-                                    print(alignments)
-                                    print(aligned)
-                                    print(node_tokens)
                                 data.append((id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_raised))
-                                #print(raised)
                                 new_mrp = get_mrp(id,flavor, framework, version, time, input, companion_data[id]['spans'], raised_r)
                                 data_mrp.append(new_mrp)
                 except:
@@ -140,7 +133,7 @@ for filename in os.listdir(mrp_dir):
 
 
 
-#sys.exit()
+
 train_test_boundary = int((len(data)*80)/100)
 random.Random(1).shuffle(data)
 training = data[:train_test_boundary]
@@ -149,7 +142,8 @@ test = data[train_test_boundary:]
 
 print('percentage of training data skipped:')
 print(errors/total)
-
+#print('Not writing anything')
+#sys.exit()
 with open(outdir+'training.txt', 'w') as outfile:
     outfile.write(header)
     for (id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_compressed) in training:
