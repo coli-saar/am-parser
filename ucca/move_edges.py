@@ -1,6 +1,5 @@
 from get_edges_from_mrp import test, get_id2lex, get_mrp_edges
 from edge_to_irtg import edge2irtg
-from nltk.tokenize.moses import MosesDetokenizer
 
 #TODO: maybe implement a node/edge class and add methods for getting sisters, daughter and parent
 
