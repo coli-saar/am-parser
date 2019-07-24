@@ -97,9 +97,6 @@ for filename in os.listdir(mrp_dir):
                                             if '<root>' in node:
                                                 node = node[:-6]
                                         alignments += str(node) + '|'
-                                    if id =='057386-0002':
-                                        print(node_tokens)
-                                        print(node_tokens[alignment])
                                     alignments += str(alignment)+'!' + '||' + str(node_tokens[alignment]) + '||' + '1.0 '
                                 data.append((id, flavor, framework, version,time, spans, input, tokens, alignments, irtg_format_compressed))
                 except:
