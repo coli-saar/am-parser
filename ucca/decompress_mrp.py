@@ -42,7 +42,7 @@ with open(out, 'w+') as outfile:
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
             mrp_post_processed['tops'] = get_tops(decompressed)
-            node_ids = update_id_labels(decompressed, node_ids)
+            label_dict,node_ids = update_id_labels(decompressed, node_ids)
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():
                 if node_ids[node] == 'Non-Terminal':
