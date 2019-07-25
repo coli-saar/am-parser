@@ -25,7 +25,7 @@ def eliminate_h(edge_dict):
                             del edge_dict[(u,v)]
     return edge_dict
 
-def add_h(edge_dict, top_node_id):
+def add_h(edge_dict, node_ids, top_node_id):
     root = top_node_id
 
     if top_node_id is None:
@@ -46,6 +46,7 @@ def add_h(edge_dict, top_node_id):
             n = max([u for (u, v) in edge_dict.keys() if type(u) == int])
             n = n + 1
             edge_dict[(n, root)] = 'H'
+            node_ids[n] = 'Non-Terminal'
             root = n
     # roots = get_roots(edge_dict)
     # if len(roots) == 1:

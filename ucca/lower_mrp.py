@@ -45,7 +45,7 @@ with open(out, 'w+') as outfile:
             node_ids, edges = update_id_labels(edges, node_ids)
             lowered = lower_edge(edges)
             decompressed = decompress_c(lowered, node_ids)
-            revised_top, with_h = add_h(decompressed, top)
+            revised_top, with_h = add_h(decompressed, node_ids, top)
             mrp_post_processed['tops'] = [revised_top]
             mrp_post_processed['id'] = id
             mrp_post_processed['framework'] = framework
