@@ -25,17 +25,31 @@ def eliminate_h(edge_dict):
                             del edge_dict[(u,v)]
     return edge_dict
 
-def add_h(edge_dict):
-    roots = get_roots(edge_dict)
-    if len(roots) == 1:
-        for root in roots:
-            daughter_edges = []
-            for (u,v) in edge_dict.keys():
-                if u == root:
-                    daughter_edges.append((u,v))
-            if not any([edge_dict[(u,v)] for (u, v) in daughter_edges if edge_dict[(u,v)] == 'H']):
-                n = max([u for (u,v) in edge_dict.keys() if type(u) == int])
-                n = n+1
-                edge_dict[(n, root)] = 'H'
-                #print(edge_dict)
-    return edge_dict
+def add_h(edge_dict, top_node_id):
+    root = top_node_id
+
+    daughter_edges = []
+    for (u, v) in edge_dict.keys():
+        if u == root:
+            daughter_edges.append((u, v))
+
+    if not any([edge_dict[(u, v)] for (u, v) in daughter_edges if edge_dict[(u, v)] == 'H']):
+        n = max([u for (u, v) in edge_dict.keys() if type(u) == int])
+        n = n + 1
+        edge_dict[(n, root)] = 'H'
+        root = n
+
+    # roots = get_roots(edge_dict)
+    # if len(roots) == 1:
+    #     for root in roots:
+    #         daughter_edges = []
+    #         for (u,v) in edge_dict.keys():
+    #             if u == root:
+    #                 daughter_edges.append((u,v))
+    #         if not any([edge_dict[(u,v)] for (u, v) in daughter_edges if edge_dict[(u,v)] == 'H']):
+    #             n = max([u for (u,v) in edge_dict.keys() if type(u) == int])
+    #             n = n+1
+    #             edge_dict[(n, root)] = 'H'
+    #             #print(edge_dict)
+
+    return root, edge_dict

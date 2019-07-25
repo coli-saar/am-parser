@@ -13,11 +13,17 @@ def extract_all_anchors(j):
         return []
 
 
+companion_filename = sys.argv[1]
+mrp_filename = sys.argv[2]
+
+print(f"Comparing tokens in companion file {companion_filename} with MRP file {mrp_filename}")
+
+
 # collect token ranges in companion data
 
 companion_tokens = {}
 
-with open("data_ucca/udpipe.mrp", "r") as f:
+with open(companion_filename, "r") as f:
     for line in tqdm(f):
         j = json.loads(line)
         id = j["id"]
@@ -27,7 +33,7 @@ with open("data_ucca/udpipe.mrp", "r") as f:
 
 
 # collect token ranges in UCCA MRP graphs
-ucca_mrp_files = ["data_ucca/ucca/ewt.mrp", "data_ucca/ucca/wiki.mrp", "data_ucca/ucca/wsj.mrp"]
+ucca_mrp_files = [mrp_filename]
 num_missing_tr = 0
 num_total_tr = 0
 
