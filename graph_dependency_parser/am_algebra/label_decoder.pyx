@@ -89,16 +89,22 @@ class AMDecoder:
         self.sents.append((conllsent,))
 
 
-    def decode(self, threads, kbest, giveup):
+    def decode(self, threads, kbest, giveup, give_up_k_1=None):
         """
         Actually parse the sentences. Write the results to the output file.
         :param threads:
         :param kbest:
         :param giveup: time limit for each sentence until we back off to lower k
+        :param give_up_k_1: time limit for each sentence until we stop trying to parse with k=1 and skip it
         :return:
         """
         self.kbest = kbest
         self.giveupat = giveup
+
+        if give_up_k_1 is None:
+            give_up_k_1 = giveup
+        self.give_up_k_1 = give_up_k_1
+
         if self.giveupat:
             print("Will give up after",self.giveupat,"s when still not successful")
         print("Using",kbest,"best supertags")
@@ -224,7 +230,7 @@ class AMDecoder:
                         else:
                             print(msg)
                         return self.viterbi(conll_sentence, new_root_id, kbest=kbest-1)
-                    else:
+                    elif time()-start_time > self.give_up_k_1:
                         if tqdm_obj:
                             tqdm_obj.write("Skipping sentence")
                         else:
