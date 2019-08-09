@@ -30,7 +30,7 @@ import json
 
 import argparse
 
-MTOOL_COMMAND = "python /Users/koller/Documents/workspace/mtool/main.py" #set path to mtool command, possibly starting with python3 ...
+MTOOL_COMMAND = "mtool" #set path to mtool command, probably something like python3 /something/mtool/main.py
 
 
 def fscore(triple):
@@ -59,7 +59,7 @@ def is_interesting(instance):
     if fscore(instance[interested_in]) < 0.8 and (instance[interested_in]["s"] > 0 or instance[interested_in]["g"] > 0 ):
         return True
     # ~ for subtask in instance:
-        # ~ if fscore(instance[subtask]) < 0.6 and instance[subtask]["s"] > 0:
+        # ~ if fscore(instance[subtask]) < 0.8 and instance[subtask]["s"] > 0:
             # ~ return True
     return False
     
@@ -121,7 +121,7 @@ with TemporaryDirectory() as direc:
 
             os.system(MTOOL_COMMAND+ " --read mrp --normalize all --write dot "+ f2mrp + " "+  os.path.join(direc,"f2.dot"))
             os.system("dot -Tpng "+os.path.join(direc,"f2.dot")+" -o"+ os.path.join(direc,"f2.png"))
-            viz_cmd = "open "+os.path.join(direc,"f1.png")+" " +os.path.join(direc,"f2.png")+" -geometry +0+0 x:"
+            viz_cmd = "montage "+os.path.join(direc,"f1.png")+" " +os.path.join(direc,"f2.png")+" -geometry +0+0 x:"
             with subprocess.Popen([viz_cmd], shell=True) as proc:
                 pass
         
