@@ -39,7 +39,7 @@ class ConllEntry:
         return '\t'.join(['_' if v is None else v for v in values])
 
 
-class ConllSent(UserList):
+class ConllSent:
     """
     A class for representing sentences. Each sentence consists of several ConllEntries (one per word + a representation of the artificial root at position 0).
     A sentence belongs to a task and may have other sentence-wide valid attributes (e.g. untokenized string).
@@ -50,16 +50,42 @@ class ConllSent(UserList):
         self.root = root #root index
         self.heads = heads #head for each word. The first entry should be -1 (because the artificial root has no root)
         self.label_scores = label_scores #access from -> to -> label. That is, the dimensions are Tokens x Tokens x Label Types
+        self.data = [] #list of ConllEntry
+
     def add_attr(self, attr):
         self.attrs.append(attr)
+
     def get_attrs(self):
         return self.attrs
+
     def copy(self):
         n = ConllSent(self.heads,self.label_scores,self.root)
         n.attrs = list(self.attrs)
         for e in self:
             n.append(e.copy())
         return n
+
+    def __len__(self):
+        return len(self.data)
+
+    def __repr__(self):
+        return str(self.data)
+
+    def append(self, item):
+        self.data.append(item)
+
+    def remove(self, item):
+        self.data.remove(item)
+
+    def __getitem__(self, sliced):
+        if isinstance(sliced, slice):
+            sent = ConllSent(self.heads[sliced], None, self.root) #TODO: add treatment of label scores
+            sent.attrs = list(self.attrs)
+            sent.data = self.data[sliced]
+            return sent
+        else: #get single entry
+            return self.data[sliced]
+
 
 def write_conll(fn, conll_gen):
     """
