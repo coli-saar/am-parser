@@ -8,6 +8,9 @@ import numpy as np
 
 from graph_dependency_parser.components.edge_models.base import EdgeModel
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 @EdgeModel.register("kg_edges")
 class KGEdges(EdgeModel):
@@ -18,8 +21,8 @@ class KGEdges(EdgeModel):
                  encoder_dim:int,
                  label_dim:int,
                  edge_dim:int,
-                 dropout: float,
                  edge_label_namespace: str,
+                 dropout: float = 0.0,
                  activation : Activation = None) -> None:
         """
             Parameters
@@ -46,6 +49,9 @@ class KGEdges(EdgeModel):
         else:
             self.activation = activation
 
+        if dropout > 0.0:
+            logger.warning("You specified a dropout, which is > 0.0 for the KG edge model, this has no effect")
+
         #edge existence:
 
         #these two matrices together form the feed forward network which takes the vectors of the two words in question and makes predictions from that
@@ -64,7 +70,6 @@ class KGEdges(EdgeModel):
 
         self.label_out_layer = torch.nn.Linear(edge_dim, num_labels) #output layer for edge labels
 
-        self._dropout = InputVariationalDropout(dropout)
 
     def encoder_dim(self):
         return self._encoder_dim
@@ -89,8 +94,8 @@ class KGEdges(EdgeModel):
         float_mask = mask.float()
 
         # shape (batch_size, sequence_length, arc_representation_dim)
-        head_arc_representation = self._dropout(self.head_arc_feedforward(encoded_text))
-        child_arc_representation = self._dropout(self.child_arc_feedforward(encoded_text))
+        head_arc_representation = self.head_arc_feedforward(encoded_text)
+        child_arc_representation = self.child_arc_feedforward(encoded_text)
 
         bs,sl,arc_dim = head_arc_representation.size()
 
@@ -131,8 +136,8 @@ class KGEdges(EdgeModel):
             for each given arc.
         """
         # shape (batch_size, sequence_length, tag_representation_dim)
-        head_label_representation = self._dropout(self.head_label_feedforward(encoded_text))
-        child_label_representation = self._dropout(self.child_label_feedforward(encoded_text))
+        head_label_representation = self.head_label_feedforward(encoded_text)
+        child_label_representation = self.child_label_feedforward(encoded_text)
 
         batch_size = head_label_representation.size(0)
         # shape (batch_size,)
@@ -172,8 +177,8 @@ class KGEdges(EdgeModel):
             for each edge. [i,j,k,l] is the the score for edge j->k being labeled l in sentence i
         """
         # shape (batch_size, sequence_length, label_representation_dim)
-        head_label_representation = self._dropout(self.head_label_feedforward(encoded_text))
-        child_label_representation = self._dropout(self.child_label_feedforward(encoded_text))
+        head_label_representation = self.head_label_feedforward(encoded_text)
+        child_label_representation = self.child_label_feedforward(encoded_text)
 
         bs,sl,label_dim = head_label_representation.size()
 
