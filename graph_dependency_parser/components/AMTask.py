@@ -176,9 +176,11 @@ class AMTask(Model):
             "position_in_corpus": [meta["position_in_corpus"] for meta in metadata],
             "formalism" : self.name
         }
+
         if encoded_text_tagging is not None and self.loss_mixing["supertagging"] is not None:
             output_dict["supertag_scores"] = supertagger_logits # shape (batch_size, seq_len, num supertags)
             output_dict["best_supertags"] = Supertagger.top_k_supertags(supertagger_logits, 1).squeeze(2) # shape (batch_size, seq_len)
+
         if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
             if not self.output_null_lex_label:
                 bottom_lex_label_index = self.vocab.get_token_index("_", namespace=self.name + "_lex_labels")
@@ -248,7 +250,7 @@ class AMTask(Model):
         In contrast to its name, this function does not perform the decoding but only prepares it.
         Therefore, we take the result of forward and perform the following steps (for each sentence in batch):
         - remove padding
-        - identifiy the root of the sentence, group other root-candidates under the proper root
+        - identify the root of the sentence, group other root-candidates under the proper root
         - collect a selection of supertags to speed up computation (top k selection is done later)
         :param output_dict: result of forward
         :return: output_dict with the following keys added:
@@ -426,7 +428,7 @@ class AMTask(Model):
                 self.current_epoch += 1
             else: #done on dev/test data
                 if self.validation_evaluator:
-                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch,model_path)
+                    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch, model_path)
                     for name, val in metrics.items():
                         r[name] = val
         return r

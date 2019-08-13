@@ -23,7 +23,7 @@ import graph_dependency_parser.graph_dependency_parser
 import graph_dependency_parser.important_imports
 import argparse
 
-parser = argparse.ArgumentParser(description="Run the am-parser on a specified amconll file in order to annotate it, doesn't perform evaluation.")
+parser = argparse.ArgumentParser(description="Run the am-parser on a text file in order to annotate it, doesn't perform tokenization (assumes spaces to separate tokens) or other preprocessing (POS tagging, lemmatization).")
 
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
 parser.add_argument('formalism', type=str, help='name of formalism (must be included in the model)')
