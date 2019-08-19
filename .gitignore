@@ -107,3 +107,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+*.amconll
+analyzers/test2/detailed_f.txt
