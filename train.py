@@ -117,7 +117,7 @@ params["random_seed"] = random_seed
 params["numpy_seed"] = numpy_seed
 params["pytorch_seed"] = pytorch_seed
 prepare_environment(params)
-from graph_dependency_parser.components.evaluation.predictors import Evaluator, StandardEvaluator
+from graph_dependency_parser.components.evaluation.predictors import Evaluator, EmptyMRPEvaluator
 from graph_dependency_parser.train.amtrainer import AMTrainer, TrainerPieces
 serialization_dir = args.serialization_dir
 create_serialization_dir(params,serialization_dir , args.recover, args.force)
@@ -196,7 +196,7 @@ if evaluate_on_test and test_evaluators:
     logger.info("The model will be evaluated using the best epoch weights.")
     overall_metrics = dict()
     for name,evaluator in test_evaluators:
-        test_metrics = evaluator.eval(trainer.model,float("inf"))
+        test_metrics = evaluator.eval(trainer.model,float("inf"), model_path=serialization_dir)
         for key, value in test_metrics.items():
             overall_metrics[name+"_"+key] = value
             metrics["test_" +name + "_"+ key] = value

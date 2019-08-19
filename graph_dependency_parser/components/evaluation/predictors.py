@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from typing import List, Iterable, Dict, Tuple, Union
 
@@ -95,7 +96,7 @@ class AMconllPredictor(Predictor):
     """
 
     def __init__(self, dataset_reader: DatasetReader, k:int,give_up:float, threads:int = 4,data_iterator: DataIterator = None,
-                 evaluation_command: BaseEvaluationCommand = None, model: Model = None, batch_size: int = 64):
+                 evaluation_command: BaseEvaluationCommand = None, model: Model = None, batch_size: int = 64, give_up_k_1 : float = None):
         """
         Creates a predictor from an AMConllDatasetReader, optionally takes an AllenNLP model. The model can also be given later using set_model.
         If evaluation is required, en evaluation_command can be supplied as well.
@@ -103,6 +104,7 @@ class AMconllPredictor(Predictor):
         :param k: number of supertags to be used during decoding
         :param give_up: time limit in seconds before retry parsing with k-1 supertags
         :param threads: number of parallel threads to parse corpus
+        :param give_up_k_1: if given, how long to wait before skipping sentence entirely ("back off" from k=1 to k=0)
         :param evaluation_command:
         :param model:
         """
@@ -110,6 +112,10 @@ class AMconllPredictor(Predictor):
         self.k = k
         self.threads = threads
         self.give_up = give_up
+        if give_up_k_1 is None:
+            self.give_up_k_1 = give_up
+        else:
+            self.give_up_k_1 = give_up_k_1
 
     def parse_and_save(self, formalism : str, input_file : str, output_file: str) -> None:
         """
@@ -132,7 +138,7 @@ class AMconllPredictor(Predictor):
             am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
             sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
-        decoder.decode(self.threads,self.k,self.give_up)
+        decoder.decode(self.threads,self.k,self.give_up,self.give_up_k_1)
 
 
 class Evaluator(Registrable):
@@ -172,3 +178,33 @@ class DummyEvaluator(Evaluator):
 
     def eval(self,model, epoch,model_path=None) -> Dict[str, float]:
         return dict()
+
+@Evaluator.register("empty_mrp_evaluator")
+class EmptyMRPEvaluator(Evaluator):
+    """
+    A wrapper around a predictor that remembers system input.
+    """
+    def __init__(self, formalism:str, system_input : str, predictor : Predictor, postprocessing : List[str]) -> None:
+        """
+
+        :param formalism:
+        :param system_input:
+        :param predictor:
+        :param postprocessing: a list of strings with postprocessing commands, you can use {system_output} as a placeholder
+        """
+        self.postprocessing = postprocessing
+        self.formalism = formalism
+        self.system_input = system_input
+        self.predictor = predictor
+
+    def eval(self,model, epoch, model_path=None) -> Dict[str, float]:
+        self.predictor.set_model(model)
+        if model_path:
+            filename = model_path + "/" + "test_"+str(self.formalism)+".amconll"
+            self.predictor.parse_and_save(self.formalism, self.system_input, filename)
+            for cmd in self.postprocessing:
+                cmd = cmd.format(system_output=filename)
+                os.system(cmd)
+            return dict()
+        else: #use temporary directory
+            raise ValueError("Need to get model_path!")

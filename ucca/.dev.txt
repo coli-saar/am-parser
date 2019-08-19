@@ -1,0 +1,14 @@
+###IRTG unannotated corpus file, v1.0
+###
+### can add comment here
+###interpretation id: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation flavor: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation framework: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation version: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation time: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation spans: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation input: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation string: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation alignment: de.up.ling.irtg.algebra.StringAlgebra
+###interpretation graph: de.up.ling.irtg.algebra.graph.GraphAlgebra
+

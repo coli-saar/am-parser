@@ -164,3 +164,15 @@ class JsonEvaluationCommand(BaseEvaluationCommand):
         if self.show_output:
             print(metrics)
         return metrics
+
+
+@BaseEvaluationCommand.register("dummy_evaluation_command")
+class DummyEvaluationCommand(BaseEvaluationCommand):
+    """
+    Does nothing, returns empty dictionary.
+    """
+    def __init__(self) -> None:
+        pass
+
+    def evaluate(self, system_output: str, gold_file: str) -> Dict[str, float]:
+        return dict()

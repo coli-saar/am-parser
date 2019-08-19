@@ -29,18 +29,27 @@ class AMConllDatasetReader(DatasetReader):
     """
     def __init__(self,
                  token_indexers: Dict[str, TokenIndexer] = None,
-                 lazy: bool = False) -> None:
+                 lazy: bool = False, fraction:float = 1.0, only_read_fraction_if_train_in_filename : bool = False) -> None:
         super().__init__(lazy)
         self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
+        self.fraction = fraction
+        self.only_read_fraction_if_train_in_filename = only_read_fraction_if_train_in_filename
 
     def _read_one_file(self, formalism:str, file_path: str):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
-
-        with open(file_path, 'r') as amconll_file:
-            logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-            for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
-                yield self.text_to_instance(formalism,i,am_sentence)
+        if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
+            with open(file_path, 'r') as amconll_file:
+                logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
+                sents = list(parse_amconll(amconll_file))
+                for i,am_sentence in  enumerate(sents):
+                    if i <= len(sents) * self.fraction:
+                        yield self.text_to_instance(formalism,i,am_sentence)
+        else:
+            with open(file_path, 'r') as amconll_file:
+                logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
+                for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
+                    yield self.text_to_instance(formalism,i,am_sentence)
 
     @overrides
     def _read(self, file_paths: List[List[str]]):

@@ -30,7 +30,7 @@ import json
 
 import argparse
 
-MTOOL_COMMAND = "mtool" #set path to mtool command, possibly starting with python3 ...
+MTOOL_COMMAND = "mtool" #set path to mtool command, probably something like python3 /something/mtool/main.py
 
 
 def fscore(triple):
@@ -53,13 +53,13 @@ def is_interesting(instance):
     # instance might look like this:
     # this comes from the mrp --trace output and might look different for different evaluation metrics (here you see --score mrp):
     # {"tops": {"g": 1, "s": 1, "c": 1}, "labels": {"g": 6, "s": 6, "c": 6}, "properties": {"g": 1, "s": 1, "c": 1}, "anchors": {"g": 0, "s": 0, "c": 0}, "edges": {"g": 6, "s": 6, "c": 5}
-    if instance["labels"]["g"] > 16:
+    if instance["edges"]["g"] > 16:
         return False
-    interested_in = "labels"
+    interested_in = "edges"
     if fscore(instance[interested_in]) < 0.8 and (instance[interested_in]["s"] > 0 or instance[interested_in]["g"] > 0 ):
         return True
     # ~ for subtask in instance:
-        # ~ if fscore(instance[subtask]) < 0.6 and instance[subtask]["s"] > 0:
+        # ~ if fscore(instance[subtask]) < 0.8 and instance[subtask]["s"] > 0:
             # ~ return True
     return False
     

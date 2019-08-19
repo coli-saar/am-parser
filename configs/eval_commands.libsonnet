@@ -1,11 +1,14 @@
-local ALTO_PATH = "/local/mlinde/am-tools/build/libs/am-tools-all.jar";
+local ALTO_PATH = "/proj/irtg.shadow/tools/am-tools-all.jar";
 
 local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
 
-local MTOOL = "/local/mlinde/mtool/main.py";
+local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
 local base_directory = "/local/mlinde/am-parser";
 
 local tool_dir = base_directory + "/external_eval_tools/";
+
+local data_paths = import 'data_paths.libsonnet';
+local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
 
 local sdp_regexes = {
  "P" : [1, "Precision (?P<value>.+)"],
@@ -57,30 +60,30 @@ local sdp_regexes = {
         "type" : "json_evaluation_command",
         "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
                         ["sdp",'python3 '+MTOOL+' --read mrp --score sdp --gold {gold_file} {tmp}/output.mrp'],
-                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
+                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --cores 4 --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
         },
 
         "MRP-PSD" : {
         "type" : "json_evaluation_command",
         "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
                         ["sdp",'python3 '+MTOOL+' --read mrp --score sdp --gold {gold_file} {tmp}/output.mrp'],
-                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
+                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --cores 4 --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
         },
 
         "MRP-EDS" : {
         "type" : "json_evaluation_command",
         "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
                         ["edm",'python3 '+MTOOL+' --read mrp --score edm --gold {gold_file} {tmp}/output.mrp'],
-                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --cores 4 --limit 2 --gold {gold_file} {tmp}/output.mrp'],
+                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --limit 2 --gold {gold_file} {tmp}/output.mrp'],
                         ]
                         #["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 10000 --gold {gold_file} {tmp}/output.mrp']]
         },
 
         "MRP-AMR" : {
         "type" : "json_evaluation_command",
-        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET +' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/first_legal/lookup/ --corpus {system_output} --out {tmp}/output.mrp'],
-                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --cores 4 --gold {gold_file} {tmp}/output_post_no_labels.mrp'],
-                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 3 --cores 4 --gold {gold_file} {tmp}/output_post_no_labels.mrp'],
+        "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET +' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/'+MRP_AMR_SUBPATH+'/lookup/ --corpus {system_output} --out {tmp}/output.mrp'],
+                        ["smatch",'python3 '+MTOOL+' --read mrp --score smatch --cores 4 --gold {gold_file} {tmp}/output.mrp'],
+                        ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --limit 3 --cores 4 --gold {gold_file} {tmp}/output.mrp'],
                         ]
         },
 
@@ -110,6 +113,18 @@ local sdp_regexes = {
         "MRP-AMR" : "+MRP-AMR_mrp_all_f",
 
         "MRP-UCCA" : "+MRP-UCCA_mrp_all_f"
+
+    },
+
+    #MRP postprocessing command instead of full evaluation command because we don't have gold graphs:
+    "postprocessing" : {
+        "MRP-DM" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
+        "MRP-PSD" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
+        "MRP-EDS" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
+        "MRP-UCCA" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp',
+                       "python3 ucca/decompress_mrp.py {system_output}.mrp {system_output}.post.mrp",
+                       "python3 ucca/remove_labels.py {system_output}.post.mrp {system_output}.post.nolabels.mrp"],
+        "MRP-AMR" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET +' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/'+MRP_AMR_SUBPATH+'/lookup/ --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp']
 
     }
 
