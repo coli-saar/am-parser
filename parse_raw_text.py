@@ -23,7 +23,10 @@ import graph_dependency_parser.graph_dependency_parser
 import graph_dependency_parser.important_imports
 import argparse
 
-parser = argparse.ArgumentParser(description="Run the am-parser on a text file in order to annotate it, doesn't perform tokenization (assumes spaces to separate tokens) or other preprocessing (POS tagging, lemmatization).")
+parser = argparse.ArgumentParser(description="Run the am-parser on a text file in order to annotate it with parses"
+                                             "in amconll format, doesn't perform tokenization (assumes spaces to"
+                                             "separate tokens) or other preprocessing (POS tagging, lemmatization)."
+                                             "Instead relies on just BERT for performance.")
 
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
 parser.add_argument('formalism', type=str, help='name of formalism (must be included in the model)')
