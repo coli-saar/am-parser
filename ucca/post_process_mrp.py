@@ -1,37 +1,61 @@
-import os
 import sys
-import ast
 import json
-
 from get_edges_from_mrp import get_id2lex, get_mrp_edges
-from move_edges import lower_edge, raise_edge
-from edge_to_irtg import edge2irtg
-from convert_irtg_to_mrp import get_edges, get_id2lex, get_input, get_mrp_edges, get_nodes, get_tops, irtg2mrp
-from process_c import compress_c_edge, decompress_c
+from process_c import decompress_c
+from convert_irtg_to_mrp import get_edges, get_tops
+from test_compression_vis import update_id_labels
+from move_edges import lower_edge
+from eliminate_h_top import add_h
 
-infile = sys.argv[1]
-outfile = sys.argv[2]
+mrp = sys.argv[1]
+out = sys.argv[2]
 
-non_deducible = ["id", "flavor", "framework", "version", "time"]
-with open(infile, 'r') as f:
-    for line in f:
-        mrp_dict = json.loads(line)
-        extras = {}
-        for category in mrp_dict.keys():
-            if category in non_deducible:
-                extras[category] = mrp_dict[category]
-        edges = get_mrp_edges(mrp_dict)
-        labels = get_id2lex(mrp_dict)
-        decompressed_c = decompress_c(edges)
-        raised_d = raise_edge(decompressed_c, 'D', ['P', 'S'], mark =True)
-        print(labels)
-        for (u, v) in decompressed_c.keys():
-            if u not in labels:
-                labels[u] = 'Non-Terminal'
-        print(labels)
-        postprocessed_mrp = irtg2mrp(raised_d, labels)
-        for key in extras.keys():
-            postprocessed_mrp[key] = extras[key]
-        with open(outfile, 'a') as out:
-            out.write(json.dumps(postprocessed_mrp))
-            out.write('\n')
+def get_terminal_nodes(mrp_dict):
+    nodes = []
+    for node in mrp_dict['nodes']:
+        if node['label'] != 'Non-Terminal':
+            nodes.append(node)
+    return nodes
+
+def strip_edge_info(edge_dict):
+    stripped_dict = {}
+    for edge in edge_dict.keys():
+        label = edge_dict[edge].split('-')[0]
+        label = edge_dict[edge].split('_')[0]
+        stripped_dict[edge] = label
+    return stripped_dict
+
+
+with open(out, 'w+') as outfile:
+    with open(mrp) as infile:
+        for line in infile:
+            mrp_post_processed = {}
+            mrp_dict = json.loads(line)
+            input = mrp_dict['input']
+            id = mrp_dict['id']
+            framework = mrp_dict['framework']
+            flavor = mrp_dict['flavor']
+            time = mrp_dict['time']
+            version = mrp_dict['version']
+            node_ids = get_id2lex(mrp_dict)
+            edges = get_mrp_edges(mrp_dict)
+            lowered = lower_edge(edges)
+            decompressed = decompress_c(lowered, node_ids)
+            decompressed = add_h(decompressed)
+            decompressed = strip_edge_info(decompressed)
+            mrp_post_processed['id'] = id
+            mrp_post_processed['framework'] = framework
+            mrp_post_processed['flavor'] = flavor
+            mrp_post_processed['time'] = time
+            mrp_post_processed['version'] = version
+            mrp_post_processed['tops'] = get_tops(decompressed)
+            node_ids = update_id_labels(decompressed, node_ids)[0]
+            mrp_nodes = get_terminal_nodes(mrp_dict)
+            for node in node_ids.keys():
+                if node_ids[node] == 'Non-Terminal':
+                    mrp_nodes.append({'id':node})
+            mrp_post_processed['nodes'] = mrp_nodes
+            mrp_post_processed['edges'] = get_edges(decompressed)
+            mrp_post_processed['input'] = input
+            outfile.write(json.dumps(mrp_post_processed))
+            outfile.write('\n')

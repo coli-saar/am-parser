@@ -25,7 +25,7 @@ def eliminate_h(edge_dict):
                             del edge_dict[(u,v)]
     return edge_dict
 
-def add_h(edge_dict, node_ids, top_node_id):
+'''def add_h(edge_dict, node_ids, top_node_id):
     root = top_node_id
 
     if top_node_id is None:
@@ -61,4 +61,17 @@ def add_h(edge_dict, node_ids, top_node_id):
     #             edge_dict[(n, root)] = 'H'
     #             #print(edge_dict)
 
-    return root, edge_dict
+    return root, edge_dict'''
+
+def add_h(edge_dict):
+    tops = get_roots(edge_dict)
+    try:
+        n = max([u for (u, v) in edge_dict.keys() if type(u) == int])
+        n = n + 1
+        if not any([edge_dict[(u, v)] for (u, v) in edge_dict.keys() if edge_dict[(u, v)] == 'H']):
+            if any([edge_dict[(u, v)] for (u, v) in edge_dict.keys() if edge_dict[(u, v)] == 'P' or edge_dict[(u, v)] == 'S']):
+                for top in tops:
+                    edge_dict[(n, top)] = 'H'
+    except ValueError:
+        pass
+    return edge_dict

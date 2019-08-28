@@ -7,6 +7,7 @@ from process_c import *
 from move_edges import lower_edge, raise_edge
 from test_head_percolation import update_id_labels
 from utils import number_edges
+from a_star_mrp import get_roots
 
 mrp_in = sys.argv[1]
 
@@ -45,4 +46,5 @@ with open(mrp_in) as infile:
         irtg_lowered = edge2irtg(lowered, labels)
         print('Lowered')
         print(irtg_lowered)
+        roots = get_roots(lowered)
         print('________________________________-')
