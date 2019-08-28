@@ -37,25 +37,31 @@ with open(out, 'w+') as outfile:
             flavor = mrp_dict['flavor']
             time = mrp_dict['time']
             version = mrp_dict['version']
+            tops = mrp_dict['tops']
+            if len(tops) > 0 :
+                top = tops[0]
+            else:
+                top = None
             node_ids = get_id2lex(mrp_dict)
             edges = get_mrp_edges(mrp_dict)
             lowered = lower_edge(edges)
             decompressed = decompress_c(lowered, node_ids)
-            decompressed = add_h(decompressed)
             decompressed = strip_edge_info(decompressed)
+            revised_top, with_h = add_h(decompressed, node_ids, top)
             mrp_post_processed['id'] = id
             mrp_post_processed['framework'] = framework
             mrp_post_processed['flavor'] = flavor
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
-            mrp_post_processed['tops'] = get_tops(decompressed)
+            mrp_post_processed['tops'] = [revised_top]
             node_ids = update_id_labels(decompressed, node_ids)[0]
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():
                 if node_ids[node] == 'Non-Terminal':
                     mrp_nodes.append({'id':node})
             mrp_post_processed['nodes'] = mrp_nodes
-            mrp_post_processed['edges'] = get_edges(decompressed)
+            mrp_post_processed['edges'] = get_edges(with_h)
             mrp_post_processed['input'] = input
+            print(mrp_post_processed)
             outfile.write(json.dumps(mrp_post_processed))
             outfile.write('\n')
