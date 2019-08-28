@@ -84,6 +84,7 @@ class AMTask(Model):
             raise ValueError(f"The following loss name(s) are unknown: {not_contained}")
 
         self._supertagging_acc = CategoricalAccuracy()
+        self._top_6supertagging_acc = CategoricalAccuracy(top_k=6)
         self._lexlabel_acc = CategoricalAccuracy()
         self._attachment_scores = AttachmentScores()
         self.current_epoch = 0
@@ -232,6 +233,7 @@ class AMTask(Model):
                                         head_tags[:, 1:],
                                         evaluation_mask)
             if supertagging_nll is not None:
+                self._top_6supertagging_acc(supertagger_logits, supertags, mask[:, 1:])
                 self._supertagging_acc(supertagger_logits, supertags, mask[:, 1:])  # compare against gold data
             if lexlabel_nll is not None:
                 self._lexlabel_acc(lexlabel_logits, lexlabels, mask[:, 1:])  # compare against gold data
@@ -437,6 +439,7 @@ class AMTask(Model):
         r = self._attachment_scores.get_metric(reset)
         if self.loss_mixing["supertagging"] is not None:
             r["Constant_Acc"] = self._supertagging_acc.get_metric(reset)
+            r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
         if self.loss_mixing["lexlabel"] is not None:
             r["Label_Acc"] = self._lexlabel_acc.get_metric(reset)
         return r
