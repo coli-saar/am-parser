@@ -53,7 +53,10 @@ with open(out, 'w+') as outfile:
             mrp_post_processed['flavor'] = flavor
             mrp_post_processed['time'] = time
             mrp_post_processed['version'] = version
-            mrp_post_processed['tops'] = [revised_top]
+            if revised_top is None:
+                mrp_post_processed['tops'] = []
+            else:
+                mrp_post_processed['tops'] = [revised_top]
             node_ids = update_id_labels(decompressed, node_ids)[0]
             mrp_nodes = get_terminal_nodes(mrp_dict)
             for node in node_ids.keys():
@@ -62,6 +65,6 @@ with open(out, 'w+') as outfile:
             mrp_post_processed['nodes'] = mrp_nodes
             mrp_post_processed['edges'] = get_edges(with_h)
             mrp_post_processed['input'] = input
-            print(mrp_post_processed)
+            #print(mrp_post_processed)
             outfile.write(json.dumps(mrp_post_processed))
             outfile.write('\n')
