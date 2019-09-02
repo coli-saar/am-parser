@@ -75,10 +75,18 @@ else
     python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --give_up 5
 fi
 
-# TODO PAS, PSD, EDS
+jar="am-tools-all.jar"
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
-echo $type
-if [ "$type" = "DM" ]; then
-    echo "converting AMConLL to final output file .."
-    java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
+echo "converting AMConLL to final output file .."
+# TODO possibly clean up the if-then-else
+if [ "$type" = "DM"  || "$type" = "PAS" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
+else
+    if [ "$type" = "PSD" ]; then
+        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
+    else
+        if [ "$type" = "EDS" ]; then
+             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
+        fi
+    fi
 fi
