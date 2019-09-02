@@ -11,12 +11,14 @@ Required arguments: \n
 
 \noptions:
 
-\n\t	 -f  faster, less accurate evaluation (flag; default false)"
+\n\t	 -f  faster, less accurate evaluation (flag; default false)
+\n\t   -g  which gpu to use (its ID, i.e. 0, 1 or 2 etc). Default is -1, using CPU instead"
 
 #defaults:
 fast=false
+gpu="-1"
 # Gathering parameters:
-while getopts "m:i:o:T:f" opt; do
+while getopts "m:i:o:T:g:f" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
@@ -28,6 +30,8 @@ while getopts "m:i:o:T:f" opt; do
 	o) output="$OPTARG"
 	   ;;
 	T) type="$OPTARG"
+	   ;;
+	g) gpu="$OPTARG"
 	   ;;
 	f) fast=true
 	   ;;
@@ -64,12 +68,11 @@ echo "Parsing raw text file $input with model $model to $type graphs, output in 
 output=$output"/"
 amconll=$output$type".amconll"
 
-# TODO cuda
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
-    python3 parse_raw_text.py $model $type $input $amconll
+    python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu
 else
-    python3 parse_raw_text.py $model $type $input $amconll --give_up 5
+    python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --give_up 5
 fi
 
 # TODO PAS, PSD, EDS
@@ -77,5 +80,5 @@ fi
 echo $type
 if [ "$type" = "DM" ]; then
     echo "converting AMConLL to final output file .."
-    java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output
+    java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
 fi
