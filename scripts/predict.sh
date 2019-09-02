@@ -96,8 +96,8 @@ echo "Parsing input file $input with model $model to $type graphs, output in $ou
 
 # create filename for amconll file
 output=$output"/"
-prefix=$output$type"_gold"
-amconllgold=$prefix".amconll"
+prefix=$type"_gold"
+amconllgold=$output$prefix".amconll"
 amconllpred=$output$type"_pred.amconll"
 
 # convert input file to AMConLL format
