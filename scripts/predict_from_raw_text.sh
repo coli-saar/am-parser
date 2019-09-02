@@ -74,3 +74,4 @@ fi
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
 if [ "$type" = "DM" ]; then
     java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output
+fi
