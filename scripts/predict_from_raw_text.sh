@@ -36,6 +36,8 @@ while getopts "m:i:o:T:f" opt; do
     esac
 done
 
+# TODO default model path, download model and am-tools jar if not given
+
 if [ "$model" = "" ]; then
     printf "\n No model. Please use -m option.\n"
     exit 1
@@ -70,8 +72,10 @@ else
     python3 parse_raw_text.py $model $type $input $amconll --give_up 5
 fi
 
-
+# TODO PAS, PSD, EDS
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
+echo $type
 if [ "$type" = "DM" ]; then
+    echo "converting AMConLL to final output file .."
     java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output
 fi
