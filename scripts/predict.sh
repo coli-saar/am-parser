@@ -49,6 +49,7 @@ done
 
 if [ "$gpu" = "-1" ]; then
     echo "Warning: using CPU, this may be slow. Use -g to specify a GPU ID"
+fi
 
 if [ "$model" = "" ]; then
     model="$defaultmodel"
