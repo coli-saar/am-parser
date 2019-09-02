@@ -59,8 +59,10 @@ fi
 echo "Parsing raw text file $input with model $model to $type graphs, output in $output"
 
 # create filename for amconll file
-amconll=$output"/"$type".amconll"
+output=$output"/"
+amconll=$output$type".amconll"
 
+# TODO cuda
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
     python3 parse_raw_text.py $model $type $input $amconll
@@ -69,3 +71,6 @@ else
 fi
 
 
+# convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
+if [ "$type" = "DM" ]; then
+    java -cp am-tools-all.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output
