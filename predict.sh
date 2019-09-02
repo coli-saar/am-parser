@@ -1,16 +1,18 @@
 #!/bin/bash
 
+# TODO make this file safe for spaces in filenames
+
 # default file paths
-defaultmodel="example/raw_text_model.tar.gz"
+defaultmodel="example/full_model.tar.gz"
 jar="am-tools-all.jar"
 
 # Documenting parameters:
 usage="Takes . \n\n
 
 Required arguments: \n
-\n\t     -i  input file: text file with one sentence per line. Assumes the file is already tokenized with spaces as delimiters.
+\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format.
 \n\t     -o  output folder: where the results will be stored.
-\n\t     -T  desired type of output formalism. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
+\n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
 
 \noptions:
 
@@ -58,7 +60,7 @@ else
     if [ "$model" = "$defaultmodel" ]; then
         echo "model not found at default model path. Downloading it!"
         # TODO replace this with code that downloads the model from the internet
-        cp /local/mlinde/am-parser/models/mtl_bert_minimum/model.tar.gz "$defaultmodel"
+        cp /local/mlinde/am-parser/models/bert_all2/model.tar.gz "$defaultmodel"
     else
         echo "model not found at $model. Please check the -m parameter"
     fi
@@ -80,20 +82,32 @@ if [ "$input" = "" ]; then
 fi
 
 if [ "$type" = "" ]; then
-    printf "\n No output graphbank type given. Please use -T option.\n"
+    printf "\n No graphbank type given. Please use -T option.\n"
     exit 1
 fi
 
 if [ "$output" = "" ]; then
-    printf "\n No output file path. Please use -o option.\n"
+    printf "\n No output folder path given. Please use -o option.\n"
     exit 1
 fi
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
-echo "Parsing raw text file $input with model $model to $type graphs, output in $output"
+echo "Parsing input file $input with model $model to $type graphs, output in $output"
 
 # create filename for amconll file
 output=$output"/"
-amconll=$output$type".amconll"
+prefix=$output$type"_gold"
+amconllgold=$prefix".amconll"
+amconllpred=$output$type"_pred.amconll"
+
+# convert input file to AMConLL format
+if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $input -o $output -p $prefix
+else
+    if [ "$type" = "EDS" ]; then
+        # TODO fix this part
+         java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
+    fi
+fi
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
@@ -103,15 +117,18 @@ else
 fi
 
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
+# and evaluate
 echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type -gold $input
 else
     if [ "$type" = "PSD" ]; then
+        # TODO
         java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
     else
         if [ "$type" = "EDS" ]; then
+             # TODO
              java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
         fi
     fi
@@ -203,7 +220,7 @@ if [ "$type" = "" ]; then
 fi
 
 if [ "$output" = "" ]; then
-    printf "\n No output folder path given. Please use -o option.\n"
+    printf "\n No output file path. Please use -o option.\n"
     exit 1
 fi
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
