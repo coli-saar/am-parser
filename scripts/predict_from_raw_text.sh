@@ -62,9 +62,9 @@ amconll=$output"/"$type".amconll"
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
-    #python3 parse_raw_text.py $model $type $input $amconll
+    python3 parse_raw_text.py $model $type $input $amconll
 else
-    #python3 parse_raw_text.py $model $type $input $amconll --give_up 5
+    python3 parse_raw_text.py $model $type $input $amconll --give_up 5
 fi
 
 
