@@ -30,6 +30,7 @@ while getopts "m:i:o:T:f" opt; do
 	T) type="$OPTARG"
 	   ;;
 	f) fast=true
+	   ;;
 	\?) echo "Invalid option -$OPTARG" >&2
 	    ;;
     esac
