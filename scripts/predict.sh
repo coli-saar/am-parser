@@ -100,6 +100,7 @@ prefix=$type"_gold"
 amconllgold=$output$prefix".amconll"
 amconllpred=$output$type"_pred.amconll"
 
+
 # convert input file to AMConLL format
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $input -o $output -p $prefix
@@ -112,9 +113,9 @@ fi
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
-    python3 parse_file.py $model $type $input $amconllpred --cuda-device $gpu
+    python3 parse_file.py $model $type $amconllgold $amconllpred --cuda-device $gpu
 else
-    python3 parse_file.py $model $type $input $amconllpred --cuda-device $gpu --give_up 5
+    python3 parse_file.py $model $type $amconllgold $amconllpred --cuda-device $gpu --give_up 5
 fi
 
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
@@ -122,15 +123,15 @@ fi
 echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type --gold $input
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c "$amconllpred" -o "$output$type" --gold "$input"
 else
     if [ "$type" = "PSD" ]; then
         # TODO
-        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
+        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconllpred -o $output$type
     else
         if [ "$type" = "EDS" ]; then
              # TODO
-             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
+             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconllpred -o "$output"$type
         fi
     fi
 fi
