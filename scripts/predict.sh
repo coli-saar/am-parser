@@ -107,7 +107,7 @@ if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
 else
     if [ "$type" = "EDS" ]; then
         # TODO fix this part
-         java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o $output$type
+         java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.PrepareTestData -c $input -o $output -p $prefix
     fi
 fi
 
