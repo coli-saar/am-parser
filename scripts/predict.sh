@@ -10,7 +10,7 @@ jar="am-tools-all.jar"
 usage="Takes . \n\n
 
 Required arguments: \n
-\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format.
+\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format. For EDS, make this the .edm file and put the .amr.txt file of the same name into the same folder
 \n\t     -o  output folder: where the results will be stored.
 \n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
 
@@ -126,12 +126,14 @@ if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c "$amconllpred" -o "$output$type" --gold "$input"
 else
     if [ "$type" = "PSD" ]; then
-        # TODO
-        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconllpred -o $output$type
+        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c "$amconllpred" -o "$output$type" --gold "$input"
     else
         if [ "$type" = "EDS" ]; then
-             # TODO
-             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconllpred -o "$output"$type
+             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c "$amconllpred" -o "$output$type"
+             python2 external_eval_tools/edm/eval_edm.py "$output$type".edm "$input"
+             amrinput=${input%".edm"}".amr.txt"
+             python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$amrinput" --pr
+
         fi
     fi
 fi
