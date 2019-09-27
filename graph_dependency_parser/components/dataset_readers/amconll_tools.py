@@ -114,7 +114,7 @@ class AMSentence:
         return len(self.words)
 
 
-def from_raw_text(words: List[str], add_art_root : bool, attributes: Dict) -> AMSentence:
+def from_raw_text(rawstr : str, words: List[str], add_art_root : bool, attributes: Dict) -> AMSentence:
     """
     Create an AMSentence from raw text, without token ranges and stuff
     :param words:
@@ -128,6 +128,7 @@ def from_raw_text(words: List[str], add_art_root : bool, attributes: Dict) -> AM
         entries.append(e)
     if add_art_root:
         entries.append(Entry("ART-ROOT","_","ART-ROOT","ART-ROOT","ART-ROOT","_","_","_",0,"IGNORE",True,None))
+    attributes["raw"] = rawstr
     sentence = AMSentence(entries, attributes)
     sentence.check_validity()
     return sentence

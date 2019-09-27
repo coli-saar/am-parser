@@ -128,7 +128,7 @@ sentences = []
 with open(args.input_file) as f:
     for sentence in f:
         words = sentence.rstrip("\n").split(" ")
-        sentences.append(from_raw_text(words,requires_art_root[args.formalism], dict()))
+        sentences.append(from_raw_text(sentence.rstrip("\n"),words,requires_art_root[args.formalism], dict()))
 with TemporaryDirectory() as direc:
     temp_path =  direc+"/sentences.amconll"
     with open(temp_path,"w") as f:
