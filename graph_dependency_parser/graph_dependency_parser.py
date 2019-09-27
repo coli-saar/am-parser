@@ -14,6 +14,7 @@ from allennlp.nn.util import get_text_field_mask
 
 from graph_dependency_parser.components.weight_sharer import MTLWeightSharer
 from graph_dependency_parser.components.AMTask import AMTask
+from graph_dependency_parser.components.spacy_token_embedder import TokenToVec
 
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -83,12 +84,13 @@ class GraphDependencyParser(Model):
                  ne_embedding: Embedding = None,
                  input_dropout: float = 0.0,
                  initializer: InitializerApplicator = InitializerApplicator(),
-                 regularizer: Optional[RegularizerApplicator] = None) -> None:
+                 regularizer: Optional[RegularizerApplicator] = None,
+                 tok2vec : Optional[TokenToVec] = None) -> None:
         super(GraphDependencyParser, self).__init__(vocab, regularizer)
 
         self.text_field_embedder = text_field_embedder
         self.encoder = encoder
-
+        self.tok2vec = tok2vec
 
         self._pos_tag_embedding = pos_tag_embedding or None
         self._lemma_embedding = lemma_embedding
@@ -108,8 +110,11 @@ class GraphDependencyParser(Model):
         assert len(tasks) > 0, "List of tasks must not be empty"
         self.tasks : Dict[str, AMTask] = {t.name : t for t in tasks}
 
+        if self.tok2vec:
+            representation_dim += self.tok2vec.get_output_dim()
+
         check_dimensions_match(representation_dim, encoder.get_input_dim(),
-                               "text field embedding dim", "encoder input dim")
+                           "text field embedding dim", "encoder input dim")
         for t in tasks:
             t.check_all_dimensions_match(encoder.get_output_dim())
 
@@ -191,8 +196,14 @@ class GraphDependencyParser(Model):
         if not formalism_of_batch in self.tasks.keys():
             raise ConfigurationError(f"Got formalism {formalism_of_batch} but I only have these tasks: {list(self.tasks.keys())}")
 
-        embedded_text_input = self.text_field_embedder(words)
-        concatenated_input = [embedded_text_input]
+        if self.tok2vec:
+            token_ids = words["tokens"]
+            embedded_text_input = self.tok2vec.embed(self.vocab, token_ids) #shape (batch_size, seq len, encoder dim)
+            concatenated_input = [embedded_text_input, self.text_field_embedder(words)]
+        else:
+            embedded_text_input = self.text_field_embedder(words)
+            concatenated_input = [embedded_text_input]
+
         if pos_tags is not None and self._pos_tag_embedding is not None:
             concatenated_input.append(self._pos_tag_embedding(pos_tags))
         elif self._pos_tag_embedding is not None:
