@@ -10,7 +10,7 @@
 echo 'preparing data'
 python3 prepare_visualize.py $1 $2 $3
 
-#get filenames
+#get filenames without the path
 f1=$(basename $1)
 f2=$(basename $2)
 
