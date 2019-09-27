@@ -14,7 +14,7 @@ __We will update the documentation soon to make it clearer and easier to reprodu
 
 It is best, to set up a conda environment for experimentation with the parser.
 
-__Internal note:__ this is already set up on the saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-on-the-Saarland-servers).
+__Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-on-the-Saarland-servers).
 
 ### Things to play around with
 The configuration files have many places where you can make changes and see how it affects parsing performance.
