@@ -134,8 +134,10 @@ else
     else
         if [ "$type" = "EDS" ]; then
              java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c "$amconllpred" -o "$output$type"
+             echo "EDM score:"
              python2 external_eval_tools/edm/eval_edm.py "$output$type".edm "$output$prefix"-gold.edm
              amrinput=${input%".edm"}".amr.txt"
+             echo "Smatch score:"
              python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
 
         fi
