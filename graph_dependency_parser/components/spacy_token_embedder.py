@@ -9,6 +9,7 @@ from allennlp.nn.util import get_device_of
 
 import spacy
 from spacy.tokens import Doc
+from graph_dependency_parser.components.spacy_interface import make_doc
 
 try:
     from spacy_pytorch_transformers import PyTT_Language, PyTT_WordPiecer, PyTT_TokenVectorEncoder
@@ -102,16 +103,6 @@ class SpacyTokenToVec(TokenToVec):
 
 
 
-def make_doc(vocab, sents : List[List[str]]) -> Doc:
-    """
-    Creates document with several sentences from nested list using a vocabulary.
-    """
-    d = Doc(vocab, [token for sentence in sents for token in sentence])
-    i = 0
-    for sent in sents:
-        d[i].is_sent_start = True
-        i += len(sent)
-    return d
 
 
 

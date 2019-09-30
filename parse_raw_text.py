@@ -17,7 +17,6 @@ from graph_dependency_parser.graph_dependency_parser import GraphDependencyParse
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
 
 import graph_dependency_parser.graph_dependency_parser
 import graph_dependency_parser.important_imports
@@ -46,6 +45,11 @@ parser.add_argument('--give_up',
                        type=float,
                        default=60*60,
                        help='number of seconds until fixed-tree decoder backs off to k-1')
+
+parser.add_argument('-v',
+                       action='store_true',
+                       default=False,
+                       help='verbose logging')
 
 cuda_device = parser.add_mutually_exclusive_group(required=False)
 cuda_device.add_argument('--cuda-device',
@@ -83,10 +87,13 @@ parser.add_argument('--embedding-sources-mapping',
                        'they are not available we will use random vectors for embedding extension.')
 
 args = parser.parse_args()
-# Disable some of the more verbose logging statements
-logging.getLogger('allennlp.common.params').disabled = True
-logging.getLogger('allennlp.nn.initializers').disabled = True
-logging.getLogger('allennlp.modules.token_embedders.embedding').setLevel(logging.INFO)
+if args.v:
+    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+                        level=logging.INFO)  # turn on logging.
+    # Disable some of the more verbose logging statements
+    logging.getLogger('allennlp.common.params').disabled = True
+    logging.getLogger('allennlp.nn.initializers').disabled = True
+    logging.getLogger('allennlp.modules.token_embedders.embedding').setLevel(logging.INFO)
 
 # Load from archive
 archive = load_archive(args.archive_file, args.cuda_device, args.overrides, args.weights_file)
