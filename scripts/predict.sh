@@ -10,7 +10,7 @@ jar="am-tools-all.jar"
 usage="Takes . \n\n
 
 Required arguments: \n
-\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format. For EDS, make this the .edm file and put the .amr.txt file of the same name into the same folder
+\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format. For EDS, make this the test.amr file that contains the gold graphs in PENMAN notation.
 \n\t     -o  output folder: where the results will be stored.
 \n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
 
@@ -91,6 +91,13 @@ if [ "$output" = "" ]; then
     printf "\n No output folder path given. Please use -o option.\n"
     exit 1
 fi
+
+#Build fast_smatch
+pushd external_eval_tools/fast_smatch
+echo "Building fast_smatch (for evaluation of EDS)"
+bash build.sh
+popd
+
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing input file $input with model $model to $type graphs, output in $output"
 
