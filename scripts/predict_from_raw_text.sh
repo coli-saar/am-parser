@@ -89,6 +89,13 @@ if [ "$output" = "" ]; then
     printf "\n No output file path. Please use -o option.\n"
     exit 1
 fi
+
+#Build fast_smatch
+pushd external_eval_tools/fast_smatch
+echo "Building fast_smatch (for evaluation of EDS)"
+bash build.sh
+popd
+
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing raw text file $input with model $model to $type graphs, output in $output"
 

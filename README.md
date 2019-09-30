@@ -7,6 +7,7 @@ __We will update the documentation soon to make it clearer and easier to reprodu
 
 ### Requirements
 - Python 3.7 up to version 3.7.3
+- Python 2.7 for EDS and AMR evaluation (EDM metric and Smatch)
 - AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
 - [am-tools](https://github.com/coli-saar/am-tools) to prepare the training data and to evaluate the AM dependency trees to graphs
