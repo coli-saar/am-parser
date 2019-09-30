@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# TODO make this file safe for spaces in filenames
+
 # default file paths
-defaultmodel="example/raw_text_model.tar.gz"
+defaultmodel="downloaded_models/raw_text_model.tar.gz"
 jar="am-tools-all.jar"
 
 # Documenting parameters:
@@ -58,8 +60,7 @@ if [ -f "$model" ]; then
 else
     if [ "$model" = "$defaultmodel" ]; then
         echo "model not found at default model path. Downloading it!"
-        # TODO replace this with code that downloads the model from the internet
-        cp /local/mlinde/am-parser/models/mtl_bert_minimum/model.tar.gz "$defaultmodel"
+        wget -O "$defaultmodel" https://coli-saar-data.s3.eu-central-1.amazonaws.com/raw_text_model.tar.gz
     else
         echo "model not found at $model. Please check the -m parameter"
     fi
@@ -69,8 +70,7 @@ if [ -f "$jar" ]; then
     echo "jar file found at $jar"
 else
     echo "jar file not found at $jar, downloading it!"
-    # TODO replace this with code that downloads the jar file from the internet
-    cp /proj/irtg.shadow/tools/am-tools-all.jar "$jar"
+    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools.jar
 fi
 
 

@@ -1,0 +1,1 @@
+When a script (e.g. scripts/predict.sh) automatically downloads a trained model, that model gets stored here.
