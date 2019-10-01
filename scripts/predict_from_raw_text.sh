@@ -4,6 +4,7 @@
 
 # default file paths
 defaultmodel="downloaded_models/raw_text_model.tar.gz"
+mkdir -p downloaded_models
 jar="am-tools-all.jar"
 
 # Documenting parameters:
