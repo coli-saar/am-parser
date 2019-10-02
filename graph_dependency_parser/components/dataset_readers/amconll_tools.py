@@ -74,7 +74,7 @@ class AMSentence:
     def set_lexlabels(self, labels : List[str]) -> "AMSentence":
         assert len(labels) == len(self.words), f"number of lexical labels must agree with number of words but got {len(labels)} and {len(self.words)}"
         return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, labels[i],
-                                word.typ, word.head, word.label, word.aligned)
+                                word.typ, word.head, word.label, word.aligned,word.range)
                            for i,word in enumerate(self.words)],self.attributes)
 
 

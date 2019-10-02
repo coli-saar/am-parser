@@ -13,6 +13,7 @@ from allennlp.common import Params
 
 from graph_dependency_parser.components.dataset_readers import amconll_tools
 from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
+from graph_dependency_parser.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
 from graph_dependency_parser.components.evaluation.iterator import forward_on_instances
 from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor
 from graph_dependency_parser.components.supertagger import Supertagger
@@ -29,26 +30,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-parser = argparse.ArgumentParser(description="Run the am-parser on a specified amconll file in order to annotate it, doesn't perform evaluation.")
+parser = argparse.ArgumentParser(description="Run the neural network to get scores supertags and edges.")
 
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
 parser.add_argument('formalism', type=str, help='name of formalism (must be included in the model)')
-parser.add_argument('input_file', type=str, help='path to the file containing the evaluation data')
-parser.add_argument('output_path', type=str, help='path to where output shall be written')
-
-parser.add_argument('-k',
-                       type=int,
-                       default=6,
-                       help='number of supertags to be used')
-parser.add_argument('-t',"--threads",
-                       type=int,
-                       default=4,
-                       help='number of threads')
-
-parser.add_argument('--give_up',
-                       type=float,
-                       default=60*60,
-                       help='number of seconds until fixed-tree decoder backs off to k-1')
+parser.add_argument('input_file', type=str, help='path to the amconll file containing the sentences to be processed')
+parser.add_argument('output_path', type=str, help='path to where output shall be written (creates scores.zip in that directory)')
 
 cuda_device = parser.add_mutually_exclusive_group(required=False)
 cuda_device.add_argument('--cuda-device',
@@ -122,11 +109,6 @@ if args.extend_vocab:
     model.vocab.extend_from_instances(Params({}), instances=instances)
     model.extend_embedder_vocab(embedding_sources)
 
-
-
-
-predictor = AMconllPredictor(dataset_reader,args.k,args.give_up, args.threads, model=model)
-
 formalism = args.formalism
 instances = dataset_reader.read([[formalism, args.input_file]])  # we need to give the formalism to amconll dataset_reader
 model.train(False)
@@ -178,14 +160,14 @@ with zipfile.ZipFile(args.output_path + "/scores.zip","w",compression=zipfile.ZI
             edge_label_scores = F.log_softmax(torch.from_numpy(edge_label_scores),dim=2).numpy() #normalize over edge labels
             modified_conll_sentences.append(conll_sentences[sentence_id].set_lexlabels(pred["lexlabels"]))
 
-            ja = False
-            if attributes["id"] == "#22048021":
-                print(edge_scores.shape)
-                print(list(edge_scores[:,4]))
-                print(list(edge_scores[:,5]))
-                print("---")
-                print(edge_scores)
-                ja = True
+            #ja = False
+            #if attributes["id"] == "#22048021":
+            #    print(edge_scores.shape)
+            #    print(list(edge_scores[:,4]))
+            #    print(list(edge_scores[:,5]))
+            #    print("---")
+            #    print(edge_scores)
+            #    ja = True
 
 
             sent_length = edge_scores.shape[0] #sent length + art root
@@ -198,8 +180,8 @@ with zipfile.ZipFile(args.output_path + "/scores.zip","w",compression=zipfile.ZI
                     interesting_labels = sorted(enumerate(edge_label_scores[from_,to_]),key=lambda x:x[1],reverse=True)[:top_k_labels]
                     o += " ".join([i2edge_label[lbl]+f"|{score:.4f}" for lbl,score in interesting_labels])
                     edges.append(o)
-            if ja:
-                print(edges)
+            #if ja:
+            #    print(edges)
             fp.write("\t".join(edges).encode())
             fp.write("\n".encode())
 
