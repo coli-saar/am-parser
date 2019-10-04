@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple, Iterable, Union
 
 from dataclasses import dataclass
 
-from graph_dependency_parser.components.spacy_interface import run_spacy
+
 
 
 @dataclass(frozen=True)
@@ -124,6 +124,7 @@ def from_raw_text(rawstr : str, words: List[str], add_art_root : bool, attribute
     :param attributes:
     :return:
     """
+    from graph_dependency_parser.components.spacy_interface import run_spacy
     entries = []
     #use spacy lemmas and tags
     spacy_doc = run_spacy([words])
