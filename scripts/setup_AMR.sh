@@ -29,7 +29,7 @@ fi
 
 
 # wordnet
-lookup_check="downloaded_models/wordnet3.0/dict/data.noun" # just check one file, should all be there or none
+wordnet_check="downloaded_models/wordnet3.0/dict/data.noun" # just check one file, should all be there or none
 if [ -f "$wordnet_check" ]; then
     echo "WordNet found in downloaded_models/wordnet3.0 (If there are problems with missing files in that folder, delete it and run this script again.)"
 else

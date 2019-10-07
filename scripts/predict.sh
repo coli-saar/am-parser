@@ -147,7 +147,7 @@ elif [ "$type" = "EDS" ]; then
     amrinput=${input%".edm"}".amr.txt"
     echo "Smatch score:"
     python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
-elif [ "$type" = "AMR-17" ]; then
+elif [ "$type" = "AMR-2017" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll_prediction -o $output
     bash eval_AMR.sh $output $jar
 fi
