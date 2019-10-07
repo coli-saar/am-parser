@@ -76,7 +76,6 @@ threads=1
 memLimit=6G
 posTagger="resources/english-bidirectional-distsim.tagger"
 nerTagger="resources/english.conll.4class.distsim.crf.ser.gz"
-PCFG="resources/englishPCFG.txt"
 wordnet="resources/wordnet/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
 
