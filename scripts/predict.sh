@@ -120,6 +120,9 @@ elif [ "$type" = "AMR-2017" ]; then
     bash scripts/setup_AMR.sh
     bash scripts/preprocess_AMR_test.sh -i $input -o $output -j $jar
     mv $output/test.amconll $amconll_input
+else
+    echo "Graphbank type $type (-T option) not recognized! valid options are DM, PAS, PSD, EDS and AMR."
+    exit 1
 fi
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
@@ -144,4 +147,7 @@ elif [ "$type" = "EDS" ]; then
     amrinput=${input%".edm"}".amr.txt"
     echo "Smatch score:"
     python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
+elif [ "$type" = "AMR-17" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll_prediction -o $output
+    bash eval_AMR.sh $output $jar
 fi

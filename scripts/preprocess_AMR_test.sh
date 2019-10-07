@@ -51,7 +51,7 @@ if [ -f "$log" ]; then
     rm "$log"
 fi
 
-testNNdata=$outputPath/nnData/test/
+testNNdata=$outputPath/
 testAltodata=$outputPath/alto/test/
 
 # a lot of scripts live here so let's store it as a variable in case it changes
