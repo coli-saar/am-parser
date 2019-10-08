@@ -2,7 +2,7 @@
 Modular implementation of the AM dependency parser used in [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450).
 
 ## Quick Guide
-This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
+This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences. This uses the BERT multitask version (in particular, the AMR 2017 training set was used and results on the AMR 2015 test set are not comparable).
 
 You can find documentation on how to train the parser in the [wiki pages](https://github.com/coli-saar/am-parser/wiki/Train-Parser) (we will update this part of the documentation later in fall 2019 to make it easier for you to train your own models).
 
