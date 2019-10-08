@@ -15,7 +15,7 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 
 (We recommend to set up a conda environment.)
 
-__Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-on-the-Saarland-servers).
+__Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 
 ### Reproducing our experiment results
 
