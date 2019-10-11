@@ -107,9 +107,10 @@ echo "Parsing input file $input with model $model to $type graphs, output in $ou
 # create filename for amconll file
 output=$output"/"
 prefix=$type"_gold"
-amconll_input=$output$prefix"-scores" # used as input for neural model, but we must create it first
-amconll_prediction=$output$type"_pred-scores" # where the neural model writes its prediction
+amconll_input=$output$prefix".conll" # used as input for neural model, but we must create it first
+amconll_prediction=$output$type"_pred-scores/" # where the neural model writes its prediction. this is a folder so we must create it first
 
+mkdir -p amconll_prediction
 
 # convert input file to AMConLL format
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
