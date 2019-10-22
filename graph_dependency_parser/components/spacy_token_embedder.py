@@ -17,7 +17,7 @@ try:
 
     spacy.require_gpu()
 except ModuleNotFoundError:
-    print("Spacy pytorch transformers not available, so you cannot use spacy-tok2vec!")
+    print("Either spacy pytorch transformers or cupy not available, so you cannot use spacy-tok2vec! This is only an issue, if you intend to use roberta or xlnet.")
 
 NAME_TO_DIM = {"xlnet-large-cased" : 1024, "xlnet-base-cased" : 768,
                "bert-base-uncased" : 768,
