@@ -11,7 +11,9 @@ jar="am-tools-all.jar"
 usage="Takes . \n\n
 
 Required arguments: \n
-\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format. For EDS, make this the test.amr file that contains the gold graphs in PENMAN notation.
+\n\t     -i  input file:  Graph corpus in the original format. For example, the DM dev set in .sdp format.
+\n\t\t     For EDS, make this the test.amr file that contains the gold graphs in PENMAN notation.
+\n\t\t     For AMR, use the directory which contains all the test corpus files (e.g. data/amrs/split/test in the official AMR corpora)
 \n\t     -o  output folder: where the results will be stored.
 \n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
 
@@ -71,7 +73,7 @@ if [ -f "$jar" ]; then
     echo "jar file found at $jar"
 else
     echo "jar file not found at $jar, downloading it!"
-    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools.jar
+    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools-all.jar
 fi
 
 
@@ -84,6 +86,8 @@ fi
 if [ "$type" = "" ]; then
     printf "\n No graphbank type given. Please use -T option.\n"
     exit 1
+elif [ "$type" = "AMR" ]; then
+    type="AMR-2017" # to make it compatible with how we referred to this in the python code
 fi
 
 if [ "$output" = "" ]; then
@@ -103,24 +107,29 @@ echo "Parsing input file $input with model $model to $type graphs, output in $ou
 # create filename for amconll file
 output=$output"/"
 prefix=$type"_gold"
-amconllgold=$output$prefix".amconll"
-amconllpred=$output$type"_pred.amconll"
+amconll_input=$output$prefix".amconll" # used as input for neural model, but we must create it first
+amconll_prediction=$output$type"_pred.amconll" # where the neural model writes its prediction
 
 
 # convert input file to AMConLL format
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $input -o $output -p $prefix
+elif [ "$type" = "EDS" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.PrepareTestData -c $input -o $output -p $prefix
+elif [ "$type" = "AMR-2017" ]; then
+    bash scripts/setup_AMR.sh
+    bash scripts/preprocess_AMR_test.sh -i $input -o $output -j $jar
+    mv $output/test.amconll $amconll_input
 else
-    if [ "$type" = "EDS" ]; then
-         java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.PrepareTestData -c $input -o $output -p $prefix
-    fi
+    echo "Graphbank type $type (-T option) not recognized! valid options are DM, PAS, PSD, EDS and AMR."
+    exit 1
 fi
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
-    python3 parse_file.py $model $type $amconllgold $amconllpred --cuda-device $gpu
+    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu
 else
-    python3 parse_file.py $model $type $amconllgold $amconllpred --cuda-device $gpu --give_up 5
+    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --give_up 5
 fi
 
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
@@ -128,19 +137,17 @@ fi
 echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c "$amconllpred" -o "$output$type" --gold "$input"
-else
-    if [ "$type" = "PSD" ]; then
-        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c "$amconllpred" -o "$output$type" --gold "$input"
-    else
-        if [ "$type" = "EDS" ]; then
-             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c "$amconllpred" -o "$output$type"
-             echo "EDM score:"
-             python2 external_eval_tools/edm/eval_edm.py "$output$type".edm "$output$prefix"-gold.edm
-             amrinput=${input%".edm"}".amr.txt"
-             echo "Smatch score:"
-             python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
-
-        fi
-    fi
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c "$amconll_prediction" -o "$output$type" --gold "$input"
+elif [ "$type" = "PSD" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c "$amconll_prediction" -o "$output$type" --gold "$input"
+elif [ "$type" = "EDS" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c "$amconll_prediction" -o "$output$type"
+    echo "EDM score:"
+    python2 external_eval_tools/edm/eval_edm.py "$output$type".edm "$output$prefix"-gold.edm
+    amrinput=${input%".edm"}".amr.txt"
+    echo "Smatch score:"
+    python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
+elif [ "$type" = "AMR-2017" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll_prediction -o $output
+    bash scripts/eval_AMR.sh $output $jar
 fi
