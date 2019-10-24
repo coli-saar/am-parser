@@ -11,8 +11,8 @@ echo 'preparing data'
 python3 prepare_visualize.py $1 $2 $3
 
 #get filenames without the path
-f1=$(basename $1)
-f2=$(basename $2)
+f1=1_$(basename $1)
+f2=2_$(basename $2)
 
 #f-scores
 echo 'computing f-score, without IGNORE and ROOT edges'
