@@ -34,11 +34,11 @@ def none_or_else(exp, val):
         return val
     return None
 
-
 class AMTask(Model):
     """
     A class that implements a task-specific model. It conceptually belongs to a formalism or corpus.
     """
+    loss_names = ["edge_existence", "edge_label", "supertagging", "lexlabel"]
 
     def __init__(self, vocab: Vocabulary,
                  name:str,
@@ -68,8 +68,8 @@ class AMTask(Model):
 
         self._dropout = InputVariationalDropout(dropout)
 
-        loss_names = ["edge_existence", "edge_label", "supertagging", "lexlabel"]
-        for loss_name in loss_names:
+
+        for loss_name in AMTask.loss_names:
             if loss_name not in self.loss_mixing:
                 self.loss_mixing[loss_name] = 1.0
                 logger.info(f"Loss name {loss_name} not found in loss_mixing, using a weight of 1.0")
@@ -78,7 +78,7 @@ class AMTask(Model):
                     if loss_name not in ["supertagging", "lexlabel"]:
                         raise ConfigurationError("Only the loss mixing coefficients for supertagging and lexlabel may be None, but not "+loss_name)
 
-        not_contained = set(self.loss_mixing.keys()) - set(loss_names)
+        not_contained = set(self.loss_mixing.keys()) - set(AMTask.loss_names)
         if len(not_contained):
             logger.critical(f"The following loss name(s) are unknown: {not_contained}")
             raise ValueError(f"The following loss name(s) are unknown: {not_contained}")
@@ -140,7 +140,9 @@ class AMTask(Model):
         edge_existence_scores = self.edge_model.edge_existence(encoded_text_parsing,
                                                                mask)  # shape (batch_size, seq_len, seq_len)
         # shape (batch_size, seq_len, num_supertags)
-        if encoded_text_tagging is not None:
+        if encoded_text_tagging is not None and self.supertagger is not None and self.lexlabeltagger is not None\
+                and self.loss_mixing["supertagging"] is not None\
+                and self.loss_mixing["lexlabel"] is not None:
             supertagger_logits = self.supertagger.compute_logits(encoded_text_tagging)
             lexlabel_logits = self.lexlabeltagger.compute_logits(encoded_text_tagging) # shape (batch_size, seq_len, num label tags)
         else:
@@ -245,11 +247,67 @@ class AMTask(Model):
             output_dict["loss"] = loss
         return output_dict
 
-
     @overrides
     def decode(self, output_dict: Dict[str, torch.Tensor]):
         """
         In contrast to its name, this function does not perform the decoding but only prepares it.
+        :param output_dict:
+        :return:
+        """
+        if self.supertagger is not None and self.loss_mixing["supertagging"] is not None: #we have a supertagger, so this is proper AM dependency parsing
+            return self.prepare_for_ftd(output_dict)
+        else: #we don't have a supertagger, perform good old dependency parsing
+            return self.only_cle(output_dict)
+
+    def only_cle(self, output_dict : Dict[str, torch.Tensor]):
+        """
+        Therefore, we take the result of forward and perform the following steps (for each sentence in batch):
+        - remove padding
+        :param output_dict: result of forward
+        :return: output_dict with the following keys added:
+            - lexlabels: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
+            - supertags: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
+        """
+        full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
+        edge_existence_scores = output_dict.pop("edge_existence_scores").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
+        heads = output_dict.pop("heads")
+        heads_cpu = heads.cpu().detach().numpy()
+        mask = output_dict.pop("mask")
+        edge_label_logits = output_dict.pop("label_logits").cpu().detach().numpy()  # shape (batch_size, seq_len, num edge labels)
+
+        output_dict.pop("encoded_text_parsing")
+        output_dict.pop("encoded_text_tagging") #don't need that
+
+        lengths = get_lengths_from_binary_sequence_mask(mask)
+
+        #here we collect things, in the end we will have one entry for each sentence:
+        all_edge_label_logits = []
+        head_indices = []
+        all_full_label_logits = []
+        all_edge_existence_scores = []
+
+        for i, length in enumerate(lengths):
+            instance_heads_cpu = list(heads_cpu[i,1:length])
+            #apply changes to instance_heads tensor:
+            instance_heads = heads[i,:]
+            for j, x in enumerate(instance_heads_cpu):
+                instance_heads[j+1] = torch.tensor(x) #+1 because we removed the first position from instance_heads_cpu
+
+            all_edge_label_logits.append(edge_label_logits[i,1:length,:])
+
+            all_full_label_logits.append(full_label_logits[i,:length, :length,:])
+            all_edge_existence_scores.append(edge_existence_scores[i,:length, :length])
+            head_indices.append(instance_heads_cpu)
+
+        output_dict["label_logits"] = all_edge_label_logits
+        output_dict["predicted_heads"] = head_indices
+        output_dict["full_label_logits"] = all_full_label_logits
+        output_dict["edge_existence_scores"] = all_edge_existence_scores
+        return output_dict
+
+    def prepare_for_ftd(self, output_dict: Dict[str, torch.Tensor]):
+        """
+        This function does not perform the decoding but only prepares it.
         Therefore, we take the result of forward and perform the following steps (for each sentence in batch):
         - remove padding
         - identify the root of the sentence, group other root-candidates under the proper root
