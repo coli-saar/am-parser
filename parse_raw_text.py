@@ -130,12 +130,13 @@ if args.extend_vocab:
 predictor = AMconllPredictor(dataset_reader,args.k,args.give_up, args.threads, model=model)
 
 requires_art_root = {"DM" : True, "PAS": True, "PSD": True, "EDS" : False, "AMR-2015": False, "AMR-2017": False}
+requires_ne_merging = {"DM" : False, "PAS": False, "PSD": False, "EDS" : False, "AMR-2015": True, "AMR-2017": True}
 
 sentences = []
 with open(args.input_file) as f:
     for sentence in f:
         words = sentence.rstrip("\n").split(" ")
-        sentences.append(from_raw_text(sentence.rstrip("\n"),words,requires_art_root[args.formalism], dict()))
+        sentences.append(from_raw_text(sentence.rstrip("\n"),words,requires_art_root[args.formalism], dict(),requires_ne_merging[args.formalism]))
 with TemporaryDirectory() as direc:
     temp_path =  direc+"/sentences.amconll"
     with open(temp_path,"w") as f:

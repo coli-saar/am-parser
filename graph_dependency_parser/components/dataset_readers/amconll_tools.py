@@ -4,7 +4,6 @@ from dataclasses import dataclass
 
 
 
-
 @dataclass(frozen=True)
 class Entry:
     token: str
@@ -123,23 +122,59 @@ class AMSentence:
         return len(self.words)
 
 
-def from_raw_text(rawstr : str, words: List[str], add_art_root : bool, attributes: Dict) -> AMSentence:
+def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes: Dict, contract_ne: bool) -> AMSentence:
     """
     Create an AMSentence from raw text, without token ranges and stuff
     :param words:
     :param add_art_root:
     :param attributes:
+    :param contract_ne: shall we contract named entites, e.g. Barack Obama --> Barack_Obama. Should be done only for AMR.
     :return:
     """
-    from graph_dependency_parser.components.spacy_interface import run_spacy
     entries = []
-    #use spacy lemmas and tags
+    # use spacy lemmas and tags
+    from graph_dependency_parser.components.spacy_interface import run_spacy, lemma_postprocess, ne_postprocess, is_number
+
     spacy_doc = run_spacy([words])
-    for i, word in zip(range(len(words)), words):
-        e = Entry(word,"_",spacy_doc[i].lemma_,spacy_doc[i].tag_,"O","_","_","_",0,"IGNORE",True,None)
-        entries.append(e)
+    ne = []
+    for i in range(len(words)):
+        word = words[i]
+        lemma = lemma_postprocess(word, spacy_doc[i].lemma_)
+        if contract_ne:
+
+            if spacy_doc[i].ent_iob_ == "B":
+                if len(ne) > 0:
+                    ent_typ = ne_postprocess(spacy_doc[i - 1].ent_type_)
+                    e = Entry("_".join(ne), is_number(ent_typ),
+                              lemma_postprocess(words[i - 1], spacy_doc[i - 1].lemma_), spacy_doc[i - 1].tag_, ent_typ,
+                              "_", "_", "_", 0, "IGNORE", True, None)
+                    entries.append(e)
+                    ne = []
+                ne = [word]
+            elif spacy_doc[i].ent_iob_ == "I":
+                ne.append(word)
+
+            if len(ne) > 0:
+                if (i == len(words) - 1 or i + 1 < len(words) and spacy_doc[i + 1].ent_iob_ != "I"):
+                    ent_typ = ne_postprocess(spacy_doc[i].ent_type_)
+
+                    e = Entry("_".join(ne), is_number(ent_typ), lemma, spacy_doc[i].tag_, ent_typ, "_", "_", "_", 0,
+                              "IGNORE", True, None)
+                    entries.append(e)
+                    ne = []
+            else:
+                e = Entry(word, "_", lemma, spacy_doc[i].tag_, ne_postprocess(spacy_doc[i].ent_type_), "_", "_", "_", 0, "IGNORE", True,
+                          None)
+                entries.append(e)
+
+        else:  # don't contract NEs
+            e = Entry(word, "_", lemma, spacy_doc[i].tag_, ne_postprocess(spacy_doc[i].ent_type_), "_", "_", "_", 0, "IGNORE", True,
+                      None)
+            entries.append(e)
+
     if add_art_root:
-        entries.append(Entry("ART-ROOT","_","ART-ROOT","ART-ROOT","ART-ROOT","_","_","_",0,"IGNORE",True,None))
+        entries.append(
+            Entry("ART-ROOT", "_", "ART-ROOT", "ART-ROOT", "ART-ROOT", "_", "_", "_", 0, "IGNORE", True, None))
     attributes["raw"] = rawstr
     sentence = AMSentence(entries, attributes)
     sentence.check_validity()

@@ -91,11 +91,6 @@ if [ "$output" = "" ]; then
     exit 1
 fi
 
-#Build fast_smatch
-pushd external_eval_tools/fast_smatch
-echo "Building fast_smatch (for evaluation of EDS)"
-bash build.sh
-popd
 
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing raw text file $input with model $model to $type graphs, output in $output"
@@ -116,12 +111,31 @@ echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
-else
-    if [ "$type" = "PSD" ]; then
-        java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
-    else
-        if [ "$type" = "EDS" ]; then
-             java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
-        fi
-    fi
+elif [ "$type" = "PSD" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
+elif [ "$type" = "EDS" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
+elif [ "$type" = "AMR-2017" ]; then
+    java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll -o "$output"
+
+    amconllabsolute=$(readlink -f "$amconll")
+    outputabsolute=$(readlink -f "$output")
+    pushd scripts/
+    #Extract sentences.txt
+    python extract_sentences.py $amconllabsolute $outputabsolute
+    popd
+
+    #Relabeling:
+    lookup="downloaded_models/lookup/lookupdata17/"
+    wordnet_path="downloaded_models/wordnet3.0/dict/"
+    echo "relabelling with threshold 10"
+    # run the relabeller
+    java -Xmx2G -cp "$jar" de.saar.coli.amrtagging.formalisms.amr.tools.Relabel "$output" "$lookup" "$wordnet_path" 10
+
+    echo "final post-processing"
+
+    # now we have a relabelled.txt in this directory
+    # do more post-processing
+    sed -E 's/\(u_[0-9]+ \/ ([-+0-9]+)\)/\1/g' $output/relabeled.txt | sed -E 's/\(explicitanon[0-9]+ \/ ([^"()]+)\)/"\1"/g' | sed -E 's/\(explicitanon[0-9]+ \/ ("[^"]+")\)/\1/g' | sed -E 's/"([-+0-9]+)"/\1/g' > $output/$type.txt
+
 fi
