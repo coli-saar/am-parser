@@ -28,7 +28,7 @@ lemma_dict = {"i": "I", "me": "I", "her": "she", "him": "he", "his": "he", "them
 def lemma_postprocess(token: str, lemma: str) -> str:
     if lemma == "-PRON-":
         if token.lower() in lemma_dict:
-            return lemma_dict[lemma]
+            return lemma_dict[token.lower()]
         else:
             return token
     return lemma
