@@ -13,6 +13,7 @@ from allennlp.common import Params
 
 from graph_dependency_parser.components.dataset_readers.amconll_tools import from_raw_text
 from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor
+from graph_dependency_parser.components.spacy_interface import spacy_tokenize
 from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -45,6 +46,11 @@ parser.add_argument('--give_up',
                        type=float,
                        default=60*60,
                        help='number of seconds until fixed-tree decoder backs off to k-1')
+
+parser.add_argument('--tokenize',
+                       action='store_true',
+                       default=False,
+                       help="Assume untokenized sentences and tokenize using spacy.")
 
 parser.add_argument('-v',
                        action='store_true',
@@ -135,8 +141,13 @@ requires_ne_merging = {"DM" : False, "PAS": False, "PSD": False, "EDS" : False, 
 sentences = []
 with open(args.input_file) as f:
     for sentence in f:
-        words = sentence.rstrip("\n").split(" ")
+        sentence = sentence.rstrip("\n")
+        if args.tokenize:
+            words = spacy_tokenize(sentence)
+        else:
+            words = [word.strip() for word in sentence.rstrip("\n").split(" ") if word.strip()]
         sentences.append(from_raw_text(sentence.rstrip("\n"),words,requires_art_root[args.formalism], dict(),requires_ne_merging[args.formalism]))
+
 with TemporaryDirectory() as direc:
     temp_path =  direc+"/sentences.amconll"
     with open(temp_path,"w") as f:

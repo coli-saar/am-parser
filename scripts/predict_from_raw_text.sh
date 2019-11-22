@@ -13,13 +13,13 @@ usage="Takes . \n\n
 Required arguments: \n
 \n\t     -i  input file: text file with one sentence per line. Assumes the file is already tokenized with spaces as delimiters.
 \n\t     -o  output folder: where the results will be stored.
-\n\t     -T  desired type of output formalism. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
+\n\t     -T  desired type of output formalism. Possible options: DM, PAS, PSD, EDS and AMR-2017.
 
 \noptions:
 
 \n\t   -m  archived model file in .tar.gz format. If not given, the default model path $defaultmodel is used. If that
 file does not exist, it will be downloaded automatically (NOT YET IMPLEMENTED)
-\n\t	 -f  faster, less accurate evaluation (flag; default false)
+\n\t	 -f  faster, less accurate (flag; default false)
 \n\t   -g  which gpu to use (its ID, i.e. 0, 1 or 2 etc). Default is -1, using CPU instead"
 
 #defaults:

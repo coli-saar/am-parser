@@ -22,6 +22,10 @@ def make_doc(vocab, sents : List[List[str]]) -> Doc:
 
 en_nlp = spacy.load("en_core_web_md", disable=["parser"])
 
+def spacy_tokenize(sent : str) -> List[str]:
+    words = en_nlp(sent)
+    return [w.text.strip() for w in words if w.text.strip()]
+
 lemma_dict = {"i": "I", "me": "I", "her": "she", "him": "he", "his": "he", "them": "they", "their": "they"}
 
 

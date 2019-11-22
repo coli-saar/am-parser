@@ -141,15 +141,14 @@ def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes:
         word = words[i]
         lemma = lemma_postprocess(word, spacy_doc[i].lemma_)
         if contract_ne:
-
+            # TODO: ninety degrees gets conflated to ninety_degrees and parser fails down the road
             if spacy_doc[i].ent_iob_ == "B":
                 if len(ne) > 0:
                     ent_typ = ne_postprocess(spacy_doc[i - 1].ent_type_)
                     e = Entry("_".join(ne), is_number(ent_typ),
-                              lemma_postprocess(words[i - 1], spacy_doc[i - 1].lemma_), spacy_doc[i - 1].tag_, ent_typ,
+                              lemma_postprocess(words[i - 1], spacy_doc[i - 1].lemma_), spacy_doc[i - 1].tag_, "O",
                               "_", "_", "_", 0, "IGNORE", True, None)
                     entries.append(e)
-                    ne = []
                 ne = [word]
             elif spacy_doc[i].ent_iob_ == "I":
                 ne.append(word)
@@ -158,17 +157,19 @@ def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes:
                 if (i == len(words) - 1 or i + 1 < len(words) and spacy_doc[i + 1].ent_iob_ != "I"):
                     ent_typ = ne_postprocess(spacy_doc[i].ent_type_)
 
-                    e = Entry("_".join(ne), is_number(ent_typ), lemma, spacy_doc[i].tag_, ent_typ, "_", "_", "_", 0,
+                    e = Entry("_".join(ne), is_number(ent_typ), lemma, spacy_doc[i].tag_, "O", "_", "_", "_", 0,
                               "IGNORE", True, None)
                     entries.append(e)
                     ne = []
             else:
-                e = Entry(word, "_", lemma, spacy_doc[i].tag_, ne_postprocess(spacy_doc[i].ent_type_), "_", "_", "_", 0, "IGNORE", True,
+                #ne_postprocess(spacy_doc[i].ent_type_)
+                e = Entry(word, "_", lemma, spacy_doc[i].tag_,"O" , "_", "_", "_", 0, "IGNORE", True,
                           None)
                 entries.append(e)
 
         else:  # don't contract NEs
-            e = Entry(word, "_", lemma, spacy_doc[i].tag_, ne_postprocess(spacy_doc[i].ent_type_), "_", "_", "_", 0, "IGNORE", True,
+            # ne_postprocess(spacy_doc[i].ent_type_)
+            e = Entry(word, "_", lemma, spacy_doc[i].tag_, "O", "_", "_", "_", 0, "IGNORE", True,
                       None)
             entries.append(e)
 
