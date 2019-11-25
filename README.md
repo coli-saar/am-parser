@@ -33,7 +33,7 @@ will create a file `DM.sdp` in the `example` folder with graphs for the sentence
 ### Getting graphs from raw text
 From the main directory, run `bash scripts/predict_from_raw_text.sh` with the following arguments (or with -h for help):
 * `-i` the input file with one sentence per line. These must already be tokenized. An example is in `example/input.txt`.
-* `-T` the type of graph bank you want to parse for, options are DM, PAS, PSD or EDS (AMR is not yet supported by this script, coming later in fall 2019).
+* `-T` the type of graph bank you want to parse for, options are DM, PAS, PSD, EDS or AMR.
 * `-o` the desired output folder (this will contain the final parsing output, but also several intermediary files)
 
 For example, say you want to do DM parsing and `INPUT` is the path to your sdp file, then
