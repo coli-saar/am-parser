@@ -45,7 +45,8 @@ will create a file `DM.sdp` in the `example` folder with graphs for the sentence
 ### Notes
 
 * When you run either of the above commands for the first time, they will download large files: our trained model file, a compiled `jar` file to support output graph formats, as well as BERT embeddings.
-* This uses the BERT multitask version. In particular, the AMR 2017 training set was used and results on the AMR 2015 test set are not comparable.
+* This uses the BERT multitask version. In particular, the AMR 2017 training set was used and results on the AMR 2015 test set are not comparable. 
+* When parsing graphs from raw text, the model used was trained without embeddings for lemmas, POS tags and named entities and thus is __not directly comparable to the results from the paper__.
 
 ## Things to play around with
 When training your own model, the configuration files have many places where you can make changes and see how it affects parsing performance.
