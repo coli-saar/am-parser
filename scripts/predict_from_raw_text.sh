@@ -11,7 +11,7 @@ jar="am-tools-all.jar"
 usage="Takes . \n\n
 
 Required arguments: \n
-\n\t     -i  input file: text file with one sentence per line. Assumes the file is already tokenized with spaces as delimiters.
+\n\t     -i  input file: text file with one sentence per line. By default, assumes the file is already tokenized with spaces as delimiters.
 \n\t     -o  output folder: where the results will be stored.
 \n\t     -T  desired type of output formalism. Possible options: DM, PAS, PSD, EDS and AMR-2017.
 
@@ -20,13 +20,15 @@ Required arguments: \n
 \n\t   -m  archived model file in .tar.gz format. If not given, the default model path $defaultmodel is used. If that
 file does not exist, it will be downloaded automatically (NOT YET IMPLEMENTED)
 \n\t	 -f  faster, less accurate (flag; default false)
+\n\t	 -t  tokenize with spacy (flag; default false)
 \n\t   -g  which gpu to use (its ID, i.e. 0, 1 or 2 etc). Default is -1, using CPU instead"
 
 #defaults:
 fast=false
 gpu="-1"
+tokenize=false
 # Gathering parameters:
-while getopts "m:i:o:T:g:fh" opt; do
+while getopts "m:i:o:T:g:fth" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
@@ -42,6 +44,8 @@ while getopts "m:i:o:T:g:fh" opt; do
 	g) gpu="$OPTARG"
 	   ;;
 	f) fast=true
+	   ;;
+	t) tokenize=true
 	   ;;
 	\?) echo "Invalid option -$OPTARG" >&2
 	    ;;
@@ -101,9 +105,17 @@ amconll=$output$type".amconll"
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
 if [ "$fast" = "false" ]; then
-    python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu
+    if [ "$tokenize" = "false" ]; then
+      python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu
+    else
+      python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --tokenize
+    fi
 else
-    python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --give_up 5
+    if [ "$tokenize" = "false" ]; then
+      python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --give_up 5
+    else
+      python3 parse_raw_text.py $model $type $input $amconll --cuda-device $gpu --give_up 5 --tokenize
+    fi
 fi
 
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
