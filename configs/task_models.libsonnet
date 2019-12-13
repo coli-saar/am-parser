@@ -21,7 +21,7 @@ function(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_mode
             "label_dim": 256,
             "edge_dim": 256,
             #"activation" : "tanh",
-            "dropout": 0.0,
+            #"dropout": 0.0,
             "edge_label_namespace" : name+"_head_tags"
         },
          "supertagger" : {

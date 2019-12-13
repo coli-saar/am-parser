@@ -53,6 +53,7 @@ local mrp_test_evaluator(dataset_reader, data_iterator, name,short_name, threads
                 "k" : k,
                 "threads" : threads,
                 "give_up": give_up_time,
+                "give_up_k_1" : 8 * give_up_time, #try four times as hard for k=1 before skipping the sentence
                 "evaluation_command" : { "type" : "dummy_evaluation_command"}
         }
         }
@@ -123,9 +124,10 @@ function (dataset_reader, data_iterator) {
      "MRP-DM" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-DM","DM", 1,give_up),
      "MRP-PSD" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-PSD","PSD", 4,give_up),
      "MRP-EDS" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-EDS","EDS", 4,give_up),
-     "MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 16, 300),
+     #"MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 7, 300), # <- submitted MRP system
+     "MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 18, 300),
 
-     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 300)
+     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 900)
 
 
 }

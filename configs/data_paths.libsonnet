@@ -4,6 +4,8 @@ local MRP_AMR_SUBPATH = "clean_decomp";
 local MRP_UCCA_SUBPATH = "very_first";
 
 {
+    "GLOVE_DIR" : "/local/mlinde/glove/",
+
     "MRP_AMR_SUBPATH" : MRP_AMR_SUBPATH,
     "MRP_UCCA_SUBPATH" : MRP_UCCA_SUBPATH,
 

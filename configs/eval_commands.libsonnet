@@ -1,4 +1,4 @@
-local ALTO_PATH = "/proj/irtg.shadow/tools/am-tools-all.jar";
+local ALTO_PATH = "/local/mlinde/am-tools/build/libs/am-tools-all.jar";
 
 local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
 
@@ -112,7 +112,12 @@ local sdp_regexes = {
         "MRP-EDS" : "+MRP-EDS_smatch_f",
         "MRP-AMR" : "+MRP-AMR_mrp_all_f",
 
-        "MRP-UCCA" : "+MRP-UCCA_mrp_all_f"
+        "MRP-UCCA" : "+MRP-UCCA_mrp_all_f",
+
+        "EWT" : "+EWT_LAS",
+        "GUM" : "+GUM_LAS",
+        "LinES" : "+LinES_LAS",
+        "ParTUT" : "+ParTUT_LAS"
 
     },
 
