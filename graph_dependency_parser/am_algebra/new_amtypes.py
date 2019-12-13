@@ -42,6 +42,7 @@ class AMType:
     def __init__(self):
         self.graph = DiGraph()
         self.is_bot : bool = False #\bot type?
+        self.origins = set()
         
     def update_origins(self):
          self.origins = { node for node, indegree in self.graph.in_degree(self.graph.nodes) if indegree == 0}
@@ -339,8 +340,7 @@ class AMType:
                 h += (hash(node) % 100000)  * (hash(o) % 500000 ) * (hash(label) % 300000)
                 
         return h
-        
-        
+
     def perform_apply(self, source : str) -> Optional["AMType"]:
         """
          * Returns the type that we obtain after using APP_s on this type (returns
@@ -354,12 +354,12 @@ class AMType:
          * and copyWithRemoved is not public. So I think this has a place -- JG
          * 
          """
-        if not self.can_apply_now(s):
+        if not self.can_apply_now(source):
              return None
          
         return self.copy_with_removed(source)
     
-    def number_of_open_source(self) -> float:
+    def number_of_open_sources(self) -> float:
         """
         Returns the number of sources left or infinity if this is the \bot type.
         """

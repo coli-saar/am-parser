@@ -1,6 +1,8 @@
 # cython: language_level=3
 
 from operator import itemgetter
+from typing import Dict, Tuple
+
 import graph_dependency_parser.am_algebra.tree as tree
 import tqdm
 from graph_dependency_parser.am_algebra.amconll import ConllEntry, ConllSent, write_conll
@@ -8,8 +10,10 @@ from graph_dependency_parser.components.cle import get_head_dict
 
 from time import time
 
-import pyximport; pyximport.install()
-import graph_dependency_parser.am_algebra.amtypes as amtypes
+#import pyximport; pyximport.install()
+#import graph_dependency_parser.am_algebra.amtypes as amtypes
+import graph_dependency_parser.am_algebra.new_amtypes as new_amtypes
+
 #import graph_dependency_parser.am_algebra.evaluator as evaluator
 import multiprocessing as mp
 import numpy as np
@@ -134,7 +138,7 @@ class AMDecoder:
         
         if string in self.totyp:
             return self.totyp[string]
-        self.totyp[string] = amtypes.parse_type(string)
+        self.totyp[string] = new_amtypes.AMType.parse_str(string)
         return self.totyp[string]
     
     def get_items(self, entry, kbest):
@@ -179,7 +183,7 @@ class AMDecoder:
         :param kbest: How many supertags to take into account? If not set, use the setting of the object (self.kbest)
         :return: the modified conll_sentence
         """
-        chart = dict()
+        chart : Dict[int,Dict[new_amtypes.AMType,Tuple[new_amtypes.AMType, float]]] = dict()
         backpointer = dict()
         agenda = []
 
@@ -207,15 +211,15 @@ class AMDecoder:
                 chart[i] = dict()
                 backpointer[i] = dict()
                 for item in self.get_items(w, kbest):
-                    chart[i][amtypes.typ_to_str(item.type)] = (item.type, item.score)
-                    backpointer[i][amtypes.typ_to_str(item.type)] = ([(i, item.type)], [])
+                    chart[i][item.type] = (item.type, item.score)
+                    backpointer[i][item.type] = ([(i, item.type)], [])
         if not encountered_root:
             print("Didn't encounter root when constructing the agenda, something's wrong :( ","root",new_root_id)
             print("tree",head_dict,t)
             print("sentence",  str(conll_sentence))
         counter = 0
 
-        cache = amtypes.CombinationCache()
+        cache = new_amtypes.CombinationCache()
         start_time = time()
         label_scores = conll_sentence.label_scores
         while agenda:
@@ -237,8 +241,7 @@ class AMDecoder:
                             print("Skipping sentence")
                         return conll_sentence
                 it = one_index.pop()
-                it_type_str = amtypes.typ_to_str(it.type)
-                tupl = (it_type_str,frozenset(it.unproc_children))
+                tupl = (it.type,frozenset(it.unproc_children))
                 if tupl in processed and processed[tupl] >= it.score:
                     continue
                 processed[tupl] = max(it.score,processed.get(tupl,it.score))
@@ -246,8 +249,7 @@ class AMDecoder:
 
                 for unprocessed in it.unproc_children:
                     for child_t, child_score in chart[unprocessed].values():
-                        child_t_str = amtypes.typ_to_str(child_t)
-                        for op,source in cache.combinations(it.type, it_type_str, child_t, child_t_str):
+                        for op,source in cache.combinations(it.type, child_t):
                             if it.is_art_root and op =="MOD_": #at ART-ROOT: only allow APP operations with sources starting with art-snt
                                 continue
                             counter += 1
@@ -258,20 +260,21 @@ class AMDecoder:
                                 edgescore = -100
                             #print(it.index, unprocessed,op+source,"mit Score",edgescore)
                             new_type = it.type
-                            sub_bp = backpointer[unprocessed][child_t_str]
+                            sub_bp = backpointer[unprocessed][child_t]
                             if op == "APP_": #type only changes for apply operations
-                                new_type = amtypes.simulate_app(it.type, source)
+                                new_type = it.type.perform_apply(source)
+                                assert new_type is not None, "applying seems disallowed although the operation came from the CombinationCache"
+
                             new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)],it.is_art_root)
 
-                            typ_str = amtypes.typ_to_str(new_it.type)
                             if len(new_it.unproc_children) == 0:
                                 if new_it.index not in chart:
                                     chart[new_it.index] = dict()
                                     backpointer[new_it.index] = dict()
                                 
-                                if typ_str not in chart[new_it.index] or new_it.score > chart[new_it.index][typ_str][1]:
-                                    chart[new_it.index][typ_str] = (new_it.type,new_it.score)
-                                    backpointer[new_it.index][typ_str] = (new_it.local_types,new_it.subtree)
+                                if new_type not in chart[new_it.index] or new_it.score > chart[new_it.index][new_type][1]:
+                                    chart[new_it.index][new_type] = (new_it.type,new_it.score)
+                                    backpointer[new_it.index][new_type] = (new_it.local_types,new_it.subtree)
                             else:
                                 #tupl = (typ_str,frozenset(new_it.unproc_children))
                                 found = None
@@ -295,7 +298,7 @@ class AMDecoder:
         #print("new root id", new_root_id)
         #print(head_dict)
         try:
-            best_entry = max(chart[new_root_id].values(), key = lambda entry: (-amtypes.number_of_open_sources(entry[0]), entry[1])) #most important: few open sources, 2nd: highest score
+            best_entry = max(chart[new_root_id].values(), key = lambda entry: (-(entry[0].number_of_open_sources()), entry[1])) #most important: few open sources, 2nd: highest score
         except KeyError as e:
             print(e)
             print("Didn't find an item for the root of the AM dependency tree. This must not happen :/")
@@ -306,10 +309,10 @@ class AMDecoder:
             print("Skipping sentence")
             return conll_sentence
         #Look up backpointers
-        local_types,edges = backpointer[new_root_id][amtypes.typ_to_str(best_entry[0])]
+        local_types,edges = backpointer[new_root_id][best_entry[0]]
         has_a_local_type = set()
         for index, typ in local_types:
-            t_str = amtypes.typ_to_str(typ)
+            t_str = str(typ)
             has_a_local_type.add(index)
             conll_sentence[index].typ = t_str 
             for (score,delex,ty) in conll_sentence[index].supertags:
