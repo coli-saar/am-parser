@@ -20,7 +20,7 @@ Required arguments: \n
 \noptions:
 
 \n\t   -m  archived model file in .tar.gz format. If not given, the default model path $defaultmodel is used. If that
-file does not exist, it will be downloaded automatically (NOT YET IMPLEMENTED)
+file does not exist, it will be downloaded automatically.
 \n\t	 -f  faster, less accurate evaluation (flag; default false)
 \n\t   -g  which gpu to use (its ID, i.e. 0, 1 or 2 etc). Default is -1, using CPU instead"
 

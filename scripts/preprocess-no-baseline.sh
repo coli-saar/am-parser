@@ -2,7 +2,7 @@
 
 
 
-usage="Preprocess the corpus.\n\n
+usage="Preprocess an AMR corpus, in ACL 2019 style.\n\n
 
 Arguments: \n
 \n\t     -m  main directory where corpus lives
@@ -80,8 +80,8 @@ wordnet="resources/wordnet/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
 
 # disable use of conceptnet by replacing this with 'conceptnet=""'
-conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
-#conceptnet=""
+#conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
+conceptnet=""
 
 # raw training data, preprocess, alto format.
 preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
