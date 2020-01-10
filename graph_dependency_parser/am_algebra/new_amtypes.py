@@ -15,7 +15,6 @@ from copy import deepcopy
 
 
 
-
 def tokenize(type_str) -> List[str]:
     return list(filter(lambda x: x!="" and x!=None, re.split("([(),])| ",type_str)))
 
@@ -44,6 +43,8 @@ class AMType:
         self.is_bot : bool = False #\bot type?
         self.origins = set()
         
+        self._outgoing_edges : Dict[str, Set[Tuple[str,str]]] = dict()
+        
     def update_origins(self):
          self.origins = { node for node, indegree in self.graph.in_degree(self.graph.nodes) if indegree == 0}
          
@@ -62,12 +63,11 @@ class AMType:
         
         assert algs.is_directed_acyclic_graph(self.graph)
         
+        self._outgoing_edges = { node : {(target,rename["label"])  for target, rename in self.graph[node].items()} for node in self.graph.nodes}
+        
         assert self.verify()
             
-        
-    def outgoing_edges(self, node) -> Iterator[Tuple[str,str]]:
-        for target, rename in self.graph[node].items():
-            yield target, rename["label"]
+
             
     def get_children(self, node) -> Set[str]:
         return set(self.graph[node])
@@ -82,7 +82,7 @@ class AMType:
 
         for node in self.graph.nodes():
             seen : Set[str] = set()
-            for _, label in self.outgoing_edges(node):
+            for _, label in self._outgoing_edges[node]:
                 if label in seen:
                     return False
                 else:
@@ -118,6 +118,7 @@ class AMType:
         parents = []
         if typ is None:
             typ = AMType()
+
         for t in s:
             if t == "(":
                 depth += 1
@@ -150,7 +151,7 @@ class AMType:
     
     def _dominated_subgraph_str(self, node : str) -> str:
         r = []
-        for target, label in sorted(self.outgoing_edges(node), key=lambda x:x[0]):
+        for target, label in sorted(self._outgoing_edges[node], key=lambda x:x[0]):
             eRep = ""
             if label != target:
                 eRep = label+UNIFY
@@ -187,7 +188,7 @@ class AMType:
             return False
         
         for node in self.graph.nodes():
-            for t, label in self.outgoing_edges(node):
+            for t, label in self._outgoing_edges[node]:
                 if t not in other.graph[node]:
                     return False # edge present in self but not in other
                 elif other.graph[node][t]["label"] != label:
@@ -220,7 +221,7 @@ class AMType:
             ret.graph.add_node(self.to_request_namespace(source,node))
             
         for node in descendants:
-            for target, label in self.outgoing_edges(node):
+            for target, label in self._outgoing_edges[node]:
                 assert target in descendants, "Type seems to be NOT transitively closed"
                 
                 ret.graph.add_edge(self.to_request_namespace(source, node),
@@ -273,13 +274,15 @@ class AMType:
         """
         if self.is_bot: #to make it explicit: \bot cannot be used in APP
             return False
-        
+
+        # check that appSource is an origin (and thus not needed for unification later)
+        if source not in self.origins:
+            return False
+
         request = self.get_request(source)
         # check if the type expected here at source is equal to the argument type
-        if request is None or request != argument:
-            return False
-        # check that appSource is an origin (and thus not needed for unification later)
-        return source in self.origins
+
+        return request is not None and request == argument
     
     def can_be_modified_by(self, modifier: "AMType", source : str) -> bool:
         """
@@ -288,12 +291,14 @@ class AMType:
         """
         if self.is_bot: # \bot cannot be modified
             return False
+
+        if source not in modifier.origins:
+            return False
         
         request = modifier.get_request(source)
         
         return request is not None and \
             request.is_empty_type() and \
-            source in modifier.origins and \
             modifier.copy_with_removed(source).is_compatible_with(self)
             
     def copy_with_removed(self, source : str) -> "AMType":
@@ -301,7 +306,7 @@ class AMType:
          Creates a copy with r removed from the domain. Does not modify the
          original type.
         """
-        copy = deepcopy(self)
+        copy = self.copy(False) #create genuine copy
         copy.graph.remove_node(source)
         copy.process_updates()
         return copy
@@ -327,7 +332,7 @@ class AMType:
             return False
         
         for node in self.graph.nodes():
-            if set(self.outgoing_edges(node)) != set(other.outgoing_edges(node)):
+            if self._outgoing_edges[node] != other._outgoing_edges[node]:
                 return False
         
         return True
@@ -336,8 +341,9 @@ class AMType:
         h = sum(hash(s) % 999999 for s in self.origins)
         
         for node in self.graph.nodes():
-            for o,label in self.outgoing_edges(node):
-                h += (hash(node) % 100000)  * (hash(o) % 500000 ) * (hash(label) % 300000)
+            h += hash(node) % 10000000
+            #for o,label in self._outgoing_edges[node]:
+            #    h += (hash(node) % 100000)  * (hash(o) % 500000 ) * (hash(label) % 300000)
                 
         return h
 
@@ -367,6 +373,15 @@ class AMType:
             return float("inf")
         
         return len(self.graph.nodes())
+    
+    def copy(self, as_view : bool = False) -> "AMType":
+        g = AMType()
+        g.graph = self.graph.copy(as_view)
+        g.is_bot = self.is_bot
+        g.origins = set(self.origins)
+        g._outgoing_edges = deepcopy(self._outgoing_edges)
+        
+        return g
     
         
 
@@ -407,8 +422,11 @@ class CombinationCache:
 
 if __name__ == "__main__":
     from tqdm import tqdm
+    import timeit
     t = AMType.parse_str("(s(), o()")
-    t2 = AMType.parse_str("()")
+    t2 = AMType.parse_str("(s(op2), o(s()))")
+    print(timeit.timeit(lambda: set(t2.outgoing_edges("o")),number = 40000))
+    t3 = AMType.parse_str("()")
     bot = AMType.parse_str("_")
     print("===")
     print(t)
@@ -417,7 +435,7 @@ if __name__ == "__main__":
     
     #TODO: (s(mod_UNIFY_o(s_UNIFY_o2()), o2())) wird nicht geparst
     
-    if False:
+    if True:
     
         with open("type_judgements.txt") as f:
                 for line in tqdm(f):
