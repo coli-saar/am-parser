@@ -51,6 +51,7 @@ class AMDecoder:
         :param output_file: The filename where to store the decoded trees (*.amconll)
         :param i2edgelabel: A list of edge names that - by their order - allows to map indices to edge labels
         """
+        print("Using new type implementation")
         self.totyp = dict() #look up table to avoid parsing the same type from string to python object twice
         self.output_file = output_file
         self.i2rel = i2edgelabel
@@ -149,16 +150,19 @@ class AMDecoder:
         types_used = []
         null_item = None
         is_art_root = entry.form == "ART-ROOT"
+        bot_type = self.parse_am_type("_")
         for (s,delex,typ) in entry.supertags:
             t = self.parse_am_type(typ)
             if not t in types_used:
                 ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root))
                 types_used.append(t)
-            if t == self.parse_am_type("_"):
+            if t == bot_type:
                 null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root)
         best_ones = ms[0:kbest]
+
         if null_item is None:
             raise ValueError("It looks like there was no prediction for the type \\bot (written _ here) provided")
+
         if not null_item in best_ones:
             best_ones.append(null_item)
         return best_ones
@@ -311,14 +315,17 @@ class AMDecoder:
         #Look up backpointers
         local_types,edges = backpointer[new_root_id][best_entry[0]]
         has_a_local_type = set()
+
         for index, typ in local_types:
             t_str = str(typ)
             has_a_local_type.add(index)
-            conll_sentence[index].typ = t_str 
+            conll_sentence[index].typ = t_str
+
             for (score,delex,ty) in conll_sentence[index].supertags:
-                if ty == t_str:
+                if self.parse_am_type(ty) == typ:
                     conll_sentence[index].delex_supertag = delex
                     break
+
         for (h,d,e) in edges:
             conll_sentence[d].pred_edge_label = e
         return conll_sentence
