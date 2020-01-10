@@ -377,7 +377,11 @@ def combinations(head : AMType, dependent : AMType) -> Iterator[Tuple[str,str]]:
     the second one is the source
     """
     if dependent.is_bot:
-        return ("IGNORE","")
+        yield ("IGNORE","")
+        return
+
+    if head.is_bot:
+        return
     
     for o in head.origins:
         if head.can_apply_to(dependent, o):
