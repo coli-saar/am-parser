@@ -1,6 +1,9 @@
-local ALTO_PATH = "/local/mlinde/am-tools/build/libs/am-tools-all.jar";
+local ALTO_PATH = "am-tools.jar";
+
+local WORDNET = "downloaded_models/wordnet3.0/dict/";
 
 local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
+
 
 local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
 local base_directory = "/local/mlinde/am-parser";
@@ -43,17 +46,23 @@ local sdp_regexes = {
         },
 
         "AMR-2015" : {
-            "type" : "amr_evaluation_command",
-            "amr_year" : "2015",
-            "tool_dir" : tool_dir + "2019rerun",
-            "alto_path" : ALTO_PATH,
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/2015/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
         },
 
-         "AMR-2017" : {
-            "type" : "amr_evaluation_command",
-            "amr_year" : "2017",
-            "tool_dir" : tool_dir + "2019rerun",
-            "alto_path" : ALTO_PATH,
+        "AMR-2017" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/2017/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
         },
 
         "MRP-DM" : {
@@ -104,8 +113,8 @@ local sdp_regexes = {
         "PAS": "+PAS_F",
         "PSD": "+PSD_F",
         "EDS": "+EDS_Smatch_F",
-        "AMR-2015": "+AMR-2015_F-score",
-        "AMR-2017": "+AMR-2017_F-score",
+        "AMR-2015": "+AMR-2015_F",
+        "AMR-2017": "+AMR-2017_F",
 
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",

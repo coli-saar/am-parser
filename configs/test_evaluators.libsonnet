@@ -67,7 +67,7 @@ function (dataset_reader, data_iterator) {
         "type": "standard_evaluator",
         "formalism" : "AMR-2015",
         "system_input" : "data/AMR/2015/test/test.amconll",
-        "gold_file": "test",
+        "gold_file": "data/AMR/2015/test/goldAMR.txt",
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader,
@@ -83,7 +83,7 @@ function (dataset_reader, data_iterator) {
         "type": "standard_evaluator",
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/test/test.amconll",
-        "gold_file": "test",
+        "gold_file": "data/AMR/2017/test/goldAMR.txt",
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader,

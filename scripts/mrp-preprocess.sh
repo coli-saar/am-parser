@@ -74,7 +74,11 @@ devMinuteLimit=20                                            # limit for geneati
 threads=1
 memLimit=6G
 posTagger="resources/english-bidirectional-distsim.tagger"
-nerTagger="resources/english.conll.4class.distsim.crf.ser.gz"
+
+#if you want to use Illinois NER (shared task setup), set nerTagger=""
+nerTagger="--stanford-ner-model resources/english.conll.4class.distsim.crf.ser.gz"
+nerTagger=""
+
 PCFG="resources/englishPCFG.txt"
 wordnet="resources/wordnet/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
@@ -147,14 +151,14 @@ echo $testRawCMD >> $log
 eval $testRawCMD
 
 # dev eval input data preprocessing
-devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata $dev_companion >>$log 2>&1" #  --stanford-ner-model $nerTagger
+devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata $dev_companion $nerTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for dev data\n"
 printf "\ngenerating evaluation input (full corpus) for dev data\n" >> $log
 echo $devEvalCMD  >> $log
 eval $devEvalCMD
 
 # test eval input data preprocessing
-testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata $test_companion  >>$log 2>&1" # --stanford-ner-model $nerTagger
+testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata $test_companion $nerTagger >>$log 2>&1"
 printf "\ngenerating evaluation input (full corpus) for test data\n"
 printf "\ngenerating evaluation input (full corpus) for test data\n" >> $log
 echo $testEvalCMD  >> $log
@@ -189,6 +193,32 @@ eval $emptyDevAmconllCMD
 emptyTestAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $testNNdata -o $outputPath --prefix test $test_companion >>$log 2>&1"
 printf "\nGenerate empty amconll test data\n"
 eval $emptyTestAmconllCMD
+
+
+#create correct directory structure
+mkdir -p $outputPath/output/train
+mkdir -p $outputPath/output/dev
+mkdir -p $outputPath/output/gold-dev
+mkdir -p $outputPath/output/test
+
+mv $outputPath/train.amconll "$outputPath/output/train/"
+mv $outputPath/gold-dev.amconll "$outputPath/output/gold-dev/"
+mv $outputPath/dev.amconll "$outputPath/output/dev/"
+mv $outputPath/test.amconll "$outputPath/output/test/"
+
+#gold AMRs, create an empty line after each graph
+sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/alto/dev/raw.amr" > "$outputPath/output/dev/goldAMR.txt"
+sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/nnData/test/goldAMR.txt" > "$outputPath/output/test/goldAMR.txt"
+
+
+
+#collect lookup data:
+mkdir -p "$outputPath/output/lookup"
+
+for file in nameLookup.txt nameTypeLookup.txt wikiLookup.txt words2labelsLookup.txt
+do
+    cp "$outputPath/alto/train/$file" "$outputPath/output/lookup/$file"
+done
 
 
 
