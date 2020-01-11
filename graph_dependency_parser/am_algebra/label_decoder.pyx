@@ -30,8 +30,11 @@ class AgendaItem:
         self.local_types = local_types
         self.subtree = subtree
         self.is_art_root = is_art_root
+
+        self.already_applied = False #did we use apply already?
+
     def __str__(self):
-        return "AgendaItem({},{},{},{},{},{})".format(self.index,self.unproc_children,self.type,self.score,self.local_types,self.subtree)
+        return "AgendaItem({},{},{},{},{},{},{})".format(self.index,self.unproc_children,self.type,self.score,self.local_types,self.subtree, self.already_applied)
     def __repr__(self):
         return str(self)
     def __le__(self,other):
@@ -254,8 +257,12 @@ class AMDecoder:
                 for unprocessed in it.unproc_children:
                     for child_t, child_score in chart[unprocessed].values():
                         for op,source in cache.combinations(it.type, child_t):
-                            if it.is_art_root and op =="MOD_": #at ART-ROOT: only allow APP operations with sources starting with art-snt
-                                continue
+                            if op == "MOD_":
+                                if it.is_art_root: #at ART-ROOT: only allow APP operations with sources starting with art-snt
+                                    continue
+                                elif it.already_applied: #we don't have to try that because we can first perform all MOD than all APP
+                                    continue
+
                             counter += 1
                             if op+source in self.rel2i:
                                 edgescore = label_scores[unprocessed-1,self.rel2i[op+source]]
@@ -265,11 +272,18 @@ class AMDecoder:
                             #print(it.index, unprocessed,op+source,"mit Score",edgescore)
                             new_type = it.type
                             sub_bp = backpointer[unprocessed][child_t]
-                            if op == "APP_": #type only changes for apply operations
+                            op_is_APP = op == "APP_"
+
+                            if op_is_APP: #type only changes for apply operations
                                 new_type = it.type.perform_apply(source)
                                 assert new_type is not None, "applying seems disallowed although the operation came from the CombinationCache"
 
                             new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)],it.is_art_root)
+
+                            if op_is_APP:
+                                new_it.already_applied = True
+                            else:
+                                new_it.already_applied = it.already_applied
 
                             if len(new_it.unproc_children) == 0:
                                 if new_it.index not in chart:
