@@ -10,7 +10,7 @@ from graph_dependency_parser.components.cle import get_head_dict
 
 from time import time
 
-#import pyximport; pyximport.install()
+import pyximport; pyximport.install()
 #import graph_dependency_parser.am_algebra.amtypes as amtypes
 import graph_dependency_parser.am_algebra.new_amtypes as new_amtypes
 
@@ -56,6 +56,8 @@ class AMDecoder:
         """
         print("Using new type implementation")
         self.totyp = dict() #look up table to avoid parsing the same type from string to python object twice
+        self.apply_cache = dict() # Dict[Tuple[new_amtypes.AMType, str], new_amtypes.AMType]
+
         self.output_file = output_file
         self.i2rel = i2edgelabel
         self.rel2i = { rel : i for i, rel in enumerate(i2edgelabel)}
@@ -144,7 +146,14 @@ class AMDecoder:
             return self.totyp[string]
         self.totyp[string] = new_amtypes.AMType.parse_str(string)
         return self.totyp[string]
-    
+
+    def perform_apply(self, typ : new_amtypes.AMType, source : str) -> new_amtypes.AMType:
+        tupl = (typ, source)
+        if tupl in self.apply_cache:
+            return self.apply_cache[tupl]
+        self.apply_cache[tupl] = typ.perform_apply(source)
+        return self.apply_cache[tupl]
+
     def get_items(self, entry, kbest):
         """
             Creates a list of Items for a (leaf) entry. Assumes entry to have a list called supertags where the tags are sorted in descending order by score.
@@ -275,7 +284,7 @@ class AMDecoder:
                             op_is_APP = op == "APP_"
 
                             if op_is_APP: #type only changes for apply operations
-                                new_type = it.type.perform_apply(source)
+                                new_type = self.perform_apply(it.type, source) #it.type.perform_apply(source)
                                 assert new_type is not None, "applying seems disallowed although the operation came from the CombinationCache"
 
                             new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)],it.is_art_root)

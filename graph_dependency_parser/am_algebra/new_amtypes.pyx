@@ -7,6 +7,7 @@ Created on Tue Dec  3 20:47:47 2019
 @author: matthias
 """
 
+import pyximport; pyximport.install()
 from graph_dependency_parser.am_algebra.dag import DiGraph
 
 from typing import Set, Dict, Tuple, List, Iterator, Optional
@@ -23,7 +24,7 @@ def extract_constituents(depths) -> List[Tuple[int,int]]:
     that is, identify chunks of the form 0 1 * 0
     """
     start = 0
-    ret : List[Tuple[int,int]] = []
+    ret  = [] # List[Tuple[int,int]]
     for i,d in enumerate(depths):
         if d == 0 and i+1 < len(depths) and depths[i+1] == 1:
             start = i+1
@@ -35,7 +36,7 @@ def extract_constituents(depths) -> List[Tuple[int,int]]:
 UNIFY_PATTERN : re.Pattern = re.compile("(.+)_UNIFY_(.+)")
 UNIFY = "_UNIFY_"
 
-class AMType(DiGraph[str]):
+class AMType(DiGraph):
     
     def __init__(self):
         super().__init__()
@@ -59,7 +60,7 @@ class AMType(DiGraph[str]):
                 return False
 
         for node in self.nodes():
-            seen : Set[str] = set()
+            seen = set() # : Set[str]
             for _, label in self.outgoing_edges(node):
                 if label in seen:
                     return False
@@ -211,8 +212,7 @@ class AMType(DiGraph[str]):
                 if source_r is None or target_r is None:
                     return None
                 ret.add_edge(source_r,target_r,label=label)
-                
-                    
+
         ret.process_updates()
         return ret
     
@@ -308,8 +308,12 @@ class AMType(DiGraph[str]):
         
         if self.is_bot != other.is_bot:
             return False
-        
+
         return super().__eq__(other)
+
+    def __hash__(self) -> int:
+
+        return super().__hash__()
         
 
     def perform_apply(self, source : str) -> Optional["AMType"]:
@@ -344,11 +348,11 @@ class AMType(DiGraph[str]):
         g.origins = set(self.origins)
         g.edges = { from_ : dict(self.edges[from_]) for from_ in self.edges.keys()}
         g.is_bot = self.is_bot
-        
+
+        assert hash(g) == hash(self)
+
         return g
-    
-    def __hash__(self) -> int:
-        return sum((hash(node) % 90000000) * (1 + int(node in self.origins)) for node in self.edges)
+
 
         
 
