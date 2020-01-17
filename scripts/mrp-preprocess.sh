@@ -228,6 +228,9 @@ printf "\neverything is in $outputPath\n"
 
 
 
+#TODO:
+#convert mrp format to penman
+#dev.mrp needs to get moved to output directory (dev/ and gold-dev/?)
 
 
 
