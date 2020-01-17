@@ -35,7 +35,7 @@ parser = argparse.ArgumentParser(description="Run the neural network to get scor
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
 parser.add_argument('formalism', type=str, help='name of formalism (must be included in the model)')
 parser.add_argument('input_file', type=str, help='path to the amconll file containing the sentences to be processed')
-parser.add_argument('output_path', type=str, help='path to where output shall be written (creates scores.zip in that directory)')
+parser.add_argument('output_path', type=str, help='path and name of zip file where to store the scores.')
 
 cuda_device = parser.add_mutually_exclusive_group(required=False)
 cuda_device.add_argument('--cuda-device',
@@ -141,7 +141,7 @@ top_k_supertags = 15
 bot_id = model.vocab.get_token_index(AMSentence.get_bottom_supertag(),namespace=formalism+"_supertag_labels")
 
 
-with zipfile.ZipFile(args.output_path + "/scores.zip","w",compression=zipfile.ZIP_DEFLATED, compresslevel=7) as myzip:
+with zipfile.ZipFile(args.output_path,"w",compression=zipfile.ZIP_DEFLATED, compresslevel=7) as myzip:
     tagprobs = []
     modified_conll_sentences = []
     with myzip.open("opProbs.txt","w") as fp:
@@ -161,10 +161,11 @@ with zipfile.ZipFile(args.output_path + "/scores.zip","w",compression=zipfile.ZI
             edge_label_scores = np.transpose(pred["full_label_logits"],[1,0,2]) #shape (sent len+1, sent len+1, num edge labels). Semantics: from, to, label index
             edge_label_scores = F.log_softmax(torch.from_numpy(edge_label_scores),dim=2).numpy() #normalize over edge labels
 
+            modified_sent = conll_sentences[sentence_id].set_heads(pred["predicted_heads"])
             if "lexlabels" in pred:
-                modified_conll_sentences.append(conll_sentences[sentence_id].set_lexlabels(pred["lexlabels"]))
+                modified_sent = modified_sent.set_lexlabels(pred["lexlabels"])
 
-            modified_conll_sentences.append(conll_sentences[sentence_id].set_heads(pred["predicted_heads"]))
+            modified_conll_sentences.append(modified_sent)
 
             #ja = False
             #if attributes["id"] == "#22048021":
