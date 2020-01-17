@@ -78,7 +78,8 @@ class AMSentence:
 
     def set_heads(self, heads : List[int]) -> "AMSentence":
         assert len(heads) == len(self.words), f"number of heads must agree with number of words but got {len(heads)} and {len(self.words)}"
-        assert all( h >= 0 and h < len(self.words) for h in heads), f"heads must be in range 0 to {len(self.words)} but got heads {heads}"
+        assert all( h >= 0 and h <= len(self.words) for h in heads), f"heads must be in range 0 to {len(self.words)} but got heads {heads}"
+
         return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, word.lexlabel,
                                  word.typ, heads[i], word.label, word.aligned, word.range)
                            for i,word in enumerate(self.words)],self.attributes)
