@@ -88,6 +88,8 @@ fi
 if [ "$type" = "" ]; then
     printf "\n No output graphbank type given. Please use -T option.\n"
     exit 1
+elif [ "$type" = "AMR" ]; then
+    type="AMR-2017" # to make it compatible with how we referred to this in the python code
 fi
 
 if [ "$output" = "" ]; then
