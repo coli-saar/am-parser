@@ -5,7 +5,7 @@
 # default file paths
 defaultmodel="downloaded_models/full_model.tar.gz"
 mkdir -p downloaded_models
-jar="am-tools-all.jar"
+jar="am-tools.jar"
 
 # Documenting parameters:
 usage="Takes . \n\n
@@ -73,7 +73,7 @@ if [ -f "$jar" ]; then
     echo "jar file found at $jar"
 else
     echo "jar file not found at $jar, downloading it!"
-    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools-all.jar
+    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools.jar
 fi
 
 

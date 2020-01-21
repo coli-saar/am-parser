@@ -49,7 +49,7 @@ evalDevAltodata=$outputPath/alto/evalDev/
 testAltodata=$outputPath/alto/test/
 
 #alto="alto-2.3-SNAPSHOT-jar-with-dependencies.jar"
-alto="am-tools-all.jar"
+alto="am-tools.jar"
 
 # a lot of scripts live here so let's store it as a variable in case it changes
 datascriptPrefix="de.saar.coli.amrtagging.formalisms.amr.tools.datascript"
