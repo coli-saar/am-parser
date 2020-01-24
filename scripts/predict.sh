@@ -15,7 +15,7 @@ Required arguments: \n
 \n\t\t     For EDS, make this the test.amr file that contains the gold graphs in PENMAN notation.
 \n\t\t     For AMR, use the directory which contains all the test corpus files (e.g. data/amrs/split/test in the official AMR corpora)
 \n\t     -o  output folder: where the results will be stored.
-\n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD (EDS support will be added later; this raw text version does not support AMR).
+\n\t     -T  graph formalism of input file / that should be parsed to. Possible options: DM, PAS, PSD, AMR-2017 and EDS.
 
 \noptions:
 
@@ -119,6 +119,7 @@ elif [ "$type" = "EDS" ]; then
 elif [ "$type" = "AMR-2017" ]; then
     bash scripts/setup_AMR.sh
     bash scripts/preprocess_AMR_test.sh -i $input -o $output -j $jar
+    #also creates goldAMR.txt in $output/
     mv $output/test.amconll $amconll_input
 else
     echo "Graphbank type $type (-T option) not recognized! valid options are DM, PAS, PSD, EDS and AMR."
@@ -148,6 +149,7 @@ elif [ "$type" = "EDS" ]; then
     echo "Smatch score:"
     python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
 elif [ "$type" = "AMR-2017" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll_prediction -o $output
-    bash scripts/eval_AMR.sh $output $jar
+    bash scripts/eval_AMR_new.sh $amconll_prediction $output $jar
+    bash scripts/smatch_AMR.sh
+
 fi

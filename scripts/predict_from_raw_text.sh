@@ -130,26 +130,5 @@ elif [ "$type" = "PSD" ]; then
 elif [ "$type" = "EDS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
 elif [ "$type" = "AMR-2017" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus -c $amconll -o "$output"
-
-    amconllabsolute=$(readlink -f "$amconll")
-    outputabsolute=$(readlink -f "$output")
-    pushd scripts/
-    #Extract sentences.txt
-    python extract_sentences.py $amconllabsolute $outputabsolute
-    popd
-
-    #Relabeling:
-    lookup="downloaded_models/lookup/lookupdata17/"
-    wordnet_path="downloaded_models/wordnet3.0/dict/"
-    echo "relabelling with threshold 10"
-    # run the relabeller
-    java -Xmx2G -cp "$jar" de.saar.coli.amrtagging.formalisms.amr.tools.Relabel "$output" "$lookup" "$wordnet_path" 10
-
-    echo "final post-processing"
-
-    # now we have a relabelled.txt in this directory
-    # do more post-processing
-    sed -E 's/\(u_[0-9]+ \/ ([-+0-9]+)\)/\1/g' $output/relabeled.txt | sed -E 's/\(explicitanon[0-9]+ \/ ([^"()]+)\)/"\1"/g' | sed -E 's/\(explicitanon[0-9]+ \/ ("[^"]+")\)/\1/g' | sed -E 's/"([-+0-9]+)"/\1/g' > $output/$type.txt
-
+    bash scripts/eval_AMR_new.sh $amconll $output $jar
 fi
