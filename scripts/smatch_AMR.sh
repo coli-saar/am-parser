@@ -1,5 +1,5 @@
 #!/bin/bash
-output=$2 # directory with goldAMR.txt and parserOut.txt
+output=$1 # directory with goldAMR.txt and parserOut.txt
 
 #run smatch:
 # add newlines to goldAMR.txt
