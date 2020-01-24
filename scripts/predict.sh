@@ -150,6 +150,6 @@ elif [ "$type" = "EDS" ]; then
     python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
 elif [ "$type" = "AMR-2017" ]; then
     bash scripts/eval_AMR_new.sh $amconll_prediction $output $jar
-    bash scripts/smatch_AMR.sh
+    bash scripts/smatch_AMR.sh $output
 
 fi
