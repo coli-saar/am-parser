@@ -17,6 +17,8 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 
+## Pretrained models
+
 ### Reproducing our experiment results
 
 From the main directory, run `bash scripts/predict.sh` with the following arguments (or with -h for help):
@@ -29,6 +31,16 @@ For example, say you want to do DM parsing and `INPUT` is the path to your sdp f
 bash scripts/predict.sh -i INPUT -T DM -o example/
 ``` 
 will create a file `DM.sdp` in the `example` folder with graphs for the sentences in `INPUT`, as well as print evaluation scores compared to the gold graphs in `INPUT`.
+
+With this pre-trained model you should get (labeled) F-scores close to the following on the test sets:
+
+| DM id | DM ood | PAS id| PAS ood| PSD id | PSD ood | EDS (Smatch) | EDS (EDM) | AMR 2017 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 94.1 | 90.5 | 94.9 | 92.9 | 81.8 | 81.6 | 90.4  | 85.2 | 76.3 |
+The F-score is considerably better than published in the paper and stems from fixing bugs in the postprocessing.
+Please note that these evaluation scores were obtained __without__ the `-f` option 
+and your results might differ slightly depending on your CPU because the parser uses a timeout. This is particularly relevant for AMR. We used Intel Xeon E5-2687W v3 processors.
+
 
 ### Getting graphs from raw text
 From the main directory, run `bash scripts/predict_from_raw_text.sh` with the following arguments (or with -h for help):
