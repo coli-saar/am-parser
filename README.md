@@ -37,6 +37,7 @@ With this pre-trained model you should get (labeled) F-scores close to the follo
 | DM id | DM ood | PAS id| PAS ood| PSD id | PSD ood | EDS (Smatch) | EDS (EDM) | AMR 2017 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 94.1 | 90.5 | 94.9 | 92.9 | 81.8 | 81.6 | 90.4  | 85.2 | 76.3 |
+
 The F-score is considerably better than published in the paper and stems from fixing bugs in the postprocessing.
 Please note that these evaluation scores were obtained __without__ the `-f` option 
 and your results might differ slightly depending on your CPU because the parser uses a timeout. This is particularly relevant for AMR. We used Intel Xeon E5-2687W v3 processors.
