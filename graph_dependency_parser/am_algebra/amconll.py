@@ -1,4 +1,3 @@
-from collections import Counter, OrderedDict, UserList
 
 class ConllEntry:
     def __init__(self, id, form, replacement, lemma, pos, ne, delex_supertag, lex_label, typ, parent_id, edge_label, aligned=True, token_range=None):
