@@ -34,6 +34,8 @@ with open(os.path.join(opts.direc,"1_"+os.path.basename(opts.file1)),"w") as of1
 
 with open(os.path.join(opts.direc, "2_"+os.path.basename(opts.file2)), "w") as of2:
     for id in ids:
+        if sents1[id].get_tokens(shadow_art_root=False) != sents2[id].get_tokens(shadow_art_root=False) :
+            continue
         for i,e in enumerate(sents2[id]):
             of2.write(str(i+1)+"\t"+"\t".join([e.token, e.lexlabel, e.fragment, e.typ,"_",str(e.head),e.label,"_","_"]))
             of2.write("\n")
