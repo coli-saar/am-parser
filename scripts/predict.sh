@@ -63,7 +63,7 @@ if [ -f "$model" ]; then
 else
     if [ "$model" = "$defaultmodel" ]; then
         echo "model not found at default model path. Downloading it!"
-        wget -O "$defaultmodel" https://coli-saar-data.s3.eu-central-1.amazonaws.com/full_model.tar.gz
+        wget -O "$defaultmodel" http://www.coli.uni-saarland.de/projects/amparser/full_model.tar.gz
     else
         echo "model not found at $model. Please check the -m parameter"
     fi
@@ -73,7 +73,7 @@ if [ -f "$jar" ]; then
     echo "jar file found at $jar"
 else
     echo "jar file not found at $jar, downloading it!"
-    wget -O "$jar" https://coli-saar-data.s3.eu-central-1.amazonaws.com/am-tools.jar
+    wget -O "$jar" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
 fi
 
 

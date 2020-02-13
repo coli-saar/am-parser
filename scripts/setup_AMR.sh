@@ -48,11 +48,11 @@ if [ -f "$lookup_check" ]; then
     echo "Lookup data found at $lf. (If there are problems with missing files in that folder, delete it and run this script again.)"
 else
     # 2015 dataset
-    wget https://coli-saar-data.s3.eu-central-1.amazonaws.com/lookupdata15.zip -O $lf/lookupdata15.zip
+    wget http://www.coli.uni-saarland.de/projects/amparser/lookupdata15.zip -O $lf/lookupdata15.zip
     unzip $lf/lookupdata15.zip -d $lf
     rm $lf/lookupdata15.zip
     # 2017 dataset
-    wget https://coli-saar-data.s3.eu-central-1.amazonaws.com/lookupdata17.zip -O $lf/lookupdata17.zip
+    wget http://www.coli.uni-saarland.de/projects/amparser/lookupdata17.zip -O $lf/lookupdata17.zip
     unzip $lf/lookupdata17.zip -d $lf
     rm $lf/lookupdata17.zip
 fi
