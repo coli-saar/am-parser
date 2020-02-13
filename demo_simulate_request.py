@@ -8,7 +8,7 @@ async def tcp_echo_client(message, loop):
     print('Send: %r' % message)
     writer.write(message.encode())
 
-    data = await reader.read(5000)
+    data = await reader.read(10_000)
     print('Received: %r' % data.decode())
 
     print('Close the socket')
@@ -18,7 +18,7 @@ async def tcp_echo_client(message, loop):
 message = """
 {
 	"sentence": "the boy wants to sleep.",
-	"formats": ["AMR-2017", "DM", "PAS", "PSD", "EDS"]
+	"formats": ["AMR-2017", "EDS"]
 }
 """
 loop = asyncio.get_event_loop()

@@ -1,5 +1,5 @@
 import os
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, TemporaryFile
 from typing import Dict, Any
 import logging
 import json
@@ -43,7 +43,12 @@ parser.add_argument('-t',"--threads",
 parser.add_argument("--port",
                     type=int,
                     default=8888,
-                    help='number of threads')
+                    help='Port to be used')
+
+parser.add_argument("--mtool",
+                    type=str,
+                    default=None,
+                    help='Path to main.py of mtool, for visualizations of the graphs.')
 
 parser.add_argument('--give_up',
                        type=float,
@@ -68,14 +73,6 @@ parser.add_argument('-o', '--overrides',
                        type=str,
                        default="",
                        help='a JSON structure used to override the experiment configuration')
-
-parser.add_argument('--embedding-sources-mapping',
-                       type=str,
-                       default="",
-                       help='a JSON dict defining mapping from embedding module path to embedding'
-                       'pretrained-file used during training. If not passed, and embedding needs to be '
-                       'extended, we will try to use the original file paths used during training. If '
-                       'they are not available we will use random vectors for embedding extension.')
 
 args = parser.parse_args()
 if args.v:
@@ -129,30 +126,44 @@ def postprocess(filename, output_path, formalism):
     fi
     """
     o_fil = ""
+    format = ""
     if formalism == "DM" or formalism == "PAS":
         os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c {filename} -o {filename}_o")
         o_fil = f"{filename}_o.sdp"
+        format = "dm"
 
     elif formalism == "PSD":
         os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c {filename} -o {filename}_o")
         o_fil = f"{filename}_o.sdp"
+        format = "psd"
 
     elif formalism == "EDS":
         os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c {filename} -o {filename}_o")
         o_fil = f"{filename}_o.amr.txt"
+        format = "amr"
 
     elif "AMR" in formalism:
         os.system(f"bash scripts/eval_AMR_new.sh {filename} {output_path} {args.am_tools}")
-        # python /local/mlinde/mtool/main.py --normalize edges --read amr --write dot parserOut.txt o.dot
         #creates output_path/parserOut.txt
         o_fil = f"{output_path}/parserOut.txt"
+        format = "amr"
+
     else:
-        return f"ERROR: formalism {formalism} not known."
+        return f"ERROR: formalism {formalism} not known.", ""
 
     with open(o_fil) as f:
         text = f.read()
 
-    return text
+    #Create svg file.
+    svg = ""
+    if args.mtool:
+        with TemporaryDirectory() as direc:
+            os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot")
+            os.system(f"dot -Tsvg {direc}/o.dot -o {direc}/o.svg")
+            with open(f"{direc}/o.svg") as f:
+                svg = f.read()
+
+    return text, svg
 
 
 
@@ -166,11 +177,19 @@ async def handle_client(reader, writer):
     words = spacy_tokenize(sentence)
 
     with TemporaryDirectory() as direc:
-        ret_val = {"sentence" : sentence, "parses" : { f : {} for f in formalisms}}
+        ret_val = {"sentence" : sentence, "parses" : { f : {} for f in formalisms}, "errors" : []}
 
         for formalism in formalisms:
             if formalism not in model.tasks:
-                print("Model was not trained on",formalism,"but on", model.tasks)
+                err = f"Model was not trained on '{formalism}' but on {model.tasks.keys()}"
+                print(err)
+                ret_val["errors"].append(err)
+                continue
+
+            if formalism not in requires_art_root:
+                err = f"Server doesn't know how to handle '{formalism}' although the model was trained on it."
+                print(err)
+                ret_val["errors"].append(err)
                 continue
 
             #Create input and save to file:
@@ -190,8 +209,10 @@ async def handle_client(reader, writer):
                 ret_val["parses"][formalism]["amdep"] = f.read()
 
             #Evaluate to graph
-            raw_graph = postprocess(output_filename, direc, formalism)
+            raw_graph, svg = postprocess(output_filename, direc, formalism)
             ret_val["parses"][formalism]["graph"] = raw_graph
+            if svg:
+                ret_val["parses"][formalism]["svg"] = svg
 
     writer.write(bytes(json.dumps(ret_val),"utf8"))
     await writer.drain()
