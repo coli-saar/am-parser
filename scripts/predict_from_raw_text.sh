@@ -130,5 +130,6 @@ elif [ "$type" = "PSD" ]; then
 elif [ "$type" = "EDS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
 elif [ "$type" = "AMR-2017" ]; then
+    bash scripts/setup_AMR.sh
     bash scripts/eval_AMR_new.sh $amconll $output $jar
 fi
