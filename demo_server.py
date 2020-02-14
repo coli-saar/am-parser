@@ -1,4 +1,5 @@
 import os
+import traceback
 from tempfile import TemporaryDirectory, TemporaryFile
 from typing import Dict, Any
 import logging
@@ -170,49 +171,57 @@ def postprocess(filename, output_path, formalism):
 async def handle_client(reader, writer):
     request = (await reader.read(255)).decode('utf8') #read 255 characters
     print("Request",request)
-    json_req = json.loads(request)
-    print("-- as json",json_req)
-    sentence = json_req["sentence"]
-    formalisms = json_req["formats"]
-    words = spacy_tokenize(sentence)
+    ret_val = {"errors" : []}
+    try:
+        json_req = json.loads(request)
+        print("-- as json",json_req)
+        sentence = json_req["sentence"]
+        formalisms = json_req["formats"]
+        words = spacy_tokenize(sentence)
 
-    with TemporaryDirectory() as direc:
-        ret_val = {"sentence" : sentence, "parses" : { f : {} for f in formalisms}, "errors" : []}
+        with TemporaryDirectory() as direc:
+            ret_val["sentence"] = sentence
+            ret_val["parses"] = { f : {} for f in formalisms}
 
-        for formalism in formalisms:
-            if formalism not in model.tasks:
-                err = f"Model was not trained on '{formalism}' but on {model.tasks.keys()}"
-                print(err)
-                ret_val["errors"].append(err)
-                continue
+            for formalism in formalisms:
+                if formalism not in model.tasks:
+                    err = f"Model was not trained on '{formalism}' but on {list(model.tasks.keys())}"
+                    print(err)
+                    ret_val["errors"].append(err)
+                    continue
 
-            if formalism not in requires_art_root:
-                err = f"Server doesn't know how to handle '{formalism}' although the model was trained on it."
-                print(err)
-                ret_val["errors"].append(err)
-                continue
+                if formalism not in requires_art_root:
+                    err = f"Server doesn't know how to handle '{formalism}' although the model was trained on it."
+                    print(err)
+                    ret_val["errors"].append(err)
+                    continue
 
-            #Create input and save to file:
-            sentences = [from_raw_text(sentence.rstrip("\n"),words,requires_art_root[formalism], dict(),requires_ne_merging[formalism])]
-            temp_path = direc+f"/sentences_{formalism}.amconll"
-            output_filename = direc+"/parsed_"+formalism+".amconll"
+                #Create input and save to file:
+                sentences = [from_raw_text(sentence.rstrip("\n"), words, requires_art_root[formalism], dict(), requires_ne_merging[formalism])]
+                temp_path = direc+f"/sentences_{formalism}.amconll"
+                output_filename = direc+"/parsed_"+formalism+".amconll"
 
-            with open(temp_path,"w") as f:
-                for s in sentences:
-                    f.write(str(s))
-                    f.write("\n\n")
+                with open(temp_path,"w") as f:
+                    for s in sentences:
+                        f.write(str(s))
+                        f.write("\n\n")
 
-            predictor.parse_and_save(formalism, temp_path, output_filename)
+                predictor.parse_and_save(formalism, temp_path, output_filename)
 
-            #Read AM dependency tree
-            with open(output_filename) as f:
-                ret_val["parses"][formalism]["amdep"] = f.read()
+                #Read AM dependency tree
+                with open(output_filename) as f:
+                    ret_val["parses"][formalism]["amdep"] = f.read()
 
-            #Evaluate to graph
-            raw_graph, svg = postprocess(output_filename, direc, formalism)
-            ret_val["parses"][formalism]["graph"] = raw_graph
-            if svg:
-                ret_val["parses"][formalism]["svg"] = svg
+                #Evaluate to graph
+                raw_graph, svg = postprocess(output_filename, direc, formalism)
+                ret_val["parses"][formalism]["graph"] = raw_graph
+                if svg:
+                    ret_val["parses"][formalism]["svg"] = svg
+    except BaseException as ex:#
+        err = "".join(traceback.TracebackException.from_exception(ex).format_exception_only())
+        ret_val["errors"].append(err)
+        print("Ignoring error:")
+        print(err)
 
     writer.write(bytes(json.dumps(ret_val),"utf8"))
     await writer.drain()
