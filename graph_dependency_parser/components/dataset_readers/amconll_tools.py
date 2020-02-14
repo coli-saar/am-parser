@@ -122,6 +122,25 @@ class AMSentence:
     def __len__(self):
         return len(self.words)
 
+    def to_dot(self):
+        from .dot_tools import penman_to_dot
+        r = []
+        index_to_node_name = dict()
+        for i,word in enumerate(self.words):
+            if word.fragment == "_":
+                continue
+
+            cluster, a_node = penman_to_dot(word.fragment, word.lexlabel, word.lemma, word.token, word.replacement, word.pos_tag, "cl"+str(i)+"_")
+            index_to_node_name[i] = a_node
+            r.append("subgraph cluster"+str(i)+" { "+cluster+' label="'+word.token+'\\n'+word.typ+ '";}\n')
+
+        for i, word in enumerate(self.words):
+            head = word.head
+            if head != 0:
+                r.append(index_to_node_name[head-1] +" -> " + index_to_node_name[i] + " [ltail=cluster"+ str(head-1)+", lhead=cluster"+str(i)+', label="' + word.label+ '"];\n')
+
+        return "digraph { compound=true; \n" +"\n".join(r) +"}"
+
 
 def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes: Dict, contract_ne: bool) -> AMSentence:
     """

@@ -1,5 +1,8 @@
 import os
+import sys
+import time
 import traceback
+from io import StringIO
 from tempfile import TemporaryDirectory, TemporaryFile
 from typing import Dict, Any
 import logging
@@ -114,6 +117,22 @@ requires_ne_merging = {"DM" : False, "PAS": False, "PSD": False, "EDS" : False, 
 import asyncio
 import json
 
+if args.mtool:
+    # Load mtool codecs
+    dname = os.path.dirname(os.path.abspath(args.mtool))
+    sys.path.append(dname)
+    import codec.amr
+    import codec.sdp
+
+    def get_mtool_graph(g, format):
+        stream = StringIO(g)
+        if format == "dm" or format=="psd":
+            r, _ = next(codec.sdp.read(stream, framework = format))
+        elif format == "amr":
+            r, _ = next(codec.amr.read(stream))
+        r.normalize("edges")
+        return r
+
 def postprocess(filename, output_path, formalism):
     """
     if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
@@ -128,6 +147,7 @@ def postprocess(filename, output_path, formalism):
     """
     o_fil = ""
     format = ""
+    #Evaluation to graph takes around 0.38s for a simple sentence, for AMR, it takes a little longer, like 0.44s
     if formalism == "DM" or formalism == "PAS":
         os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c {filename} -o {filename}_o")
         o_fil = f"{filename}_o.sdp"
@@ -152,6 +172,7 @@ def postprocess(filename, output_path, formalism):
     else:
         return f"ERROR: formalism {formalism} not known.", ""
 
+    # The rest takes about 0.38s for a simple sentence on tony-1:
     with open(o_fil) as f:
         text = f.read()
 
@@ -159,11 +180,13 @@ def postprocess(filename, output_path, formalism):
     svg = ""
     if args.mtool:
         with TemporaryDirectory() as direc:
-            os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot")
+            #os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot") # takes long, like 0.26s
+            graph = get_mtool_graph(text, format)
+            with open(direc+"/o.dot","w") as f:
+                graph.dot(f)
             os.system(f"dot -Tsvg {direc}/o.dot -o {direc}/o.svg")
             with open(f"{direc}/o.svg") as f:
                 svg = f.read()
-
     return text, svg
 
 
@@ -172,6 +195,7 @@ async def handle_client(reader, writer):
     request = (await reader.read(255)).decode('utf8') #read 255 characters
     print("Request",request)
     ret_val = {"errors" : []}
+    t1 = time.time()
     try:
         json_req = json.loads(request)
         print("-- as json",json_req)
@@ -212,6 +236,15 @@ async def handle_client(reader, writer):
                 with open(output_filename) as f:
                     ret_val["parses"][formalism]["amdep"] = f.read()
 
+                #...and as svg:
+                with open(output_filename) as f:
+                    amdep = next(parse_amconll(f))
+                    with open(direc+"/amdep.dot","w") as g:
+                        g.write(amdep.to_dot())
+                    os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
+                    with open(direc+"/amdep.svg") as g:
+                        ret_val["parses"][formalism]["amdep-svg"] = g.read()
+
                 #Evaluate to graph
                 raw_graph, svg = postprocess(output_filename, direc, formalism)
                 ret_val["parses"][formalism]["graph"] = raw_graph
@@ -226,6 +259,8 @@ async def handle_client(reader, writer):
     writer.write(bytes(json.dumps(ret_val),"utf8"))
     await writer.drain()
     writer.close()
+    t2 = time.time()
+    print("Handling request took", t2-t1)
 
 loop = asyncio.get_event_loop()
 loop.create_task(asyncio.start_server(handle_client, 'localhost', args.port))
