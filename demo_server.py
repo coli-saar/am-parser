@@ -217,7 +217,7 @@ def postprocess(filename, output_path, formalism):
     format = ""
     if formalism in {"DM", "PSD", "PAS"}:
         format = "dm"
-    if formalism == "EDS":
+    elif formalism == "EDS":
         format = "amr"
     elif "AMR" in formalism:
         format = "amr"
