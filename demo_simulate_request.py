@@ -8,7 +8,7 @@ async def tcp_echo_client(message, loop):
     print('Send: %r' % message)
     writer.write(message.encode())
 
-    data = await reader.read(10_000)
+    data = await reader.read(40_000)
     print('Received: %r' % data.decode())
 
     print('Close the socket')

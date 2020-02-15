@@ -23,7 +23,8 @@ from graph_dependency_parser.graph_dependency_parser import GraphDependencyParse
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
+                    level=logging.INFO)  # turn on logging.
 
 import graph_dependency_parser.graph_dependency_parser
 import graph_dependency_parser.important_imports
@@ -36,13 +37,13 @@ parser.add_argument('archive_file', type=str, help='path to an archived trained 
 parser.add_argument('am_tools', type=str, help='path to am-tools.jar')
 
 parser.add_argument('-k',
-                       type=int,
-                       default=6,
-                       help='number of supertags to be used')
-parser.add_argument('-t',"--threads",
-                       type=int,
-                       default=1,
-                       help='number of threads')
+                    type=int,
+                    default=6,
+                    help='number of supertags to be used')
+parser.add_argument('-t', "--threads",
+                    type=int,
+                    default=1,
+                    help='number of threads')
 
 parser.add_argument("--port",
                     type=int,
@@ -54,14 +55,24 @@ parser.add_argument("--mtool",
                     default=None,
                     help='Path to main.py of mtool, for visualizations of the graphs.')
 
+parser.add_argument("--lookup",
+                    type=str,
+                    default="downloaded_models/lookup/lookupdata17/",
+                    help='Path to AMR-2017 lookup data.')
+
+parser.add_argument("--wordnet",
+                    type=str,
+                    default="downloaded_models/wordnet3.0/dict/",
+                    help='Path to wordnet')
+
 parser.add_argument('--give_up',
-                       type=float,
-                       default=1,
-                       help='number of seconds until fixed-tree decoder backs off to k-1')
+                    type=float,
+                    default=1,
+                    help='number of seconds until fixed-tree decoder backs off to k-1')
 parser.add_argument('-v',
-                       action='store_true',
-                       default=False,
-                       help='verbose logging')
+                    action='store_true',
+                    default=False,
+                    help='verbose logging')
 
 cuda_device = parser.add_mutually_exclusive_group(required=False)
 cuda_device.add_argument('--cuda-device',
@@ -70,13 +81,13 @@ cuda_device.add_argument('--cuda-device',
                          help='id of GPU to use (if any)')
 
 parser.add_argument('--weights-file',
-                       type=str,
-                       help='a path that overrides which weights file to use')
+                    type=str,
+                    help='a path that overrides which weights file to use')
 
 parser.add_argument('-o', '--overrides',
-                       type=str,
-                       default="",
-                       help='a JSON structure used to override the experiment configuration')
+                    type=str,
+                    default="",
+                    help='a JSON structure used to override the experiment configuration')
 
 args = parser.parse_args()
 if args.v:
@@ -107,12 +118,10 @@ if validation_dataset_reader_params is not None:
 else:
     dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
 
+predictor = AMconllPredictor(dataset_reader, args.k, args.give_up, args.threads, model=model)
 
-predictor = AMconllPredictor(dataset_reader,args.k,args.give_up, args.threads, model=model)
-
-requires_art_root = {"DM" : True, "PAS": True, "PSD": True, "EDS" : False, "AMR-2015": False, "AMR-2017": False}
-requires_ne_merging = {"DM" : False, "PAS": False, "PSD": False, "EDS" : False, "AMR-2015": True, "AMR-2017": True}
-
+requires_art_root = {"DM": True, "PAS": True, "PSD": True, "EDS": False, "AMR-2015": False, "AMR-2017": False}
+requires_ne_merging = {"DM": False, "PAS": False, "PSD": False, "EDS": False, "AMR-2015": True, "AMR-2017": True}
 
 import asyncio
 import json
@@ -124,14 +133,73 @@ if args.mtool:
     import codec.amr
     import codec.sdp
 
+
     def get_mtool_graph(g, format):
         stream = StringIO(g)
-        if format == "dm" or format=="psd":
-            r, _ = next(codec.sdp.read(stream, framework = format))
+        if format == "dm" or format == "psd":
+            r, _ = next(codec.sdp.read(stream, framework=format))
         elif format == "amr":
             r, _ = next(codec.amr.read(stream))
         r.normalize("edges")
         return r
+
+import jnius_config
+
+jnius_config.set_classpath(".", args.am_tools)
+from jnius import autoclass
+
+
+class AMToolsInterface:
+    def evaluate(self, input_file: str, output_path: str) -> str:
+        raise NotImplementedError()
+
+
+class DMInterface(AMToolsInterface):
+    def __init__(self):
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus")
+
+    def evaluate(self, input_file: str, output_path: str) -> str:
+        save_to = input_file + "_o"
+        self.main.main(["-c", input_file, "-o", save_to])
+        return save_to + ".sdp"
+
+
+class PSDInterface(AMToolsInterface):
+    def __init__(self):
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus")
+
+    def evaluate(self, input_file: str, output_path: str) -> str:
+        save_to = input_file + "_o"
+        self.main.main(["-c", input_file, "-o", save_to])
+        return save_to + ".sdp"
+
+
+class EDSInterface(AMToolsInterface):
+    def __init__(self):
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus")
+
+    def evaluate(self, input_file: str, output_path: str) -> str:
+        save_to = input_file + "_o"
+        self.main.main(["-c", input_file, "-o", save_to])
+        return save_to + ".amr.txt"
+
+
+class AMRInterface(AMToolsInterface):
+    def __init__(self, lookupdata: str, wordnet_path: str):
+        self.lookupdata = lookupdata
+        self.wordnet_path = wordnet_path
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus")
+
+    def evaluate(self, input_file: str, output_path: str) -> str:
+        self.main.main(
+            ["-c", input_file, "-o", output_path, "--relabel", "--wn", self.wordnet_path, "--lookup", self.lookupdata,
+             "--th", "10"])
+        return output_path + "/parserOut.txt"
+
+
+formalism_to_class = {"DM": DMInterface(), "PAS": DMInterface(), "PSD": PSDInterface(), "EDS": EDSInterface(),
+                      "AMR-2017": AMRInterface(args.lookup, args.wordnet)}
+
 
 def postprocess(filename, output_path, formalism):
     """
@@ -145,44 +213,27 @@ def postprocess(filename, output_path, formalism):
         bash scripts/eval_AMR_new.sh $amconll $output $jar
     fi
     """
-    o_fil = ""
+    o_fil = formalism_to_class[formalism].evaluate(filename, output_path)
     format = ""
-    #Evaluation to graph takes around 0.38s for a simple sentence, for AMR, it takes a little longer, like 0.44s
-    if formalism == "DM" or formalism == "PAS":
-        os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c {filename} -o {filename}_o")
-        o_fil = f"{filename}_o.sdp"
+    if formalism in {"DM", "PSD", "PAS"}:
         format = "dm"
-
-    elif formalism == "PSD":
-        os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c {filename} -o {filename}_o")
-        o_fil = f"{filename}_o.sdp"
-        format = "psd"
-
-    elif formalism == "EDS":
-        os.system(f"java -cp {args.am_tools} de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c {filename} -o {filename}_o")
-        o_fil = f"{filename}_o.amr.txt"
+    if formalism == "EDS":
         format = "amr"
-
     elif "AMR" in formalism:
-        os.system(f"bash scripts/eval_AMR_new.sh {filename} {output_path} {args.am_tools}")
-        #creates output_path/parserOut.txt
-        o_fil = f"{output_path}/parserOut.txt"
         format = "amr"
-
     else:
         return f"ERROR: formalism {formalism} not known.", ""
 
-    # The rest takes about 0.38s for a simple sentence on tony-1:
     with open(o_fil) as f:
         text = f.read()
 
-    #Create svg file.
+    # Create svg file.
     svg = ""
     if args.mtool:
         with TemporaryDirectory() as direc:
-            #os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot") # takes long, like 0.26s
+            # os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot") # takes long, like 0.26s
             graph = get_mtool_graph(text, format)
-            with open(direc+"/o.dot","w") as f:
+            with open(direc + "/o.dot", "w") as f:
                 graph.dot(f)
             os.system(f"dot -Tsvg {direc}/o.dot -o {direc}/o.svg")
             with open(f"{direc}/o.svg") as f:
@@ -190,22 +241,24 @@ def postprocess(filename, output_path, formalism):
     return text, svg
 
 
-
 async def handle_client(reader, writer):
-    request = (await reader.read(255)).decode('utf8') #read 255 characters
-    print("Request",request)
-    ret_val = {"errors" : []}
+    request = (await reader.read(4048)).decode('utf8')  # read a maximum of 4048 bytes, that's more than enough
+    print("Request", request)
+    ret_val = {"errors": []}
     t1 = time.time()
     try:
         json_req = json.loads(request)
-        print("-- as json",json_req)
+        print("-- as json", json_req)
         sentence = json_req["sentence"]
+        if len(sentence) > 256:
+            raise ValueError("Your input exceeded the maximal input length")
+
         formalisms = json_req["formats"]
         words = spacy_tokenize(sentence)
 
         with TemporaryDirectory() as direc:
             ret_val["sentence"] = sentence
-            ret_val["parses"] = { f : {} for f in formalisms}
+            ret_val["parses"] = {f: {} for f in formalisms}
 
             for formalism in formalisms:
                 if formalism not in model.tasks:
@@ -220,47 +273,49 @@ async def handle_client(reader, writer):
                     ret_val["errors"].append(err)
                     continue
 
-                #Create input and save to file:
-                sentences = [from_raw_text(sentence.rstrip("\n"), words, requires_art_root[formalism], dict(), requires_ne_merging[formalism])]
-                temp_path = direc+f"/sentences_{formalism}.amconll"
-                output_filename = direc+"/parsed_"+formalism+".amconll"
+                # Create input and save to file:
+                sentences = [from_raw_text(sentence.rstrip("\n"), words, requires_art_root[formalism], dict(),
+                                           requires_ne_merging[formalism])]
+                temp_path = direc + f"/sentences_{formalism}.amconll"
+                output_filename = direc + "/parsed_" + formalism + ".amconll"
 
-                with open(temp_path,"w") as f:
+                with open(temp_path, "w") as f:
                     for s in sentences:
                         f.write(str(s))
                         f.write("\n\n")
 
                 predictor.parse_and_save(formalism, temp_path, output_filename)
 
-                #Read AM dependency tree
+                # Read AM dependency tree
                 with open(output_filename) as f:
                     ret_val["parses"][formalism]["amdep"] = f.read()
 
-                #...and as svg:
+                # ...and as svg:
                 with open(output_filename) as f:
                     amdep = next(parse_amconll(f))
-                    with open(direc+"/amdep.dot","w") as g:
+                    with open(direc + "/amdep.dot", "w") as g:
                         g.write(amdep.to_dot())
                     os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
-                    with open(direc+"/amdep.svg") as g:
+                    with open(direc + "/amdep.svg") as g:
                         ret_val["parses"][formalism]["amdep-svg"] = g.read()
 
-                #Evaluate to graph
+                # Evaluate to graph
                 raw_graph, svg = postprocess(output_filename, direc, formalism)
                 ret_val["parses"][formalism]["graph"] = raw_graph
                 if svg:
                     ret_val["parses"][formalism]["svg"] = svg
-    except BaseException as ex:#
+    except BaseException as ex:  #
         err = "".join(traceback.TracebackException.from_exception(ex).format_exception_only())
         ret_val["errors"].append(err)
         print("Ignoring error:")
         print(err)
 
-    writer.write(bytes(json.dumps(ret_val),"utf8"))
+    writer.write(bytes(json.dumps(ret_val), "utf8"))
     await writer.drain()
     writer.close()
     t2 = time.time()
-    print("Handling request took", t2-t1)
+    print("Handling request took", t2 - t1)
+
 
 loop = asyncio.get_event_loop()
 loop.create_task(asyncio.start_server(handle_client, 'localhost', args.port))
