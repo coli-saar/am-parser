@@ -162,7 +162,7 @@ class AMSentence:
 
         r += "\\&".join(w.token for w in self.words) + "\\\\ \n"
         r += space
-        pretty_types = [ str(AMType.parse_str(t)) for t in self.words]
+        pretty_types = [ str(AMType.parse_str(t.typ)) for t in self.words]
         r += "\\&".join(t.replace("_","\\_") if t != "_" else "$\\bot$" for t in pretty_types) + "\\\\ \n"
         r += "\\&".join("\\hspace{1.2cm}" for _ in self.words) + "\\\\ \n"
         r += space
