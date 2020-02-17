@@ -145,6 +145,7 @@ class AMSentence:
 
     def to_tex_svg(self, directory):
         from .dot_tools import penman_to_dot, parse_penman, compile_dot
+        from graph_dependency_parser.am_algebra.new_amtypes import AMType
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
         \\usepackage{tikz-dependency}
@@ -161,7 +162,8 @@ class AMSentence:
 
         r += "\\&".join(w.token for w in self.words) + "\\\\ \n"
         r += space
-        r += "\\&".join(w.typ.replace("_","\\_") if w.typ != "_" else "$\\bot$" for w in self.words) + "\\\\ \n"
+        pretty_types = [ str(AMType.parse_str(t)) for t in self.words]
+        r += "\\&".join(t.replace("_","\\_") if t != "_" else "$\\bot$" for t in pretty_types) + "\\\\ \n"
         r += "\\&".join("\\hspace{1.2cm}" for _ in self.words) + "\\\\ \n"
         r += space
         r += "\end{deptext}\n"
