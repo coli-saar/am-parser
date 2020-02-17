@@ -1,0 +1,15 @@
+# ::id isi_0001.24e
+# ::snt The car came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / car))
+      :op2 (l / leave-11
+            :ARG0 b))
+
+# ::id isi_0001.24f
+# ::snt The bird came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / bird))
+      :op2 (l / leave-11
+            :ARG0 b))

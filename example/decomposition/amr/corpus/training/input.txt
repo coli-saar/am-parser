@@ -1,0 +1,40 @@
+# ::id isi_0001.24
+# ::snt The boy came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / boy))
+      :op2 (l / leave-11
+            :ARG0 b))
+            
+# ::id isi_0001.24b
+# ::snt The girl came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / girl))
+      :op2 (l / leave-11
+            :ARG0 b))
+
+# ::id lpp_1943.23
+# ::snt At a glance I can distinguish China from Arizona .
+(p / possible-01
+      :ARG1 (d / distinguish-01
+            :ARG0 (i / i)
+            :ARG1 (c / country :wiki "China"
+                  :name (n / name :op1 "China"))
+            :ARG2 (s / state :wiki "Arizona"
+                  :name (n2 / name :op1 "Arizona"))
+            :manner (g / glance-01
+                  :ARG0 i)))
+                  
+# ::id lpp_1943.279
+# ::snt Everybody knows that when it is noon in the United States the sun is setting over France .
+(k / know-01
+      :ARG0 (e / everybody)
+      :ARG1 (s / set-11
+            :ARG1 (s2 / sun)
+            :location (c2 / country :wiki "France"
+                  :name (n3 / name :op1 "France"))
+            :time (d / date-entity :time "12:00"
+                  :location (c / country :wiki "United_States"
+                        :name (n2 / name :op1 "United" :op2 "States")))))
+

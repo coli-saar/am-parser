@@ -1,0 +1,15 @@
+# ::id isi_0001.24c
+# ::snt The cow came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / cow))
+      :op2 (l / leave-11
+            :ARG0 b))
+
+# ::id isi_0001.24d
+# ::snt The horse came and left.
+(a / and
+      :op1 (c / come-01
+            :ARG1 (b / horse))
+      :op2 (l / leave-11
+            :ARG0 b))

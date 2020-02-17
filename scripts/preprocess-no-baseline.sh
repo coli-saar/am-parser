@@ -51,6 +51,13 @@ testAltodata=$outputPath/alto/test/
 #alto="alto-2.3-SNAPSHOT-jar-with-dependencies.jar"
 alto="am-tools.jar"
 
+if [ -f "$alto" ]; then
+    echo "jar file found at $jar"
+else
+    echo "jar file not found at $jar, downloading it!"
+    wget -O "$alto" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
+fi
+
 # a lot of scripts live here so let's store it as a variable in case it changes
 datascriptPrefix="de.saar.coli.amrtagging.formalisms.amr.tools.datascript"
 
@@ -67,6 +74,8 @@ mkdir -p $devAltodata              # dev input for evaluation
 mkdir -p $evalDevAltodata              # dev input for evaluation
 mkdir -p $testAltodata             # test input for evaluation
 
+# Download models if necessary.
+bash scripts/setup_AMR.sh
 
 NNdataCorpusName="namesDatesNumbers_AlsFixed_sorted.corpus"  # from which we get the NN training data
 evalDataCorpusName="finalAlto.corpus"                        # from which we get the dev and test evaluation data
@@ -74,9 +83,9 @@ trainMinuteLimit=600                                         # limit for generat
 devMinuteLimit=20                                            # limit for geneating NN dev data
 threads=1
 memLimit=6G
-posTagger="resources/english-bidirectional-distsim.tagger"
-nerTagger="resources/english.conll.4class.distsim.crf.ser.gz"
-wordnet="resources/wordnet/dict/"
+posTagger="downloaded_models/stanford/english-bidirectional-distsim.tagger"
+nerTagger="downloaded_models/stanford/english.conll.4class.distsim.crf.ser.gz"
+wordnet="downloaded_models/wordnet3.0/dict/"
 #wordnet="/proj/corpora/wordnet/3.0/dict/"
 
 # disable use of conceptnet by replacing this with 'conceptnet=""'

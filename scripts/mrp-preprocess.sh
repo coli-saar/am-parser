@@ -50,6 +50,14 @@ testAltodata=$outputPath/alto/test/
 #alto="alto-2.3-SNAPSHOT-jar-with-dependencies.jar"
 alto="am-tools.jar"
 
+if [ -f "$alto" ]; then
+    echo "jar file found at $jar"
+else
+    echo "jar file not found at $jar, downloading it!"
+    wget -O "$alto" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
+fi
+
+
 # a lot of scripts live here so let's store it as a variable in case it changes
 datascriptPrefix="de.saar.coli.amrtagging.formalisms.amr.tools.datascript"
 
@@ -73,15 +81,14 @@ trainMinuteLimit=600                                         # limit for generat
 devMinuteLimit=20                                            # limit for geneating NN dev data
 threads=1
 memLimit=6G
-posTagger="resources/english-bidirectional-distsim.tagger"
+
+posTagger="downloaded_models/stanford/english-bidirectional-distsim.tagger"
 
 #if you want to use Illinois NER (shared task setup), set nerTagger=""
-nerTagger="--stanford-ner-model resources/english.conll.4class.distsim.crf.ser.gz"
+nerTagger="--stanford-ner-model downloaded_models/stanford/english.conll.4class.distsim.crf.ser.gz"
 nerTagger=""
 
-PCFG="resources/englishPCFG.txt"
-wordnet="resources/wordnet/dict/"
-#wordnet="/proj/corpora/wordnet/3.0/dict/"
+wordnet="downloaded_models/wordnet3.0/dict/"
 
 # disable use of conceptnet by replacing this with 'conceptnet=""'
 conceptnet="--conceptnet resources/conceptnet-assertions-5.7.0.csv.gz"
