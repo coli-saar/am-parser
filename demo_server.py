@@ -293,11 +293,12 @@ async def handle_client(reader, writer):
                 # ...and as svg:
                 with open(output_filename) as f:
                     amdep = next(parse_amconll(f))
-                    with open(direc + "/amdep.dot", "w") as g:
-                        g.write(amdep.to_dot())
-                    os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
-                    with open(direc + "/amdep.svg") as g:
-                        ret_val["parses"][formalism]["amdep-svg"] = g.read()
+                    #with open(direc + "/amdep.dot", "w") as g:
+                    #    g.write(amdep.to_dot())
+                    #os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
+                    #with open(direc + "/amdep.svg") as g:
+                    #    ret_val["parses"][formalism]["amdep-svg"] = g.read()
+                    ret_val["parses"][formalism]["amdep-svg"] = amdep.to_tex_svg(direc)
 
                 # Evaluate to graph
                 raw_graph, svg = postprocess(output_filename, direc, formalism)

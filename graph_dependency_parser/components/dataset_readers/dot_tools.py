@@ -5,6 +5,9 @@ def relex(label, lex_label, lemma, form, replacement, pos):
     lex_label = lex_label.replace("$POS$", pos)
     return label.replace("--LEX--", lex_label)
 
+def parse_penman(graph_fragment):
+    import penman
+    return penman.decode(graph_fragment)
 
 def penman_to_dot(graph_fragment, lex_label, lemma, form, replacement, pos, prefix="n"):
     """
@@ -12,7 +15,10 @@ def penman_to_dot(graph_fragment, lex_label, lemma, form, replacement, pos, pref
     """
 
     import penman
-    g = penman.decode(graph_fragment)
+    if isinstance(graph_fragment, str):
+        g = penman.decode(graph_fragment)
+    else:
+        g = graph_fragment
     name2name = dict()
     accounted_for = set()
     counter = 0
@@ -55,3 +61,8 @@ def penman_to_dot(graph_fragment, lex_label, lemma, form, replacement, pos, pref
 
     return r, name2name[g.top]
 
+
+import os
+
+def compile_dot(fname):
+    os.system("dot -Tpdf "+fname+".dot -o "+fname+".pdf")

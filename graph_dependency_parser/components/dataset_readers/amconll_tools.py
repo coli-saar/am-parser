@@ -1,7 +1,9 @@
+import subprocess
 from typing import List, Dict, Tuple, Iterable, Union
 
 from dataclasses import dataclass
-
+import os
+import multiprocessing as mp
 
 
 @dataclass(frozen=True)
@@ -73,7 +75,7 @@ class AMSentence:
     def set_lexlabels(self, labels : List[str]) -> "AMSentence":
         assert len(labels) == len(self.words), f"number of lexical labels must agree with number of words but got {len(labels)} and {len(self.words)}"
         return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, labels[i],
-                                word.typ, word.head, word.label, word.aligned,word.range)
+                                 word.typ, word.head, word.label, word.aligned,word.range)
                            for i,word in enumerate(self.words)],self.attributes)
 
     def set_heads(self, heads : List[int]) -> "AMSentence":
@@ -140,6 +142,73 @@ class AMSentence:
                 r.append(index_to_node_name[head-1] +" -> " + index_to_node_name[i] + " [ltail=cluster"+ str(head-1)+", lhead=cluster"+str(i)+', label="' + word.label+ '"];\n')
 
         return "digraph { compound=true; \n" +"\n".join(r) +"}"
+
+    def to_tex_svg(self, directory):
+        from .dot_tools import penman_to_dot, parse_penman, compile_dot
+        r = """\\documentclass{standalone}
+        \\usepackage[utf8]{inputenc}
+        \\usepackage{tikz-dependency}
+        \\usepackage{amsmath}
+        \\usepackage{amsfonts}
+
+        \\begin{document}
+
+        \\newcommand{\\s}[1]{$_\\textsc{#1}$}
+
+        \\begin{dependency}
+        \\begin{deptext}[column sep=1.0cm]"""
+        space = "\\&".join(" " for _ in self.words) + "\\\\ \n"
+
+        r += "\\&".join(w.token for w in self.words) + "\\\\ \n"
+        r += space
+        r += "\\&".join(w.typ.replace("_","\\_") if w.typ != "_" else "$\\bot$" for w in self.words) + "\\\\ \n"
+        r += "\\&".join("\\hspace{1.2cm}" for _ in self.words) + "\\\\ \n"
+        r += space
+        r += "\end{deptext}\n"
+
+
+        dot_filenames = []
+        for i,word in enumerate(self.words,1):
+            head = word.head
+            if head == 0:
+                if word.label == "ROOT":
+                    r += "\\deproot{"+str(i)+"}{root}\n"
+                else:
+                    continue
+            else:
+                op, source = word.label.split("_")
+                r += "\\depedge{"+str(head)+"}{"+str(i)+"}{"+op+"\s{"+source+"}}\n"
+
+            graph_fragment = parse_penman(word.fragment)
+            cluster, _ = penman_to_dot(graph_fragment, word.lexlabel, word.lemma, word.token, word.replacement, word.pos_tag, "n")
+            fname = directory+"/w"+str(i)
+            with open(fname+".dot","w") as f:
+                if len(graph_fragment.instances()) == 1:
+                    #make smaller graph, otherwise node will look too large.
+                    f.write('digraph{ graph [size="0.4,0.4"]; margin=0; bgcolor=transparent; ' + cluster + "}")
+                else:
+                    f.write('digraph{ graph [size="0.8,0.8"]; margin=0; bgcolor=transparent; ' + cluster + "}")
+            dot_filenames.append(fname)
+
+            #os.system("dot -Tpdf "+fname+".dot -o "+fname+".pdf")
+            r += "\\node (n"+str(i)+") [below of = \wordref{5}{"+str(i)+"}] {\\includegraphics{w"+str(i)+".pdf}};\n"
+
+        r += "\end{dependency} \end{document}"
+        fname = directory+"/sentence"
+
+        #compile dot graphs in parallel.
+        with mp.Pool(8) as p:
+            p.map(compile_dot, dot_filenames)
+
+        with open(fname+".tex","w") as g:
+            g.write(r)
+
+        subprocess.run("pdflatex -interaction=batchmode "+ fname+".tex", shell=True, cwd=directory)
+        #os.system("./pdf2svg " + fname + ".pdf " + fname+".svg")
+        os.system("inkscape -l " + fname + ".svg " + fname+".pdf")
+        os.system("cat "+fname+".svg | tr -s ' ' > "+fname+"2.svg") #svg contains a lot of spaces, strip them away.
+        with open(fname+"2.svg") as f:
+            return f.read()
 
 
 def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes: Dict, contract_ne: bool) -> AMSentence:
