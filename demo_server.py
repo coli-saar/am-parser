@@ -213,6 +213,7 @@ def postprocess(filename, output_path, formalism):
         bash scripts/eval_AMR_new.sh $amconll $output $jar
     fi
     """
+    t = time.time()
     o_fil = formalism_to_class[formalism].evaluate(filename, output_path)
     format = ""
     if formalism in {"DM", "PSD", "PAS"}:
@@ -226,7 +227,9 @@ def postprocess(filename, output_path, formalism):
 
     with open(o_fil) as f:
         text = f.read()
+    graph_time = time.time() - t
 
+    t = time.time()
     # Create svg file.
     svg = ""
     if args.mtool:
@@ -238,13 +241,15 @@ def postprocess(filename, output_path, formalism):
             os.system(f"dot -Tsvg {direc}/o.dot -o {direc}/o.svg")
             with open(f"{direc}/o.svg") as f:
                 svg = f.read()
-    return text, svg
+    svg_time = time.time() - t
+    return (text, graph_time), (svg, svg_time)
 
 
 async def handle_client(reader, writer):
     request = (await reader.read(4048)).decode('utf8')  # read a maximum of 4048 bytes, that's more than enough
     print("Request", request)
-    ret_val = {"errors": []}
+    ret_val = {"errors": [], "times" : {"amdep" : 0.0 , "svg" : 0.0, "graph" : 0.0, "amdep-svg" : 0.0}}
+    # times: amdep: parse time, svg: time to visualize graph, graph: evaluation time from amdep to graph, amdep-svg: viz. of amdep tree.
     t1 = time.time()
     try:
         json_req = json.loads(request)
@@ -273,6 +278,7 @@ async def handle_client(reader, writer):
                     ret_val["errors"].append(err)
                     continue
 
+                t = time.time()
                 # Create input and save to file:
                 sentences = [from_raw_text(sentence.rstrip("\n"), words, requires_art_root[formalism], dict(),
                                            requires_ne_merging[formalism])]
@@ -289,8 +295,10 @@ async def handle_client(reader, writer):
                 # Read AM dependency tree
                 with open(output_filename) as f:
                     ret_val["parses"][formalism]["amdep"] = f.read()
+                ret_val["times"]["amdep"] += time.time() - t
 
                 # ...and as svg:
+                t = time.time()
                 with open(output_filename) as f:
                     amdep = next(parse_amconll(f))
                     #with open(direc + "/amdep.dot", "w") as g:
@@ -299,12 +307,16 @@ async def handle_client(reader, writer):
                     #with open(direc + "/amdep.svg") as g:
                     #    ret_val["parses"][formalism]["amdep-svg"] = g.read()
                     ret_val["parses"][formalism]["amdep-svg"] = amdep.to_tex_svg(direc)
+                ret_val["times"]["amdep-svg"] += time.time() - t
 
                 # Evaluate to graph
-                raw_graph, svg = postprocess(output_filename, direc, formalism)
+                (raw_graph, graph_time), (svg, svg_time) = postprocess(output_filename, direc, formalism)
                 ret_val["parses"][formalism]["graph"] = raw_graph
                 if svg:
                     ret_val["parses"][formalism]["svg"] = svg
+
+                ret_val["times"]["graph"] += graph_time
+                ret_val["times"]["svg"] += svg_time
     except BaseException as ex:  #
         err = "".join(traceback.TracebackException.from_exception(ex).format_exception_only())
         ret_val["errors"].append(err)
@@ -316,6 +328,7 @@ async def handle_client(reader, writer):
     writer.close()
     t2 = time.time()
     print("Handling request took", t2 - t1)
+    print("Breakdown:",ret_val["times"])
 
 
 loop = asyncio.get_event_loop()
