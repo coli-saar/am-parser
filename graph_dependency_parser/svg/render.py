@@ -156,9 +156,9 @@ class DependencyRenderer(object):
         </g>\n"""
 
         if self.compact:
-            y_pos = self.offset_y - (max(self.levels)+1) * self.distance / 6
+            y_pos = self.offset_y - (self.highest_level+1) * self.distance / 6
         else:
-            y_pos = self.offset_y - (max(self.levels)+1) * self.distance / 2
+            y_pos = self.offset_y - (self.highest_level+1) * self.distance / 2
         x_pos = self.offset_x + i * self.distance
         return root_node.format(x=x_pos, y = y_pos) + root_arrow.format(id=self.id, start=",".join((str(x_pos), str(y_pos+5))), end = ",".join((str(x_pos), str(self.offset_y))))
 
