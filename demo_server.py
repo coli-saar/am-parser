@@ -306,7 +306,7 @@ async def handle_client(reader, writer):
                     #os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
                     #with open(direc + "/amdep.svg") as g:
                     #    ret_val["parses"][formalism]["amdep-svg"] = g.read()
-                    ret_val["parses"][formalism]["amdep-svg"] = amdep.to_tex_svg(direc)
+                    ret_val["parses"][formalism]["amdep-svg"] = amdep.displacy_svg()
                 ret_val["times"]["amdep-svg"] += time.time() - t
 
                 # Evaluate to graph

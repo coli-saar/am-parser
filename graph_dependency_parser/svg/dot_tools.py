@@ -63,6 +63,55 @@ def penman_to_dot(graph_fragment, lex_label, lemma, form, replacement, pos, pref
 
 
 import os
+import subprocess
+import re
 
 def compile_dot(fname):
     os.system("dot -Tpdf "+fname+".dot -o "+fname+".pdf")
+
+def get_dot(graph, format):
+    with subprocess.Popen("dot -T"+format, shell=True, stdout=subprocess.PIPE,stdin=subprocess.PIPE) as proc:
+        proc.stdin.write(bytes(graph,"utf8"))
+        proc.stdin.close()
+        return bytes.decode(proc.stdout.read())  # output of shell commmand as string
+
+def dot_strip_svg_header(svg):
+    return "\n".join(svg.split("\n")[3:])
+
+
+class DotSVG:
+    """
+    Quick, dirty and limited method to manipulate the output of dot -Tsvg
+    """
+
+    width_pattern = re.compile('width="([^"]+)"')
+    height_pattern = re.compile('height="([^"]+)"')
+
+    def __init__(self, dot_script):
+        self.s = get_dot(dot_script, "svg")
+
+    def get_width(self):
+        m = re.search(self.width_pattern, self.s)
+        return m.group(1) #e.g. 89pt
+
+    def get_height(self):
+        m = re.search(self.height_pattern, self.s)
+        return m.group(1)
+
+    def get_str(self):
+        return self.s
+
+    def get_str_without_header(self):
+        return dot_strip_svg_header(self.s)
+
+    def set_xy(self, x,y):
+        self.s = self.s.replace("<svg",'<svg x="'+x+'" y="'+y+'"')
+
+    def set_width(self, w):
+        self.s = re.sub(self.width_pattern, 'width="'+w+'"', self.s)
+
+    def set_height(self, h):
+        self.s = re.sub(self.height_pattern, 'height="'+h+'"', self.s)
+
+
+

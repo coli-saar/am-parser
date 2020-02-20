@@ -5,6 +5,9 @@ from dataclasses import dataclass
 import os
 import multiprocessing as mp
 
+from ...svg.dot_tools import penman_to_dot, parse_penman
+from ...svg.render import DependencyRenderer
+from ...am_algebra.new_amtypes import AMType
 
 @dataclass(frozen=True)
 class Entry:
@@ -125,7 +128,7 @@ class AMSentence:
         return len(self.words)
 
     def to_dot(self):
-        from .dot_tools import penman_to_dot
+        from graph_dependency_parser.svg.dot_tools import penman_to_dot
         r = []
         index_to_node_name = dict()
         for i,word in enumerate(self.words):
@@ -144,7 +147,7 @@ class AMSentence:
         return "digraph { compound=true; \n" +"\n".join(r) +"}"
 
     def to_tex_svg(self, directory):
-        from .dot_tools import penman_to_dot, parse_penman, compile_dot
+        from graph_dependency_parser.svg.dot_tools import penman_to_dot, parse_penman, compile_dot
         from graph_dependency_parser.am_algebra.new_amtypes import AMType
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
@@ -212,6 +215,39 @@ class AMSentence:
         with open(fname+"2.svg") as f:
             return f.read()
 
+    def displacy_svg(self):
+
+        renderer = DependencyRenderer({"compact" : True})
+        root_node = 0
+        d = {"words" :  [ {"text" : w.token, "tag" : str(AMType.parse_str(w.typ)) if w.typ != "_" else "⊥"} for w in self.words] }
+        d["arcs"] = []
+        for i, word in enumerate(self.words):
+            if word.head != 0:
+                if i < word.head-1:
+                    start = i
+                    end = word.head-1
+                else:
+                    start = word.head-1
+                    end = i
+                d["arcs"].append({"start": start, "end" : end, "label" : word.label, "dir" : "left" if i < word.head-1 else "right"})
+
+            if word.head == 0 and word.label == "ROOT":
+                root_node = i
+
+            if word.fragment == "_":
+                d["words"][i]["supertag"] = ""
+                continue
+            graph_fragment = parse_penman(word.fragment)
+            cluster, _ = penman_to_dot(graph_fragment, word.lexlabel, word.lemma, word.token, word.replacement, word.pos_tag, "n")
+
+            if len(graph_fragment.instances()) == 1:
+                #make smaller graph, otherwise node will look too large.
+                d["words"][i]["supertag"] = 'digraph{ graph [size="0.7,0.7"]; margin=0; bgcolor=transparent; ' + cluster + "}"
+            else:
+                d["words"][i]["supertag"] =  'digraph{ graph [size="1.4,1.4"]; margin=0; bgcolor=transparent; ' + cluster + "}"
+
+        d["root"] = root_node
+        return renderer.render([d])
 
 def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes: Dict, contract_ne: bool) -> AMSentence:
     """
