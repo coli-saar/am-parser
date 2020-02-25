@@ -1,0 +1,51 @@
+#SDP 2015
+#40504002
+1	So	so	RB	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+2	wrote	write	VBD	+	+	_	adj_ARG1	_	_	_	_	_	prep_ARG1	_	_	_	_	_	_	_	_	_	_
+3	a	a	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+4	ten	ten	CD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+5	year	year	NN	-	+	_	_	_	_	adj_ARG1	_	_	_	_	_	_	_	_	_	_	_	_	_
+6	old	old	JJ	-	+	_	_	_	_	_	noun_ARG1	_	_	_	_	_	_	_	_	_	_	_	_
+7	student	student	NN	-	-	_	_	verb_ARG1	det_ARG1	_	_	adj_ARG1	_	_	_	_	_	_	_	_	_	_	_
+8	in	in	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+9	a	a	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+10	letter	letter	NN	-	-	_	_	_	_	_	_	_	prep_ARG2	det_ARG1	prep_ARG1	_	prep_ARG1	_	_	_	_	_	_
+11	to	to	TO	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+12	his	his	PRP$	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+13	parents	parent	NNS	-	-	_	_	_	_	_	_	_	_	_	prep_ARG2	det_ARG1	_	_	_	_	_	_	_
+14	from	from	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+15	North	north	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+16	Country	country	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+17	School	school	NNP	-	-	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	noun_ARG1	noun_ARG1	app_ARG1	_	_	_
+18	,	-COMMA-	,	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+19	Lake	lake	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+20	Placid	placid	NNP	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	app_ARG2	noun_ARG1	app_ARG1	_
+21	,	-COMMA-	,	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+22	New	new	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+23	York	york	NNP	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	app_ARG2	noun_ARG1
+24	.	_	.	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+
+#40504003
+1	In	in	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+2	this	this	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+3	one	one	CD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+4	sentence	sentence	NN	-	-	_	prep_ARG2	det_ARG1	adj_ARG1	_	_	_	_	_	_	_	_	_	_	_	_	_
+5	,	-COMMA-	,	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+6	he	he	PRP	-	-	_	_	_	_	_	_	verb_ARG1	_	_	_	_	_	_	_	_	_	_
+7	unwittingly	unwittingly	RB	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+8	revealed	reveal	VBD	+	+	_	prep_ARG1	_	_	punct_ARG1	adj_ARG1	_	_	_	_	_	_	_	_	_	_	_
+9	the	the	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+10	basic	basic	JJ	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+11	philosophy	philosophy	NN	-	-	_	_	_	_	_	_	verb_ARG2	det_ARG1	adj_ARG1	prep_ARG1	_	_	_	_	_	_	_
+12	of	of	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+13	the	the	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+14	nutrition	nutrition	NN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	coord_ARG1	_	_	_	_
+15	and	and	CC	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+16	psychological	psychological	JJ	-	+	_	_	_	_	_	_	_	_	_	_	_	_	coord_ARG2	_	_	_	_
+17	programs	program	NNS	-	-	_	_	_	_	_	_	_	_	_	prep_ARG2	det_ARG1	noun_ARG1	_	adj_ARG1	prep_ARG1	prep_ARG1	_
+18	in	in	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+19	operation	operation	NN	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	_	_
+20	at	at	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+21	the	the	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+22	school	school	NN	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	det_ARG1
+23	.	_	.	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_

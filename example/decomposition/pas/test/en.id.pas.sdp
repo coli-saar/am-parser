@@ -1,0 +1,49 @@
+#SDP 2015
+#22100001
+1	Consumers	consumer	NNS	-	-	_	aux_ARG1	verb_ARG1	_	verb_ARG1	_	_	_	_	_	_	_
+2	may	may	MD	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+3	want	want	VB	+	+	_	aux_ARG2	_	_	_	_	_	_	_	_	_	_
+4	to	to	TO	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+5	move	move	VB	-	+	_	_	verb_ARG2	comp_ARG1	_	_	_	_	adj_ARG1	_	_	_
+6	their	their	PRP$	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+7	telephones	telephone	NNS	-	-	_	_	_	_	verb_ARG2	det_ARG1	_	_	_	_	_	_
+8	a	a	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+9	little	little	RB	-	+	_	_	_	_	_	_	det_ARG1	_	_	_	_	_
+10	closer	close	RBR	-	+	_	_	_	_	_	_	_	noun_ARG1	_	prep_ARG1	_	_
+11	to	to	TO	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+12	the	the	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+13	TV	tv	NN	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+14	set	set	NN	-	-	_	_	_	_	_	_	_	_	_	prep_ARG2	det_ARG1	noun_ARG1
+15	.	_	.	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+
+#22100002
+1	Couch-potato	couch-potato	NN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+2	jocks	jock	NNS	-	-	_	noun_ARG1	verb_ARG1	_	_	_	_	_	aux_ARG1	_	verb_ARG1	_	_	_	_	_	_	_	_	_	_	_	_
+3	watching	watch	VBG	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+4	ABC	abc	NNP	-	-	_	_	_	poss_ARG2	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+5	’s	's	POS	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+6	“	-DQS-	``	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+7	Monday	monday	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+8	Night	night	NNP	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+9	Football	football	NNP	-	-	_	_	verb_ARG2	poss_ARG1	punct_ARG1	noun_ARG1	noun_ARG1	punct_ARG1	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+10	”	-DQE-	''	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+11	can	can	MD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+12	now	now	RB	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+13	vote	vote	VB	+	+	_	_	_	_	_	_	_	_	aux_ARG2	adj_ARG1	_	prep_ARG1	prep_ARG1	_	_	_	_	_	_	_	_	_	_
+14	during	during	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+15	halftime	halftime	NN	-	-	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	_	_	_	_	_	_	_	_	_	_	_
+16	for	for	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+17	the	the	DT	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+18	greatest	great	JJS	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+19	play	play	NN	-	-	_	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	det_ARG1	adj_ARG1	prep_ARG1	_	_	prep_ARG1	_	_	_	_
+20	in	in	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+21	20	-NUMBER-	CD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+22	years	year	NNS	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	adj_ARG1	_	_	_	_	_	_
+23	from	from	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+24	among	among	IN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	adj_ARG1	_	_	_	_	_
+25	four	four	CD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	coord_ARG1	_	_
+26	or	or	CC	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+27	five	five	CD	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	coord_ARG2	_	_
+28	filmed	film	VBN	-	+	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_
+29	replays	replay	NNS	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	prep_ARG2	adj_ARG1	_	adj_ARG1	verb_ARG2
+30	.	_	.	-	-	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_	_

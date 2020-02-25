@@ -1,0 +1,49 @@
+#SDP 2015
+#22100001
+1	Consumers	consumer	NNS	-	-	_	ACT-arg	ACT-arg	_	_	_
+2	may	may	MD	-	-	_	_	_	_	_	_
+3	want	want	VB	+	+	ev-w3586f1	_	_	_	_	_
+4	to	to	TO	-	-	_	_	_	_	_	_
+5	move	move	VB	-	+	ev-w2031f2	PAT-arg	_	_	_	_
+6	their	#PersPron	PRP$	-	-	_	_	_	APP	_	_
+7	telephones	telephone	NNS	-	+	_	_	PAT-arg	_	_	_
+8	a	a	DT	-	-	_	_	_	_	_	_
+9	little	little	RB	-	-	_	_	_	_	EXT	_
+10	closer	close	RBR	-	+	_	_	DIR3	_	_	_
+11	to	to	TO	-	-	_	_	_	_	_	_
+12	the	the	DT	-	-	_	_	_	_	_	_
+13	TV	tv	NN	-	-	_	_	_	_	_	RSTR
+14	set	set	NN	-	+	_	_	_	_	DIR3	_
+15	.	.	.	-	-	_	_	_	_	_	_
+
+#22100002
+1	Couch-potato	couch-potato	NN	-	-	_	RSTR	_	_	_	_	_	_	_	_
+2	jocks	jock	NNS	-	+	_	_	_	_	_	ACT-arg	_	_	_	_
+3	watching	watch	VBG	-	+	ev-w3595f2	RSTR	_	_	_	_	_	_	_	_
+4	ABC	abc	NNP	-	-	_	_	_	_	APP	_	_	_	_	_
+5	’s	’s	POS	-	-	_	_	_	_	_	_	_	_	_	_
+6	“	“	``	-	-	_	_	_	_	_	_	_	_	_	_
+7	Monday	monday	NNP	-	-	_	_	_	RSTR	_	_	_	_	_	_
+8	Night	night	NNP	-	+	_	_	_	_	TWHEN	_	_	_	_	_
+9	Football	football	NNP	-	+	_	_	PAT-arg	_	_	_	_	_	_	_
+10	”	”	''	-	-	_	_	_	_	_	_	_	_	_	_
+11	can	can	MD	-	-	_	_	_	_	_	_	_	_	_	_
+12	now	now	RB	-	-	_	_	_	_	_	TWHEN	_	_	_	_
+13	vote	vote	VB	+	+	ev-w3564f2	_	_	_	_	_	_	_	_	_
+14	during	during	IN	-	-	_	_	_	_	_	_	_	_	_	_
+15	halftime	halftime	NN	-	-	_	_	_	_	_	TPAR	_	_	_	_
+16	for	for	IN	-	-	_	_	_	_	_	_	_	_	_	_
+17	the	the	DT	-	-	_	_	_	_	_	_	_	_	_	_
+18	greatest	great	JJS	-	-	_	_	_	_	_	_	RSTR	_	_	_
+19	play	play	NN	-	+	_	_	_	_	_	PAT-arg	_	_	_	_
+20	in	in	IN	-	-	_	_	_	_	_	_	_	_	_	_
+21	20	20	CD	-	-	_	_	_	_	_	_	_	RSTR	_	_
+22	years	year	NNS	-	+	_	_	_	_	_	_	THL	_	_	_
+23	from	from	IN	-	-	_	_	_	_	_	_	_	_	_	_
+24	among	among	IN	-	-	_	_	_	_	_	_	_	_	_	_
+25	four	four	CD	-	-	_	_	_	_	_	_	_	_	DISJ.member	RSTR
+26	or	or	CC	-	+	_	_	_	_	_	_	_	_	_	_
+27	five	five	CD	-	-	_	_	_	_	_	_	_	_	DISJ.member	RSTR
+28	filmed	film	VBN	-	-	ev-w1322f1	_	_	_	_	_	_	_	_	RSTR
+29	replays	replay	NNS	-	+	_	_	_	_	_	_	DIR1	_	_	_
+30	.	.	.	-	-	_	_	_	_	_	_	_	_	_	_

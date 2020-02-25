@@ -1,0 +1,51 @@
+#SDP 2015
+#40504002
+1	So	so	RB	-	-	_	PREC	_	_	_	_	_	_	_	_	_	_
+2	wrote	write	VBD	+	+	ev-w3674f5	_	_	_	_	_	_	_	_	_	_	_
+3	a	a	DT	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+4	ten	ten	CD	-	-	_	_	RSTR	_	_	_	_	_	_	_	_	_
+5	year	year	NN	-	+	_	_	_	EXT	_	_	_	_	_	_	_	_
+6	old	old	JJ	-	+	_	_	_	_	RSTR	_	_	_	_	_	_	_
+7	student	student	NN	-	+	_	ACT-arg	_	_	_	_	_	_	_	_	_	_
+8	in	in	IN	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+9	a	a	DT	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+10	letter	letter	NN	-	+	_	LOC	_	_	_	_	_	_	_	_	_	_
+11	to	to	TO	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+12	his	#PersPron	PRP$	-	-	_	_	_	_	_	_	APP	_	_	_	_	_
+13	parents	parent	NNS	-	+	_	_	_	_	_	ADDR-arg	_	_	_	_	_	_
+14	from	from	IN	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+15	North	North	NNP	-	-	_	_	_	_	_	_	_	NE	_	_	_	_
+16	Country	Country	NNP	-	+	_	_	_	_	_	_	_	_	NE	_	_	_
+17	School	School	NNP	-	+	_	DIR1	_	_	_	_	_	_	_	_	_	_
+18	,	#Comma	,	-	+	_	_	_	_	_	_	_	_	_	_	_	_
+19	Lake	Lake	NNP	-	-	_	_	_	_	_	_	_	_	_	_	NE	_
+20	Placid	Placid	NNP	-	+	_	_	_	_	_	_	_	_	LOC	CONJ.member	_	_
+21	,	,	,	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+22	New	New	NNP	-	-	_	_	_	_	_	_	_	_	_	_	_	NE
+23	York	York	NNP	-	+	_	_	_	_	_	_	_	_	LOC	CONJ.member	_	_
+24	.	.	.	-	-	_	_	_	_	_	_	_	_	_	_	_	_
+
+#40504003
+1	In	in	IN	-	-	_	_	_	_	_	_
+2	this	this	DT	-	-	_	RSTR	_	_	_	_
+3	one	one	CD	-	-	_	RSTR	_	_	_	_
+4	sentence	sentence	NN	-	+	_	_	LOC	_	_	_
+5	,	,	,	-	-	_	_	_	_	_	_
+6	he	#PersPron	PRP	-	-	_	_	ACT-arg	_	_	_
+7	unwittingly	wittingly	RB	-	-	_	_	MANN	_	_	_
+8	revealed	reveal	VBD	+	+	ev-w2740f1	_	_	_	_	_
+9	the	the	DT	-	-	_	_	_	_	_	_
+10	basic	basic	JJ	-	-	_	_	_	RSTR	_	_
+11	philosophy	philosophy	NN	-	+	_	_	PAT-arg	_	_	_
+12	of	of	IN	-	-	_	_	_	_	_	_
+13	the	the	DT	-	-	_	_	_	_	_	_
+14	nutrition	nutrition	NN	-	-	_	_	_	_	CONJ.member	RSTR
+15	and	and	CC	-	+	_	_	_	_	_	_
+16	psychological	psychological	JJ	-	-	_	_	_	_	CONJ.member	RSTR
+17	programs	program	NNS	-	+	_	_	_	APP	_	_
+18	in	in	IN	-	-	_	_	_	_	_	_
+19	operation	operation	NN	-	-	_	_	_	_	_	LOC
+20	at	at	IN	-	-	_	_	_	_	_	_
+21	the	the	DT	-	-	_	_	_	_	_	_
+22	school	school	NN	-	-	_	_	_	_	_	LOC
+23	.	.	.	-	-	_	_	_	_	_	_

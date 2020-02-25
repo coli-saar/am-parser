@@ -1,0 +1,45 @@
+#SDP 2015
+#20001001
+1	Pierre	Pierre	NNP	-	-	_	NE	_	_	_	_	_
+2	Vinken	vinken	NNP	-	+	_	_	_	_	ACT-arg	_	_
+3	,	,	,	-	-	_	_	_	_	_	_	_
+4	61	61	CD	-	-	_	_	RSTR	_	_	_	_
+5	years	year	NNS	-	+	_	_	_	EXT	_	_	_
+6	old	old	JJ	-	+	_	DESCR	_	_	_	_	_
+7	,	,	,	-	-	_	_	_	_	_	_	_
+8	will	will	MD	-	-	_	_	_	_	_	_	_
+9	join	join	VB	+	+	ev-w1777f1	_	_	_	_	_	_
+10	the	the	DT	-	-	_	_	_	_	_	_	_
+11	board	board	NN	-	-	_	_	_	_	PAT-arg	_	_
+12	as	as	IN	-	-	_	_	_	_	_	_	_
+13	a	a	DT	-	-	_	_	_	_	_	_	_
+14	nonexecutive	nonexecutive	JJ	-	-	_	_	_	_	_	RSTR	_
+15	director	director	NN	-	+	_	_	_	_	COMPL	_	_
+16	Nov.	nov.	NNP	-	+	_	_	_	_	TWHEN	_	_
+17	29	29	CD	-	-	_	_	_	_	_	_	RSTR
+18	.	.	.	-	-	_	_	_	_	_	_	_
+
+#20001002
+1	Mr.	mr.	NNP	-	-	_	RSTR	_	_	_	_	_
+2	Vinken	vinken	NNP	-	+	_	_	ACT-arg	_	_	_	_
+3	is	be	VBZ	+	+	ev-w218f2	_	_	_	_	_	_
+4	chairman	chairman	NN	-	+	_	_	PAT-arg	_	_	_	_
+5	of	of	IN	-	-	_	_	_	_	_	_	_
+6	Elsevier	Elsevier	NNP	-	-	_	_	_	_	NE	_	_
+7	N.V.	n.v.	NNP	-	+	_	_	_	APP	_	APPS.member	_
+8	,	#Comma	,	-	+	_	_	_	_	_	_	_
+9	the	the	DT	-	-	_	_	_	_	_	_	_
+10	Dutch	dutch	NNP	-	-	_	_	_	_	_	_	RSTR
+11	publishing	publish	VBG	-	-	ev-w2430f2	_	_	_	_	_	RSTR
+12	group	group	NN	-	+	_	_	_	APP	_	APPS.member	_
+13	.	.	.	-	-	_	_	_	_	_	_	_
+
+#22043030
+1	Another	another	DT	-	-	_	RSTR	_
+2	agency	agency	NN	-	-	_	REG	_
+3	issue	issue	NN	-	+	_	_	ACT-arg
+4	came	come	VBD	+	+	ev-w590f16	_	_
+5	to	to	TO	-	-	_	_	_
+6	market	market	NN	-	-	_	_	DIR3-arg
+7	yesterday	yesterday	NN	-	-	_	_	TWHEN
+8	.	.	.	-	-	_	_	_

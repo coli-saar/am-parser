@@ -1,0 +1,50 @@
+#SDP 2015
+#22100001
+1	Consumers	consumer	NNS
+2	may	may	MD
+3	want	want	VB
+4	to	to	TO
+5	move	move	VB
+6	their	their	PRP$
+7	telephones	telephone	NNS
+8	a	a	DT
+9	little	little	RB
+10	closer	close	RBR
+11	to	to	TO
+12	the	the	DT
+13	TV	tv	NN
+14	set	set	NN
+15	.	_	.
+
+#22100002
+1	Couch-potato	couch-potato	NN
+2	jocks	jock	NNS
+3	watching	watch	VBG
+4	ABC	abc	NNP
+5	’s	's	POS
+6	“	-DQS-	``
+7	Monday	monday	NNP
+8	Night	night	NNP
+9	Football	football	NNP
+10	”	-DQE-	''
+11	can	can	MD
+12	now	now	RB
+13	vote	vote	VB
+14	during	during	IN
+15	halftime	halftime	NN
+16	for	for	IN
+17	the	the	DT
+18	greatest	great	JJS
+19	play	play	NN
+20	in	in	IN
+21	20	-NUMBER-	CD
+22	years	year	NNS
+23	from	from	IN
+24	among	among	IN
+25	four	four	CD
+26	or	or	CC
+27	five	five	CD
+28	filmed	film	VBN
+29	replays	replay	NNS
+30	.	_	.
+
