@@ -48,7 +48,7 @@ test_id="$maindir/test/en.id.psd.sdp"
 test_ood_input="$maindir/test/en.ood.psd.tt"
 test_ood="$maindir/test/en.ood.psd.sdp"
 
-tmp=$maindir/tmp
+tmp=$outputPath/tmp
 mkdir -p $tmp
 
 
@@ -103,6 +103,10 @@ mkdir -p $outputPath/test.ood
 java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $test_ood_input -o "$outputPath/test.ood" --prefix test.ood --framework psd &> $log
 cp $test_ood "$outputPath/test.ood/"
 
+#remove temp files
+rm -f $train
+rm -f $dev
+rmdir $tmp
 
 printf "process complete\n"
 
