@@ -18,8 +18,8 @@ optparser.add_argument("file2", type=str)
 opts = optparser.parse_args()
 
 word_col = 1
-head_col = 6
-label_col = 7
+head_col = 9
+label_col = 10
 
 total_edges_1 = 0
 total_edges_2 = 0
