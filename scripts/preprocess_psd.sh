@@ -79,28 +79,28 @@ java -cp $alto se.liu.ida.nlp.sdp.toolkit.tools.Splitter $train_and_dev $train $
 # Decompose train set
 
 mkdir -p $outputPath/train
-java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.psd.tools.CreateCorpusParallel -c $train -o "$outputPath/train" --prefix train &> $log
+java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.psd.tools.CreateCorpusParallel -c $train -o "$outputPath/train" --prefix train &>> $log
 
 
 # Decompose dev set
 mkdir -p $outputPath/gold-dev
-java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.psd.tools.CreateCorpusParallel -c $dev -o "$outputPath/gold-dev" --prefix gold-dev --vocab "$outputPath/train/train-supertags.txt" &> $log
+java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.psd.tools.CreateCorpusParallel -c $dev -o "$outputPath/gold-dev" --prefix gold-dev --vocab "$outputPath/train/train-supertags.txt" &>> $log
 
 
 # Prepare dev data (as if it was test data)
 mkdir -p $outputPath/dev
-java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareDevData -c $dev -o "$outputPath/dev" --prefix dev  --framework psd &> $log
+java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareDevData -c $dev -o "$outputPath/dev" --prefix dev  --framework psd &>> $log
 cp $dev "$outputPath/dev/dev.sdp"
 
 
 #In-domain test:
 mkdir -p $outputPath/test.id
-java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $test_id_input -o "$outputPath/test.id" --prefix test.id --framework psd &> $log
+java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $test_id_input -o "$outputPath/test.id" --prefix test.id --framework psd &>> $log
 cp $test_id "$outputPath/test.id/"
 
 #out-of-domain test:
 mkdir -p $outputPath/test.ood
-java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $test_ood_input -o "$outputPath/test.ood" --prefix test.ood --framework psd &> $log
+java -Xmx$mem -cp $alto de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $test_ood_input -o "$outputPath/test.ood" --prefix test.ood --framework psd &>> $log
 cp $test_ood "$outputPath/test.ood/"
 
 #remove temp files
