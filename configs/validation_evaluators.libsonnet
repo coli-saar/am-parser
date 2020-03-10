@@ -5,12 +5,13 @@ local give_up = 15; #15 seconds
 local data_paths = import 'data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
 local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
+local SDP_prefix = data_paths["SDP_prefix"];
 
 local sdp_evaluator(dataset_reader, data_iterator, name, threads, from_epoch) = {
         "type": "standard_evaluator",
         "formalism" : name,
-        "system_input" : "data/SemEval/2015/"+name+"/dev/dev.amconll",
-        "gold_file": "data/SemEval/2015/"+name+"/dev/dev.sdp",
+        "system_input" : SDP_prefix+name+"/dev/dev.amconll",
+        "gold_file": SDP_prefix+name+"/dev/dev.sdp",
         "use_from_epoch" : from_epoch,
         "predictor" : {
                 "type" : "amconll_predictor",

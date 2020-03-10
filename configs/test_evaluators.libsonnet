@@ -5,14 +5,14 @@ local eval_commands = import 'eval_commands.libsonnet';
 local data_paths = import 'data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
 local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
-
+local SDP_prefix = data_paths["SDP_prefix"];
 
 local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
         [name+"_id", { #prefix used for evaluation metric
             "type": "standard_evaluator",
             "formalism" : name,
-            "system_input" : "data/SemEval/2015/"+name+"/test.id/test.id.amconll",
-            "gold_file": "data/SemEval/2015/"+name+"/test.id/en.id."+std.asciiLower(name)+".sdp",
+            "system_input" : SDP_prefix+name+"/test.id/test.id.amconll",
+            "gold_file": SDP_prefix+name+"/test.id/en.id."+std.asciiLower(name)+".sdp",
             "predictor" : {
                     "type" : "amconll_predictor",
                     "dataset_reader" : dataset_reader,
@@ -25,8 +25,8 @@ local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
         }],[name+"_ood",{ #prefix used for evaluation metric
                 "type": "standard_evaluator",
                 "formalism" : name,
-                "system_input" : "data/SemEval/2015/"+name+"/test.ood/test.ood.amconll",
-                "gold_file": "data/SemEval/2015/"+name+"/test.ood/en.ood."+std.asciiLower(name)+".sdp",
+                "system_input" : SDP_prefix+name+"/test.ood/test.ood.amconll",
+                "gold_file": SDP_prefix+name+"/test.ood/en.ood."+std.asciiLower(name)+".sdp",
                 "predictor" : {
                         "type" : "amconll_predictor",
                         "dataset_reader" : dataset_reader,
