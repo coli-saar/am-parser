@@ -7,7 +7,7 @@ import multiprocessing as mp
 
 from ...svg.dot_tools import penman_to_dot, parse_penman
 from ...svg.render import DependencyRenderer
-from ...am_algebra.new_amtypes import AMType
+
 
 @dataclass(frozen=True)
 class Entry:
@@ -148,7 +148,6 @@ class AMSentence:
 
     def to_tex_svg(self, directory):
         from graph_dependency_parser.svg.dot_tools import penman_to_dot, parse_penman, compile_dot
-        from graph_dependency_parser.am_algebra.new_amtypes import AMType
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
         \\usepackage{tikz-dependency}
@@ -165,7 +164,7 @@ class AMSentence:
 
         r += "\\&".join(w.token for w in self.words) + "\\\\ \n"
         r += space
-        pretty_types = [ str(AMType.parse_str(t.typ)) for t in self.words]
+        pretty_types = [ str(t.typ) for t in self.words]
         r += "\\&".join(t.replace("_","\\_") if t != "_" else "$\\bot$" for t in pretty_types) + "\\\\ \n"
         r += "\\&".join("\\hspace{1.2cm}" for _ in self.words) + "\\\\ \n"
         r += space
@@ -216,7 +215,7 @@ class AMSentence:
             return f.read()
 
     def displacy_svg(self):
-
+        from graph_dependency_parser.am_algebra.new_amtypes import AMType
         renderer = DependencyRenderer({"compact" : True})
         root_node = 0
         d = {"words" :  [ {"text" : w.token, "tag" : str(AMType.parse_str(w.typ)) if w.typ != "_" else "⊥"} for w in self.words] }

@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from dependency_decoding import chu_liu_edmonds # requires https://github.com/andersjo/dependency_decoding
+from allennlp.nn.util import get_device_of
 
 import numpy as np
 import torch
@@ -45,7 +46,6 @@ def cle_loss(scores: torch.Tensor, lengths : torch.Tensor, gold_heads : torch.Te
         :param lengths: actual lengths of the sentences, tensor of shape (batch_size,)
         :return: a scalar torch.Tensor with the hinge loss
         """
-    from allennlp.nn.util import get_device_of
     losses : torch.Tensor = 0
     device = get_device_of(scores)
     scores = scores.cpu()
