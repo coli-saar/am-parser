@@ -1,6 +1,7 @@
 import argparse
 
 from collections import namedtuple
+import sys
 
 ### usage: python3 am_dep_las.py filename1 filename2
 ###
@@ -71,17 +72,20 @@ labels_and_heads_correct = 0
 lex_labels_correct = 0
 
 with open(opts.gold) as f1:
-    gold = list(parse_amconll(f1))
+    gold = { attr["id"] : s for s, attr in parse_amconll(f1) }
 
 with open(opts.system) as f1:
-    system = list(parse_amconll(f1))
+    system = { attr["id"] : s for s, attr in parse_amconll(f1) }
     
-for (gold_sent, gold_attr), (system_sent, system_attr) in zip(gold, system):
-    if gold_attr["id"] != system_attr["id"]:
-        print("IDs are different", gold_attr["id"], system_attr["id"])
-        break
-        
-    for gold_w, system_w in zip(gold_sent, system_sent):
+print("Gold sents", len(gold))
+print("System sents", len(system))
+    
+intersection = set(gold.keys()) & set(system.keys())
+
+print("Intersection size", len(intersection))
+
+for id in intersection:
+    for gold_w, system_w in zip(gold[id], system[id]):
         tokens += 1
         if gold_w.fragment == system_w.fragment and gold_w.type == system_w.type:
             supertags_correct += 1
@@ -95,10 +99,12 @@ for (gold_sent, gold_attr), (system_sent, system_attr) in zip(gold, system):
             lex_labels_correct += 1
 
 
-print("Supertagging acc %", round(supertags_correct/tokens*100,3))
-print("Lexical label acc %", round(lex_labels_correct/tokens*100,3))
-print("UAS %", round(heads_correct/tokens*100,3))
-print("LAS %", round(labels_and_heads_correct/tokens*100,3))
+if len(intersection) > 0:
+    print()
+    print("Supertagging acc %", round(supertags_correct/tokens*100,3))
+    print("Lexical label acc %", round(lex_labels_correct/tokens*100,3))
+    print("UAS (including IGNORE) %", round(heads_correct/tokens*100,3))
+    print("LAS (including IGNORE) %", round(labels_and_heads_correct/tokens*100,3))
 
    
 
