@@ -43,6 +43,17 @@ cuda_device.add_argument('--cuda-device',
                          default=-1,
                          help='id of GPU to use (if any)')
 
+cuda_device.add_argument('--edge-label-limit',
+                         type=int,
+                         default=30,
+                         help='How many labels per edge to include in the scores file')
+
+
+cuda_device.add_argument('--supertag-limit',
+                         type=int,
+                         default=15,
+                         help='How many labels per edge to include in the scores file')
+
 parser.add_argument('--weights-file',
                        type=str,
                        help='a path that overrides which weights file to use')
@@ -136,8 +147,8 @@ def dump_tags(score, fragment, type):
         x = fragment.replace("  "," ").replace(" ","__ALTO_WS__")+"--TYPE--"+str(type).replace(" ","")
     return x+"|"+str(round(score,5))
 
-top_k_labels = 30
-top_k_supertags = 15
+top_k_labels = args.edge_label_limit
+top_k_supertags = args.supertag_limit
 bot_id = model.vocab.get_token_index(AMSentence.get_bottom_supertag(),namespace=formalism+"_supertag_labels")
 
 
