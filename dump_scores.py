@@ -43,15 +43,16 @@ cuda_device.add_argument('--cuda-device',
                          default=-1,
                          help='id of GPU to use (if any)')
 
-cuda_device.add_argument('--edge-label-limit',
-                         type=int,
-                         default=30,
-                         help='How many labels per edge to include in the scores file')
 
 
 cuda_device.add_argument('--supertag-limit',
                          type=int,
                          default=15,
+                         help='How many labels per edge to include in the scores file')
+
+parser.add_argument('--edge-label-limit',
+                         type=int,
+                         default=30,
                          help='How many labels per edge to include in the scores file')
 
 parser.add_argument('--weights-file',
