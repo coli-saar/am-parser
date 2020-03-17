@@ -234,11 +234,12 @@ class AMTask(Model):
                                         head_indices[:, 1:],
                                         head_tags[:, 1:],
                                         evaluation_mask)
+            evaluation_mask = mask[:, 1:].contiguous()
             if supertagging_nll is not None:
-                self._top_6supertagging_acc(supertagger_logits, supertags, mask[:, 1:])
-                self._supertagging_acc(supertagger_logits, supertags, mask[:, 1:])  # compare against gold data
+                self._top_6supertagging_acc(supertagger_logits, supertags, evaluation_mask)
+                self._supertagging_acc(supertagger_logits, supertags, evaluation_mask)  # compare against gold data
             if lexlabel_nll is not None:
-                self._lexlabel_acc(lexlabel_logits, lexlabels, mask[:, 1:])  # compare against gold data
+                self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)  # compare against gold data
 
             output_dict["arc_loss"] = edge_existence_loss
             output_dict["edge_label_loss"] = edge_label_loss
