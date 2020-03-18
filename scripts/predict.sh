@@ -113,7 +113,7 @@ amconll_prediction=$output$type"_pred.amconll" # where the neural model writes i
 
 # convert input file to AMConLL format
 if [ "$type" = "DM" ] || [ "$type" = "PAS" ] || [ "$type" = "PSD" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $input -o $output -p $prefix
+    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.tools.PrepareFinalTestData -c $input -o $output -p $prefix --framework $type
 elif [ "$type" = "EDS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.PrepareTestData -c $input -o $output -p $prefix
 elif [ "$type" = "AMR-2017" ]; then

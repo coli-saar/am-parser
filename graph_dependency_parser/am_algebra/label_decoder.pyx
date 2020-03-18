@@ -164,12 +164,16 @@ class AMDecoder:
         is_art_root = entry.form == "ART-ROOT"
         bot_type = self.parse_am_type("_")
         for (s,delex,typ) in entry.supertags:
-            t = self.parse_am_type(typ)
-            if not t in types_used:
-                ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root))
-                types_used.append(t)
-            if t == bot_type:
-                null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root)
+            try:
+                t = self.parse_am_type(typ)
+                if not t in types_used:
+                    ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root))
+                    types_used.append(t)
+                if t == bot_type:
+                    null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root)
+            except AssertionError:
+                print("Skipping supertag (ill-formed type?)",s,delex,typ)
+
         best_ones = ms[0:kbest]
 
         if null_item is None:
