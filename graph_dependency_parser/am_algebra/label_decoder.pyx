@@ -1,6 +1,8 @@
 # cython: language_level=3
 
 from operator import itemgetter
+from typing import Dict, Tuple
+
 import graph_dependency_parser.am_algebra.tree as tree
 import tqdm
 from graph_dependency_parser.am_algebra.amconll import ConllEntry, ConllSent, write_conll
@@ -9,7 +11,9 @@ from graph_dependency_parser.components.cle import get_head_dict
 from time import time
 
 import pyximport; pyximport.install()
-import graph_dependency_parser.am_algebra.amtypes as amtypes
+#import graph_dependency_parser.am_algebra.amtypes as amtypes
+import graph_dependency_parser.am_algebra.new_amtypes as new_amtypes
+
 #import graph_dependency_parser.am_algebra.evaluator as evaluator
 import multiprocessing as mp
 import numpy as np
@@ -26,8 +30,11 @@ class AgendaItem:
         self.local_types = local_types
         self.subtree = subtree
         self.is_art_root = is_art_root
+
+        self.already_applied = False #did we use apply already?
+
     def __str__(self):
-        return "AgendaItem({},{},{},{},{},{})".format(self.index,self.unproc_children,self.type,self.score,self.local_types,self.subtree)
+        return "AgendaItem({},{},{},{},{},{},{})".format(self.index,self.unproc_children,self.type,self.score,self.local_types,self.subtree, self.already_applied)
     def __repr__(self):
         return str(self)
     def __le__(self,other):
@@ -47,7 +54,10 @@ class AMDecoder:
         :param output_file: The filename where to store the decoded trees (*.amconll)
         :param i2edgelabel: A list of edge names that - by their order - allows to map indices to edge labels
         """
+        print("Using new type implementation")
         self.totyp = dict() #look up table to avoid parsing the same type from string to python object twice
+        self.apply_cache = dict() # Dict[Tuple[new_amtypes.AMType, str], new_amtypes.AMType]
+
         self.output_file = output_file
         self.i2rel = i2edgelabel
         self.rel2i = { rel : i for i, rel in enumerate(i2edgelabel)}
@@ -134,9 +144,16 @@ class AMDecoder:
         
         if string in self.totyp:
             return self.totyp[string]
-        self.totyp[string] = amtypes.parse_type(string)
+        self.totyp[string] = new_amtypes.AMType.parse_str(string)
         return self.totyp[string]
-    
+
+    def perform_apply(self, typ : new_amtypes.AMType, source : str) -> new_amtypes.AMType:
+        tupl = (typ, source)
+        if tupl in self.apply_cache:
+            return self.apply_cache[tupl]
+        self.apply_cache[tupl] = typ.perform_apply(source)
+        return self.apply_cache[tupl]
+
     def get_items(self, entry, kbest):
         """
             Creates a list of Items for a (leaf) entry. Assumes entry to have a list called supertags where the tags are sorted in descending order by score.
@@ -145,16 +162,19 @@ class AMDecoder:
         types_used = []
         null_item = None
         is_art_root = entry.form == "ART-ROOT"
+        bot_type = self.parse_am_type("_")
         for (s,delex,typ) in entry.supertags:
             t = self.parse_am_type(typ)
             if not t in types_used:
                 ms.append(AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root))
                 types_used.append(t)
-            if t == self.parse_am_type("_"):
+            if t == bot_type:
                 null_item = AgendaItem(entry.id,set(),t,s,[(entry.id,t)],[],is_art_root)
         best_ones = ms[0:kbest]
+
         if null_item is None:
             raise ValueError("It looks like there was no prediction for the type \\bot (written _ here) provided")
+
         if not null_item in best_ones:
             best_ones.append(null_item)
         return best_ones
@@ -179,7 +199,7 @@ class AMDecoder:
         :param kbest: How many supertags to take into account? If not set, use the setting of the object (self.kbest)
         :return: the modified conll_sentence
         """
-        chart = dict()
+        chart : Dict[int,Dict[new_amtypes.AMType,Tuple[new_amtypes.AMType, float]]] = dict()
         backpointer = dict()
         agenda = []
 
@@ -207,15 +227,15 @@ class AMDecoder:
                 chart[i] = dict()
                 backpointer[i] = dict()
                 for item in self.get_items(w, kbest):
-                    chart[i][amtypes.typ_to_str(item.type)] = (item.type, item.score)
-                    backpointer[i][amtypes.typ_to_str(item.type)] = ([(i, item.type)], [])
+                    chart[i][item.type] = (item.type, item.score)
+                    backpointer[i][item.type] = ([(i, item.type)], [])
         if not encountered_root:
             print("Didn't encounter root when constructing the agenda, something's wrong :( ","root",new_root_id)
             print("tree",head_dict,t)
             print("sentence",  str(conll_sentence))
         counter = 0
 
-        cache = amtypes.CombinationCache()
+        cache = new_amtypes.CombinationCache()
         start_time = time()
         label_scores = conll_sentence.label_scores
         while agenda:
@@ -237,8 +257,7 @@ class AMDecoder:
                             print("Skipping sentence")
                         return conll_sentence
                 it = one_index.pop()
-                it_type_str = amtypes.typ_to_str(it.type)
-                tupl = (it_type_str,frozenset(it.unproc_children))
+                tupl = (it.type,frozenset(it.unproc_children))
                 if tupl in processed and processed[tupl] >= it.score:
                     continue
                 processed[tupl] = max(it.score,processed.get(tupl,it.score))
@@ -246,10 +265,13 @@ class AMDecoder:
 
                 for unprocessed in it.unproc_children:
                     for child_t, child_score in chart[unprocessed].values():
-                        child_t_str = amtypes.typ_to_str(child_t)
-                        for op,source in cache.combinations(it.type, it_type_str, child_t, child_t_str):
-                            if it.is_art_root and op =="MOD_": #at ART-ROOT: only allow APP operations with sources starting with art-snt
-                                continue
+                        for op,source in cache.combinations(it.type, child_t):
+                            if op == "MOD_":
+                                if it.is_art_root: #at ART-ROOT: only allow APP operations with sources starting with art-snt
+                                    continue
+                                elif it.already_applied: #we don't have to try that because we can first perform all MOD than all APP
+                                    continue
+
                             counter += 1
                             if op+source in self.rel2i:
                                 edgescore = label_scores[unprocessed-1,self.rel2i[op+source]]
@@ -258,20 +280,28 @@ class AMDecoder:
                                 edgescore = -100
                             #print(it.index, unprocessed,op+source,"mit Score",edgescore)
                             new_type = it.type
-                            sub_bp = backpointer[unprocessed][child_t_str]
-                            if op == "APP_": #type only changes for apply operations
-                                new_type = amtypes.simulate_app(it.type, source)
+                            sub_bp = backpointer[unprocessed][child_t]
+                            op_is_APP = op == "APP_"
+
+                            if op_is_APP: #type only changes for apply operations
+                                new_type = self.perform_apply(it.type, source) #it.type.perform_apply(source)
+                                assert new_type is not None, "applying seems disallowed although the operation came from the CombinationCache"
+
                             new_it = AgendaItem(it.index, it.unproc_children - {unprocessed}, new_type, child_score + it.score + edgescore,it.local_types+sub_bp[0],sub_bp[1] + it.subtree + [(it.index, unprocessed,op+source)],it.is_art_root)
 
-                            typ_str = amtypes.typ_to_str(new_it.type)
+                            if op_is_APP:
+                                new_it.already_applied = True
+                            else:
+                                new_it.already_applied = it.already_applied
+
                             if len(new_it.unproc_children) == 0:
                                 if new_it.index not in chart:
                                     chart[new_it.index] = dict()
                                     backpointer[new_it.index] = dict()
                                 
-                                if typ_str not in chart[new_it.index] or new_it.score > chart[new_it.index][typ_str][1]:
-                                    chart[new_it.index][typ_str] = (new_it.type,new_it.score)
-                                    backpointer[new_it.index][typ_str] = (new_it.local_types,new_it.subtree)
+                                if new_type not in chart[new_it.index] or new_it.score > chart[new_it.index][new_type][1]:
+                                    chart[new_it.index][new_type] = (new_it.type,new_it.score)
+                                    backpointer[new_it.index][new_type] = (new_it.local_types,new_it.subtree)
                             else:
                                 #tupl = (typ_str,frozenset(new_it.unproc_children))
                                 found = None
@@ -295,7 +325,7 @@ class AMDecoder:
         #print("new root id", new_root_id)
         #print(head_dict)
         try:
-            best_entry = max(chart[new_root_id].values(), key = lambda entry: (-amtypes.number_of_open_sources(entry[0]), entry[1])) #most important: few open sources, 2nd: highest score
+            best_entry = max(chart[new_root_id].values(), key = lambda entry: (-(entry[0].number_of_open_sources()), entry[1])) #most important: few open sources, 2nd: highest score
         except KeyError as e:
             print(e)
             print("Didn't find an item for the root of the AM dependency tree. This must not happen :/")
@@ -306,16 +336,19 @@ class AMDecoder:
             print("Skipping sentence")
             return conll_sentence
         #Look up backpointers
-        local_types,edges = backpointer[new_root_id][amtypes.typ_to_str(best_entry[0])]
+        local_types,edges = backpointer[new_root_id][best_entry[0]]
         has_a_local_type = set()
+
         for index, typ in local_types:
-            t_str = amtypes.typ_to_str(typ)
+            t_str = str(typ)
             has_a_local_type.add(index)
-            conll_sentence[index].typ = t_str 
+            conll_sentence[index].typ = t_str
+
             for (score,delex,ty) in conll_sentence[index].supertags:
-                if ty == t_str:
+                if self.parse_am_type(ty) == typ:
                     conll_sentence[index].delex_supertag = delex
                     break
+
         for (h,d,e) in edges:
             conll_sentence[d].pred_edge_label = e
         return conll_sentence

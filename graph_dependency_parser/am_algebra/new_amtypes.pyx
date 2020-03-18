@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# cython: language_level=3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Dec  3 20:47:47 2019
@@ -6,13 +7,11 @@ Created on Tue Dec  3 20:47:47 2019
 @author: matthias
 """
 
-from networkx import DiGraph
-import networkx.algorithms.dag as algs
+import pyximport; pyximport.install()
+from graph_dependency_parser.am_algebra.dag import DiGraph
 
 from typing import Set, Dict, Tuple, List, Iterator, Optional
 import re
-from copy import deepcopy
-
 
 
 
@@ -25,7 +24,7 @@ def extract_constituents(depths) -> List[Tuple[int,int]]:
     that is, identify chunks of the form 0 1 * 0
     """
     start = 0
-    ret : List[Tuple[int,int]] = []
+    ret  = [] # List[Tuple[int,int]]
     for i,d in enumerate(depths):
         if d == 0 and i+1 < len(depths) and depths[i+1] == 1:
             start = i+1
@@ -37,50 +36,31 @@ def extract_constituents(depths) -> List[Tuple[int,int]]:
 UNIFY_PATTERN : re.Pattern = re.compile("(.+)_UNIFY_(.+)")
 UNIFY = "_UNIFY_"
 
-class AMType:
+class AMType(DiGraph):
     
     def __init__(self):
-        self.graph = DiGraph()
+        super().__init__()
         self.is_bot : bool = False #\bot type?
         
-    def update_origins(self):
-         self.origins = { node for node, indegree in self.graph.in_degree(self.graph.nodes) if indegree == 0}
-         
-    def ensure_closure(self):
-        self.graph = algs.transitive_closure(self.graph)
-        
-    def ensure_edge_labels(self):
-        for f,t in self.graph.edges():
-            if "label" not in self.graph[f][t]:
-                self.graph[f][t]["label"] = t
             
     def process_updates(self):
-        self.update_origins()
-        self.ensure_closure()
-        self.ensure_edge_labels()
+        self.closure()
         
-        assert algs.is_directed_acyclic_graph(self.graph)
+        assert not self.has_cycle()
         
         assert self.verify()
             
-        
-    def outgoing_edges(self, node) -> Iterator[Tuple[str,str]]:
-        for target, rename in self.graph[node].items():
-            yield target, rename["label"]
-            
-    def get_children(self, node) -> Set[str]:
-        return set(self.graph[node])
         
     def verify(self) -> bool:
         """
         Checks that all edges leaving a node are uniquely labeled. See definition 5.2. (iv)
         """
         if self.is_bot:
-            if len(self.graph.nodes()) > 0:
+            if not self.is_empty():
                 return False
 
-        for node in self.graph.nodes():
-            seen : Set[str] = set()
+        for node in self.nodes():
+            seen = set() # : Set[str]
             for _, label in self.outgoing_edges(node):
                 if label in seen:
                     return False
@@ -117,6 +97,7 @@ class AMType:
         parents = []
         if typ is None:
             typ = AMType()
+
         for t in s:
             if t == "(":
                 depth += 1
@@ -127,15 +108,15 @@ class AMType:
             elif depth == 0:
                 m = UNIFY_PATTERN.fullmatch(t)
                 if m: #rename, e.g. o2(s_UNIFY_o)
-                    typ.graph.add_node(m.group(2))
+                    typ.add_node(m.group(2))
                     assert parent is not None
                     parents.append(m.group(2))
-                    typ.graph.add_edge(parent, m.group(2),label=m.group(1))
+                    typ.add_edge(parent, m.group(2),label=m.group(1))
                 else:
-                    typ.graph.add_node(t)
+                    typ.add_node(t)
                     parents.append(t)
                     if parent is not None:
-                        typ.graph.add_edge(parent, t, label=t)
+                        typ.add_edge(parent, t, label=t)
             depths.append(depth)
             
         subexprs = [ s[from_:to_+1] for (from_, to_) in extract_constituents(depths)]
@@ -181,15 +162,15 @@ class AMType:
         """
         Checks whether this type is a subgraph of type 'other'.
         """
-        node_subset = set(self.graph.nodes()).issubset(other.graph.nodes())
+        node_subset = set(self.nodes()).issubset(other.nodes())
         if not node_subset:
             return False
         
-        for node in self.graph.nodes():
+        for node in self.nodes():
             for t, label in self.outgoing_edges(node):
-                if t not in other.graph[node]:
+                if t not in other.edges[node]:
                     return False # edge present in self but not in other
-                elif other.graph[node][t]["label"] != label:
+                elif other.edges[node][t] != label:
                     return False # edge present in both but not the same label
                 
         return True
@@ -200,33 +181,38 @@ class AMType:
         Maps the descendant/child to its counterpart in req(parent). Returns None
         if "descendant" is not actually a descendant of parent.
         """
-        if parent not in self.graph.nodes() or child not in self.graph.nodes() or child not in self.graph[parent]:
+        if parent not in self.nodes() or child not in self.nodes() or child not in self.edges[parent]:
             return None
-        return self.graph[parent][child]["label"]
+        return self.edges[parent][child]
 
     def get_request(self, source : str) -> Optional["AMType"]:
         """
         Returns the request of this type at source s (=req(s)).
         Returns None if s is not present in self
         """
-        if source not in self.graph:
+        if source not in self.edges:
             return None
         
         descendants = self.get_children(source)
         ret = AMType()
         
         for node in descendants:
-            ret.graph.add_node(self.to_request_namespace(source,node))
+            in_namespace = self.to_request_namespace(source,node)
+            if in_namespace is not None:
+                ret.add_node(in_namespace)
+            else:
+                return None
             
         for node in descendants:
             for target, label in self.outgoing_edges(node):
                 assert target in descendants, "Type seems to be NOT transitively closed"
                 
-                ret.graph.add_edge(self.to_request_namespace(source, node),
-                                   self.to_request_namespace(source, target),
-                                   label=label
-                                   )
-                    
+                source_r = self.to_request_namespace(source, node)
+                target_r = self.to_request_namespace(source, target)
+                if source_r is None or target_r is None:
+                    return None
+                ret.add_edge(source_r,target_r,label=label)
+
         ret.process_updates()
         return ret
     
@@ -234,7 +220,7 @@ class AMType:
         """
         Is this the empty type?
         """
-        return len(self.graph.nodes()) == 0 and not self.is_bot
+        return self.is_empty() and not self.is_bot
     
     
     def get_apply_set(self, target : "AMType") -> Optional[Set[str]]:
@@ -252,15 +238,15 @@ class AMType:
             return None
         
         #return value is all sources in this type that are not in target
-        ret = set(self.graph.nodes()) - set(target.graph.nodes())
+        ret = set(self.nodes()) - set(target.nodes())
         
         
         # but if any source s in ret is a descendant of a node t in target,
         # then we can't remove s via apply without removing t before.
         # Can check for that by just looking at the children of the nodes in target.
         
-        for node in target.graph.nodes():
-            if self.get_children(node) & ret:
+        for node in target.nodes():
+            if set(self.get_children(node)) & ret:
                 return None
             
         return ret
@@ -272,13 +258,15 @@ class AMType:
         """
         if self.is_bot: #to make it explicit: \bot cannot be used in APP
             return False
-        
+
+        # check that appSource is an origin (and thus not needed for unification later)
+        if source not in self.origins:
+            return False
+
         request = self.get_request(source)
         # check if the type expected here at source is equal to the argument type
-        if request is None or request != argument:
-            return False
-        # check that appSource is an origin (and thus not needed for unification later)
-        return source in self.origins
+
+        return request is not None and request == argument
     
     def can_be_modified_by(self, modifier: "AMType", source : str) -> bool:
         """
@@ -287,12 +275,14 @@ class AMType:
         """
         if self.is_bot: # \bot cannot be modified
             return False
+
+        if source not in modifier.origins:
+            return False
         
         request = modifier.get_request(source)
         
         return request is not None and \
             request.is_empty_type() and \
-            source in modifier.origins and \
             modifier.copy_with_removed(source).is_compatible_with(self)
             
     def copy_with_removed(self, source : str) -> "AMType":
@@ -300,8 +290,8 @@ class AMType:
          Creates a copy with r removed from the domain. Does not modify the
          original type.
         """
-        copy = deepcopy(self)
-        copy.graph.remove_node(source)
+        copy = self.copy()
+        copy.remove_node(source)
         copy.process_updates()
         return copy
     
@@ -316,31 +306,16 @@ class AMType:
         if not isinstance(other, AMType):
            raise NotImplementedError("Comparison between AMType and "+str(type(other))+" not implemented.")
         
-        if self.origins != other.origins:
-            return False
-        
         if self.is_bot != other.is_bot:
             return False
-        
-        if set(self.graph.nodes()) != set(other.graph.nodes()):
-            return False
-        
-        for node in self.graph.nodes():
-            if set(self.outgoing_edges(node)) != set(other.outgoing_edges(node)):
-                return False
-        
-        return True
-    
+
+        return super().__eq__(other)
+
     def __hash__(self) -> int:
-        h = sum(hash(s) % 999999 for s in self.origins)
+
+        return super().__hash__()
         
-        for node in self.graph.nodes():
-            for o,label in self.outgoing_edges(node):
-                h += (hash(node) % 100000)  * (hash(o) % 500000 ) * (hash(label) % 300000)
-                
-        return h
-        
-        
+
     def perform_apply(self, source : str) -> Optional["AMType"]:
         """
          * Returns the type that we obtain after using APP_s on this type (returns
@@ -354,20 +329,31 @@ class AMType:
          * and copyWithRemoved is not public. So I think this has a place -- JG
          * 
          """
-        if not self.can_apply_now(s):
+        if not self.can_apply_now(source):
              return None
          
         return self.copy_with_removed(source)
     
-    def number_of_open_source(self) -> float:
+    def number_of_open_sources(self) -> float:
         """
         Returns the number of sources left or infinity if this is the \bot type.
         """
         if self.is_bot:
             return float("inf")
         
-        return len(self.graph.nodes())
+        return sum(1 for _ in self.nodes())
     
+    def copy(self) -> "AMType":
+        g = AMType()
+        g.origins = set(self.origins)
+        g.edges = { from_ : dict(self.edges[from_]) for from_ in self.edges.keys()}
+        g.is_bot = self.is_bot
+
+        assert hash(g) == hash(self)
+
+        return g
+
+
         
 
 def combinations(head : AMType, dependent : AMType) -> Iterator[Tuple[str,str]]:
@@ -407,8 +393,11 @@ class CombinationCache:
 
 if __name__ == "__main__":
     from tqdm import tqdm
+    import timeit
     t = AMType.parse_str("(s(), o()")
-    t2 = AMType.parse_str("()")
+    t2 = t.copy()
+    print(timeit.timeit(lambda: t.copy(),number = 40000))
+    t3 = AMType.parse_str("()")
     bot = AMType.parse_str("_")
     print("===")
     print(t)
