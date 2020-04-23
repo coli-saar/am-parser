@@ -1,6 +1,9 @@
 # am-parser
 Modular implementation of the AM dependency parser used in [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450).
 
+## Online Demo
+Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
+
 ## Quick Guide
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
