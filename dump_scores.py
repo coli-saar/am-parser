@@ -1,3 +1,4 @@
+import socket
 from typing import Dict, Any
 import logging
 import json
@@ -158,7 +159,6 @@ with zipfile.ZipFile(args.output_path,"w",compression=zipfile.ZIP_DEFLATED, comp
     modified_conll_sentences = []
     with myzip.open("opProbs.txt","w") as fp:
         for sentence_id,pred in enumerate(predictions):
-            attributes = pred["attributes"]
 
             if "supertag_scores" in pred:
                 all_supertag_scores = F.log_softmax(torch.from_numpy(pred["supertag_scores"]),1) #shape (sent length, num supertags)
@@ -176,6 +176,12 @@ with zipfile.ZipFile(args.output_path,"w",compression=zipfile.ZIP_DEFLATED, comp
             modified_sent = conll_sentences[sentence_id].set_heads(pred["predicted_heads"])
             if "lexlabels" in pred:
                 modified_sent = modified_sent.set_lexlabels(pred["lexlabels"])
+
+            attributes = pred["attributes"]
+            attributes["batch_size"] = str(pred["batch_size"])
+            attributes["normalized_nn_time"] = str(pred["batch_time"] / pred["batch_size"])
+            attributes["nn_host"] = socket.gethostname()
+            modified_sent.attributes = attributes
 
             modified_conll_sentences.append(modified_sent)
 

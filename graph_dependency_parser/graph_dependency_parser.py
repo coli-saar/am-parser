@@ -1,3 +1,4 @@
+import time
 from typing import Dict, Optional, Any, List
 import logging
 
@@ -185,6 +186,7 @@ class GraphDependencyParser(Model):
         mask : ``torch.LongTensor``
             A mask denoting the padded elements in the batch.
         """
+        t0 = time.time()
         if 'formalism' not in metadata[0]:
             raise ConfigurationError("metadata is missing 'formalism' key.\
             Please use the amconll dataset reader.")
@@ -237,7 +239,12 @@ class GraphDependencyParser(Model):
         if head_tags is not None:
             head_tags = torch.cat([head_tags.new_zeros(batch_size, 1), head_tags], 1)
 
-        return self.tasks[formalism_of_batch](encoded_text_parsing, encoded_text_tagging, mask, pos_tags, metadata, supertags, lexlabels, head_tags, head_indices)
+        ret = self.tasks[formalism_of_batch](encoded_text_parsing, encoded_text_tagging, mask, pos_tags, metadata, supertags, lexlabels, head_tags, head_indices)
+        t1 = time.time()
+        # Save time and batch size, but save it separately for each batch element.
+        ret["batch_size"] = torch.ones(batch_size, dtype=torch.long) * batch_size
+        ret["batch_time"] = torch.ones(batch_size) * (t1-t0)
+        return ret
 
 
     @overrides
