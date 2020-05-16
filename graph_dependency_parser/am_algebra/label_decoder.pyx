@@ -187,8 +187,12 @@ class AMDecoder:
     
     def call_viterbi(self, conll_sentence, tqdm_obj=None):
         assert(all(len(entry.supertags) >= self.kbest for entry in conll_sentence[1:]))
-
-        return self.viterbi(conll_sentence,conll_sentence.root, self.kbest, tqdm_obj=tqdm_obj)
+        t0 = time()
+        modified_conll_sentence = self.viterbi(conll_sentence,conll_sentence.root, self.kbest, tqdm_obj=tqdm_obj)
+        t1 = time()
+        modified_conll_sentence.add_attr("#parsing_time:"+str(t1-t0))
+        modified_conll_sentence.add_attr("#k-supertags:"+str(self.kbest))
+        return modified_conll_sentence
         
     def viterbi(self, conll_sentence, new_root_id, kbest, tqdm_obj=None):
         """
