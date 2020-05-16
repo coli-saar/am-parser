@@ -65,7 +65,7 @@ local dataset_reader =  {
 
 local data_iterator = {
         "type": "same_formalism",
-        "batch_size": 48,
+        "batch_size": 32,
         "formalisms" : my_tasks
     };
 
