@@ -50,7 +50,7 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2015",
         "system_input" : "data/AMR/2015/dev/dev.amconll",
         "gold_file": "data/AMR/2015/dev/goldAMR.txt",
-        "use_from_epoch" : 5,
+        "use_from_epoch" : 10,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
@@ -68,7 +68,7 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/dev/dev.amconll",
         "gold_file": "data/AMR/2017/dev/goldAMR.txt",
-        "use_from_epoch" : 5,
+        "use_from_epoch" : 10,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
@@ -81,18 +81,18 @@ function (dataset_reader, data_iterator) {
 
   },
 
-    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,0),
+    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,10),
 
-    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,20),
+    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,10),
 
-    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",2,15),
+    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",2,10),
 
     "EDS" :  {
         "type": "standard_evaluator",
         "formalism" : "EDS",
         "system_input" : "data/EDS/dev/dev.amconll",
         "gold_file": "data/EDS/dev/dev-gold",
-        "use_from_epoch" : 15,
+        "use_from_epoch" : 10,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
