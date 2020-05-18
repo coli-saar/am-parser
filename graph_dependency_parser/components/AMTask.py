@@ -326,6 +326,7 @@ class AMTask(Model):
         if self.validation_evaluator: #retrieve k supertags from validation evaluator.
             if isinstance(self.validation_evaluator.predictor,AMconllPredictor):
                 k = self.validation_evaluator.predictor.k
+        k += 10 # perhaps there are some ill-formed supertags, make that very unlikely that there are not enough left after filtering.
         top_k_supertags = Supertagger.top_k_supertags(supertag_scores, k).cpu().detach().numpy() # shape (batch_size, seq_len, k)
         supertag_scores = supertag_scores.cpu().detach().numpy()
         lexlabels = output_dict.pop("lexlabels").cpu().detach().numpy() #shape (batch_size, seq_len)

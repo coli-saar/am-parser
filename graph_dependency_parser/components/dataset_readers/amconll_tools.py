@@ -127,6 +127,11 @@ class AMSentence:
     def __len__(self):
         return len(self.words)
 
+    def strip_annotation(self) -> "AMSentence":
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, "_", "_",
+                                 "_", 0, "IGNORE", word.aligned, word.range)
+                           for word in self.words],self.attributes)
+
     def to_dot(self):
         from graph_dependency_parser.svg.dot_tools import penman_to_dot
         r = []

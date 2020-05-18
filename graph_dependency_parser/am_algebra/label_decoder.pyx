@@ -92,7 +92,15 @@ class AMDecoder:
             entry.pred_parent_id = heads[i]
             if not any(triple[2] == "_" for triple in supertagpreds[i]):
                 raise ValueError("The supertag prediction for word "+str(i+1)+" has no entry for bottom (represented by _). This is required.")
-            entry.supertags = sorted(supertagpreds[i], key= lambda triple: triple[0], reverse=True)
+            supertag_preds = []
+            for triple in supertagpreds[i]:
+                try:
+                    self.parse_am_type(triple[2])
+                    supertag_preds.append(triple)
+                except AssertionError: # skip ill-formed types
+                    pass
+
+            entry.supertags = sorted(supertag_preds, key= lambda triple: triple[0], reverse=True)
             conllsent.append(entry)
         assert len(conllsent) == len(heads)+1
 
