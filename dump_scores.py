@@ -1,4 +1,6 @@
 import socket
+import sys
+import time
 from typing import Dict, Any
 import logging
 import json
@@ -55,6 +57,8 @@ parser.add_argument('--edge-label-limit',
                          type=int,
                          default=30,
                          help='How many labels per edge to include in the scores file')
+
+parser.add_argument("--batch_size", type=int, default=None, help="Overwrite batch size.")
 
 parser.add_argument('--weights-file',
                        type=str,
@@ -128,10 +132,26 @@ instances = dataset_reader.read([[formalism, args.input_file]])  # we need to gi
 model.train(False)
 data_iterator = DataIterator.from_params(config.pop('iterator'))
 
+assert isinstance(data_iterator, SameFormalismIterator)
+
+if args.batch_size is not None:
+    data_iterator : SameFormalismIterator = data_iterator # to get code completion.
+    data_iterator = SameFormalismIterator(data_iterator.formalisms, args.batch_size)
+
 with open (args.input_file) as f:
     conll_sentences = list(amconll_tools.parse_amconll(f))
 
+# The following just has the effect that we compute softmax scores (see below)
+# within the part of the code that measures computation time.
+# It's easier to compute this twice.
+
+for task in model.tasks.values():
+    task.compute_softmax_for_scores = True
+
+t0 = time.time()
 predictions = dataset_reader.restore_order(forward_on_instances(model, instances, data_iterator))
+t1 = time.time()
+print("Scoring took", t1-t0, "seconds")
 
 i2edge_label = [model.vocab.get_token_from_index(i, namespace=formalism + "_head_tags") for i in
                 range(model.vocab.get_vocab_size(formalism + "_head_tags"))]

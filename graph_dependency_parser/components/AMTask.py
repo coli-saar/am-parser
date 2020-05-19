@@ -21,6 +21,8 @@ from graph_dependency_parser.components.losses import EdgeLoss
 from graph_dependency_parser.components.losses.supertagging import SupertaggingLoss
 from graph_dependency_parser.components.supertagger import Supertagger
 
+import torch.nn.functional as F
+
 import logging
 
 
@@ -94,6 +96,8 @@ class AMTask(Model):
         self._pos_to_ignore = set(punctuation_tag_indices.values())
         logger.info(f"Found POS tags corresponding to the following punctuation : {punctuation_tag_indices}. "
                     "Ignoring words with these POS tags for evaluation.")
+
+        self.compute_softmax_for_scores = False # set to true when dumping scores to incorporate softmax computation into computation time
 
     def check_all_dimensions_match(self, encoder_output_dim):
 
@@ -246,6 +250,14 @@ class AMTask(Model):
             output_dict["supertagging_loss"] = supertagging_nll
             output_dict["lexlabel_loss"] = lexlabel_nll
             output_dict["loss"] = loss
+
+        if self.compute_softmax_for_scores:
+            # We don't use the results but we want it to be included in the time measurement
+            # See dump_scores what part of computation is done outside of the time measurement in forward()
+            F.log_softmax(output_dict["full_label_logits"], 3)
+            F.log_softmax(output_dict["supertag_scores"], 2)
+            torch.argsort(output_dict["supertag_scores"], descending=True, dim=2)
+
         return output_dict
 
     @overrides
