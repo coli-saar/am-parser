@@ -1,3 +1,4 @@
+from time import time
 from typing import Dict, Optional, List, Any
 
 import numpy
@@ -330,6 +331,7 @@ class AMTask(Model):
             - lexlabels: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
             - supertags: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
         """
+        t0 = time()
         best_supertags = output_dict.pop("best_supertags").cpu().detach().numpy()
         supertag_scores = output_dict.pop("supertag_scores") # shape (batch_size, seq_len, num supertags)
         full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
@@ -399,6 +401,9 @@ class AMTask(Model):
             all_predicted_lex_labels.append([self.vocab.get_token_from_index(label,namespace=self.name+"_lex_labels") for label in lexlabels[i,1:length]])
             head_indices.append(instance_heads_cpu)
 
+        t1 = time()
+        normalized_diff = (t1-t0) / len(lengths)
+        output_dict["normalized_prepare_ftd_time"] = [normalized_diff for _ in range(len(lengths))]
         output_dict["lexlabels"] = all_predicted_lex_labels
         output_dict["supertags"] = all_supertags
         output_dict["root"] = roots

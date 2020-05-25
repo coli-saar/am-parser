@@ -10,6 +10,8 @@ from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
+from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll
+from graph_dependency_parser.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
 from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, Evaluator, StandardEvaluator
 from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
 
@@ -25,6 +27,9 @@ parser = argparse.ArgumentParser(description="Run the am-parser on a specified a
 
 parser.add_argument('archive_file', type=str, help='path to an archived trained model')
 
+parser.add_argument("--batch_size", type=int, default=None, help="Overwrite batch size.")
+
+# NOT SURE IF THESE WORK:
 parser.add_argument('-k',
                        type=int,
                        default=6,
@@ -89,13 +94,33 @@ if validation_dataset_reader_params is not None:
 else:
     dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
 
+metrics = dict()
 for x in test_evaluators:
     for param_evaluator in x:
         prefix = param_evaluator[0]
         param_evaluator[1].pop("type")
         evaluator = StandardEvaluator.from_params(param_evaluator[1])
-        evaluator.predictor.set_model(model)
-        evaluator.predictor.parse_and_save(evaluator.formalism, evaluator.system_input, args.archive_file + "/test_" + prefix + ".amconll")
 
+        if args.batch_size is not None:
+            data_iterator = SameFormalismIterator(list(model.tasks.keys()), args.batch_size)
+            evaluator.predictor.data_iterator = data_iterator
+
+        evaluator.predictor.set_model(model)
+        filename = args.archive_file + "/test_" + prefix + ".amconll"
+        local_metrics = evaluator.predictor.parse_and_eval(evaluator.formalism, evaluator.system_input, evaluator.gold_file, filename=filename)
+        metrics.update({prefix+"_"+k: v for k,v in local_metrics.items()})
+        #evaluator.predictor.parse_and_save(evaluator.formalism, evaluator.system_input, filename)
+        #evaluator.
+        cumulated_parse_time = 0.0
+        with open(filename) as f:
+            for am_sentence in parse_amconll(f, validate=False):
+                cumulated_parse_time += float(am_sentence.attributes["normalized_nn_time"]) + float(am_sentence.attributes["parsing_time"]) \
+                                        + float(am_sentence.attributes["normalized_prepare_ftd_time"])
+        metrics[prefix+"_time"] = cumulated_parse_time
+
+with open(args.archive_file+"/test_metrics.json", "w") as f:
+    f.write(json.dumps(metrics))
+
+print(metrics)
 
 logger.info("Finished parsing.")

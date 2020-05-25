@@ -138,6 +138,7 @@ class AMconllPredictor(Predictor):
             attributes = pred["attributes"]
             attributes["batch_size"] = pred["batch_size"]
             attributes["normalized_nn_time"] = pred["batch_time"] / pred["batch_size"]
+            attributes["normalized_prepare_ftd_time"] = pred["normalized_prepare_ftd_time"]
             attributes["host"] = socket.gethostname()
             attributes["parser"] = "ftd"
             am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
