@@ -519,5 +519,8 @@ class AMTask(Model):
             r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
         if self.loss_mixing["lexlabel"] is not None:
             r["Label_Acc"] = self._lexlabel_acc.get_metric(reset)
+        las = r["LAS"]
+        if "Constant_Acc" in r:
+            r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2
         return r
 
