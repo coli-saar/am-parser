@@ -151,8 +151,14 @@ class AMSentence:
 
         return "digraph { compound=true; \n" +"\n".join(r) +"}"
 
-    def to_tex_svg(self, directory):
+    def to_tex_svg(self, directory, prefix=""):
         from graph_dependency_parser.svg.dot_tools import penman_to_dot, parse_penman, compile_dot
+        def escape_chars(string: str) -> str:
+            if string in "#$&%":
+                string = "\\" + string
+            # todo what if '\'
+            # todo replace special char in longer string ('5$'->'5\$')
+            return string
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
         \\usepackage{tikz-dependency}
@@ -167,7 +173,7 @@ class AMSentence:
         \\begin{deptext}[column sep=1.0cm]"""
         space = "\\&".join(" " for _ in self.words) + "\\\\ \n"
 
-        r += "\\&".join(w.token for w in self.words) + "\\\\ \n"
+        r += "\\&".join(escape_chars(w.token) for w in self.words) + "\\\\ \n"
         r += space
         pretty_types = [ str(t.typ) for t in self.words]
         r += "\\&".join(t.replace("_","\\_") if t != "_" else "$\\bot$" for t in pretty_types) + "\\\\ \n"
@@ -190,8 +196,10 @@ class AMSentence:
 
             graph_fragment = parse_penman(word.fragment)
             cluster, _ = penman_to_dot(graph_fragment, word.lexlabel, word.lemma, word.token, word.replacement, word.pos_tag, "n")
-            fname = directory+"/w"+str(i)
+            fname = os.path.join(directory, "w"+str(i))
             with open(fname+".dot","w") as f:
+                # todo for dots files increase font (less white space)
+                # todo try: node [fontsize=18,margin="0.05,0.005"]; # tested with 0.8,0.8
                 if len(graph_fragment.instances()) == 1:
                     #make smaller graph, otherwise node will look too large.
                     f.write('digraph{ graph [size="0.4,0.4"]; margin=0; bgcolor=transparent; ' + cluster + "}")
@@ -203,7 +211,7 @@ class AMSentence:
             r += "\\node (n"+str(i)+") [below of = \wordref{5}{"+str(i)+"}] {\\includegraphics{w"+str(i)+".pdf}};\n"
 
         r += "\end{dependency} \end{document}"
-        fname = directory+"/sentence"
+        fname = os.path.join(directory, prefix+"sentence")
 
         #compile dot graphs in parallel.
         with mp.Pool(8) as p:
@@ -212,7 +220,7 @@ class AMSentence:
         with open(fname+".tex","w") as g:
             g.write(r)
 
-        subprocess.run("pdflatex -interaction=batchmode "+ fname+".tex", shell=True, cwd=directory)
+        subprocess.run("pdflatex -interaction=batchmode "+ fname+".tex" + " > /dev/null 2>&1", shell=True, cwd=directory)
         #os.system("./pdf2svg " + fname + ".pdf " + fname+".svg")
         os.system("inkscape -l " + fname + ".svg " + fname+".pdf")
         os.system("cat "+fname+".svg | tr -s ' ' > "+fname+"2.svg") #svg contains a lot of spaces, strip them away.
