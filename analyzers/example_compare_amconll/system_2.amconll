@@ -1,0 +1,31 @@
+#id:#22058015
+1	You	_	#PersPron	PRP	O	(i_2<root> / --LEX--)	~~_	()	10	APP_s	true
+2	talk	_	talk	VBP	O	(i_2<root> / --LEX--  :ACT-arg (i_1<s>)  :PAT-arg (i_3<o>))	~~ev-w3318f3	(o(), s())	10	APP_op	true
+3	of	_	of	IN	O	_	_	_	0	IGNORE	true
+4	times	_	time	NNS	O	(i_2<root> / --LEX--)	~~_	()	2	APP_o	true
+5	of	_	of	IN	O	_	_	_	0	IGNORE	true
+6	peace	_	peace	NN	O	(i_1<root> / --LEX--  :APP-of (i_2<poss>))	~~_	(poss())	4	MOD_poss	true
+7	for	_	for	IN	O	_	_	_	0	IGNORE	true
+8	all	_	all	DT	O	(i_1<root> / --LEX--  :BEN-of (i_2<mod>))	~~_	(mod())	6	MOD_mod	true
+9	,	_	,	,	O	_	_	_	0	IGNORE	true
+10	and	_	and	CC	O	(i_2<root> / --LEX--  :CONJ.member (i_1<op>)  :CONJ.member (i_3<op2>))	~~_	(op(s_UNIFY_s()), op2(s_UNIFY_s()))	17	APP_art-snt1	true
+11	then	_	then	RB	O	(i_1<root> / --LEX--  :TWHEN-of (i_2<mod>))	~~_	(mod())	12	MOD_mod	true
+12	prepare	_	prepare	VBP	O	(i_2<root> / --LEX--  :ACT-arg (i_1<s>)  :PAT-arg (i_3<o>))	~~ev-w2370f4	(o(), s())	10	APP_op2	true
+13	for	_	for	IN	O	_	_	_	0	IGNORE	true
+14	war	_	war	NN	CAUSE_OF_DEATH	(i_2<root> / --LEX--)	~~_	()	12	APP_o	true
+15	.	_	.	.	O	_	_	_	0	IGNORE	true
+16	”	_	”	''	O	_	_	_	0	IGNORE	true
+17	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_2<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+
+#id:#22052006
+1	Those	_	those	DT	O	(i_2<root> / --LEX--)	~~_	()	8	APP_s	true
+2	who	_	who	WP	O	(i_2<root> / --LEX--)	~~_	()	3	APP_s	true
+3	bought	_	buy	VBD	O	(i_5<root> / --LEX--  :ACT-arg (i_4<s>)  :PAT-arg (i_7<o>)  :RSTR-of (i_3<mod>))	~~ev-w410f1	(mod(), o(), s())	1	MOD_mod	true
+4	that	_	that	DT	O	(i_1<root> / --LEX--  :RSTR-of (i_2<mod>))	~~_	(mod())	5	MOD_mod	true
+5	illusion	_	illusion	NN	O	(i_2<root> / --LEX--)	~~_	()	3	APP_o	true
+6	are	_	be	VBP	O	_	_	_	0	IGNORE	true
+7	now	_	now	RB	DATE	(i_1<root> / --LEX--  :TWHEN-of (i_2<mod>))	~~_	(mod())	8	MOD_mod	true
+8	bewildered	_	bewilder	VBN	O	(i_1<root> / --LEX--  :PAT-arg (i_2<s>))	~~ev-w257f3	(s())	10	APP_art-snt1	true
+9	.	_	.	.	O	_	_	_	0	IGNORE	true
+10	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_2<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+
