@@ -73,8 +73,15 @@ precision_l = labeled_matches/total_edges_2
 recall_u = unlabeled_matches/total_edges_1
 recall_l = labeled_matches/total_edges_1
 
-f_u = 2*precision_u*recall_u/(precision_u+recall_u)
-f_l = 2*precision_l*recall_l/(precision_l+recall_l)
+if (precision_u + recall_u < 0.000001):
+    f_u = 0
+else:
+    f_u = 2*precision_u*recall_u/(precision_u+recall_u)
+
+if (precision_l + recall_l < 0.000001):
+    f_l = 0
+else:
+    f_l = 2*precision_l*recall_l/(precision_l+recall_l)
 
 print("unlabeled F: %4.2f" % (f_u*100))
 print("unlabeled P: %4.2f" % (precision_u*100))
