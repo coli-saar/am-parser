@@ -11,7 +11,7 @@ import argparse
 ### author: JG
 
 optparser = argparse.ArgumentParser(add_help=True,
-    description="reads two amconll files and produces two conllu files (the intersection) sorted by size that can be compared with MaltEval")
+    description="reads two amconll files and computes F-scores.")
 optparser.add_argument("file1", type=str)
 optparser.add_argument("file2", type=str)
 

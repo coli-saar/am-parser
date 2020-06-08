@@ -1,6 +1,9 @@
 # am-parser
 Modular implementation of the AM dependency parser used in [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450).
 
+## Online Demo
+Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
+
 ## Quick Guide
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
@@ -12,6 +15,7 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 - AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
+- a build of [am-tools](https://github.com/coli-saar/am-tools); will be downloaded automatically.
 
 (We recommend to set up a conda environment.)
 
@@ -60,6 +64,15 @@ will create a file `DM.sdp` in the `example` folder with graphs for the sentence
 * When you run either of the above commands for the first time, they will download large files: our trained model file, a compiled `jar` file to support output graph formats, as well as BERT embeddings.
 * This uses the BERT multitask version. In particular, the AMR 2017 training set was used and results on the AMR 2015 test set are not comparable. 
 * When parsing graphs from raw text, the model used was trained without embeddings for lemmas, POS tags and named entities and thus is __not directly comparable to the results from the paper__.
+* In contrast to the ACL 2019 experiments, we now use a [new formalization of the type system](http://www.coli.uni-saarland.de/~jonasg/thesis.pdf). 
+If you absolutely want to use the old implementation and formalization, use the `old_types` branch and a version of am-tools from February 2020.
+
+After the bugix in AMR postprocessing, the parser achieves the following Smatch scores on the test set (average of 5 runs and standard deviations):
+
+|  | AMR 2015 | AMR 2017 |
+| --- | --- | --- |
+| Single task, GloVe | 70.0 +- 0.1 | 71.2 +- 0.1 |
+| Single task, BERT | 75.1 +- 0.1 | 76.0 +- 0.2 |
 
 ## Things to play around with
 When training your own model, the configuration files have many places where you can make changes and see how it affects parsing performance.

@@ -15,6 +15,7 @@ from graph_dependency_parser.components.evaluation.commands import BaseEvaluatio
 from graph_dependency_parser.components.evaluation.iterator import forward_on_instances
 
 import tempfile
+import socket
 
 
 class Predictor (Registrable):
@@ -135,6 +136,11 @@ class AMconllPredictor(Predictor):
         decoder = AMDecoder(output_file,i2edge_label)
         for pred in predictions:
             attributes = pred["attributes"]
+            attributes["batch_size"] = pred["batch_size"]
+            attributes["normalized_nn_time"] = pred["batch_time"] / pred["batch_size"]
+            attributes["normalized_prepare_ftd_time"] = pred["normalized_prepare_ftd_time"]
+            attributes["host"] = socket.gethostname()
+            attributes["parser"] = "ftd"
             am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
             sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())

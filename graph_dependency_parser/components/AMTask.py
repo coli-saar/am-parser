@@ -1,3 +1,4 @@
+from time import time
 from typing import Dict, Optional, List, Any
 
 import numpy
@@ -20,6 +21,8 @@ from graph_dependency_parser.components.evaluation.predictors import AMconllPred
 from graph_dependency_parser.components.losses import EdgeLoss
 from graph_dependency_parser.components.losses.supertagging import SupertaggingLoss
 from graph_dependency_parser.components.supertagger import Supertagger
+
+import torch.nn.functional as F
 
 import logging
 
@@ -94,6 +97,8 @@ class AMTask(Model):
         self._pos_to_ignore = set(punctuation_tag_indices.values())
         logger.info(f"Found POS tags corresponding to the following punctuation : {punctuation_tag_indices}. "
                     "Ignoring words with these POS tags for evaluation.")
+
+        self.compute_softmax_for_scores = False # set to true when dumping scores to incorporate softmax computation into computation time
 
     def check_all_dimensions_match(self, encoder_output_dim):
 
@@ -234,17 +239,26 @@ class AMTask(Model):
                                         head_indices[:, 1:],
                                         head_tags[:, 1:],
                                         evaluation_mask)
+            evaluation_mask = mask[:, 1:].contiguous()
             if supertagging_nll is not None:
-                self._top_6supertagging_acc(supertagger_logits, supertags, mask[:, 1:])
-                self._supertagging_acc(supertagger_logits, supertags, mask[:, 1:])  # compare against gold data
+                self._top_6supertagging_acc(supertagger_logits, supertags, evaluation_mask)
+                self._supertagging_acc(supertagger_logits, supertags, evaluation_mask)  # compare against gold data
             if lexlabel_nll is not None:
-                self._lexlabel_acc(lexlabel_logits, lexlabels, mask[:, 1:])  # compare against gold data
+                self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)  # compare against gold data
 
             output_dict["arc_loss"] = edge_existence_loss
             output_dict["edge_label_loss"] = edge_label_loss
             output_dict["supertagging_loss"] = supertagging_nll
             output_dict["lexlabel_loss"] = lexlabel_nll
             output_dict["loss"] = loss
+
+        if self.compute_softmax_for_scores:
+            # We don't use the results but we want it to be included in the time measurement
+            # See dump_scores what part of computation is done outside of the time measurement in forward()
+            F.log_softmax(output_dict["full_label_logits"], 3)
+            F.log_softmax(output_dict["supertag_scores"], 2)
+            torch.argsort(output_dict["supertag_scores"], descending=True, dim=2)
+
         return output_dict
 
     @overrides
@@ -317,6 +331,7 @@ class AMTask(Model):
             - lexlabels: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
             - supertags: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
         """
+        t0 = time()
         best_supertags = output_dict.pop("best_supertags").cpu().detach().numpy()
         supertag_scores = output_dict.pop("supertag_scores") # shape (batch_size, seq_len, num supertags)
         full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
@@ -325,6 +340,7 @@ class AMTask(Model):
         if self.validation_evaluator: #retrieve k supertags from validation evaluator.
             if isinstance(self.validation_evaluator.predictor,AMconllPredictor):
                 k = self.validation_evaluator.predictor.k
+        k += 10 # perhaps there are some ill-formed supertags, make that very unlikely that there are not enough left after filtering.
         top_k_supertags = Supertagger.top_k_supertags(supertag_scores, k).cpu().detach().numpy() # shape (batch_size, seq_len, k)
         supertag_scores = supertag_scores.cpu().detach().numpy()
         lexlabels = output_dict.pop("lexlabels").cpu().detach().numpy() #shape (batch_size, seq_len)
@@ -385,6 +401,9 @@ class AMTask(Model):
             all_predicted_lex_labels.append([self.vocab.get_token_from_index(label,namespace=self.name+"_lex_labels") for label in lexlabels[i,1:length]])
             head_indices.append(instance_heads_cpu)
 
+        t1 = time()
+        normalized_diff = (t1-t0) / len(lengths)
+        output_dict["normalized_prepare_ftd_time"] = [normalized_diff for _ in range(len(lengths))]
         output_dict["lexlabels"] = all_predicted_lex_labels
         output_dict["supertags"] = all_supertags
         output_dict["root"] = roots
@@ -500,5 +519,8 @@ class AMTask(Model):
             r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
         if self.loss_mixing["lexlabel"] is not None:
             r["Label_Acc"] = self._lexlabel_acc.get_metric(reset)
+        las = r["LAS"]
+        if "Constant_Acc" in r:
+            r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2
         return r
 

@@ -1,0 +1,31 @@
+#id:#22058015
+1	You	_	you	PRP	O	(i_2<root> / --LEX--)	~~pron:x	()	2	APP_s	true
+2	talk	_	talk	NN	O	(i_4<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_6<o>))	~~v_of:e-i-i	(o(), s())	17	APP_art-snt1	true
+3	of	_	of	IN	O	_	_	_	0	IGNORE	true
+4	times	_	time	NNS	O	(i_2<root> / --LEX--)	~~n_of:x	()	2	APP_o	true
+5	of	_	of	IN	O	(i_4<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_6<o>))	~~p:e-x-i	(o(), s())	4	MOD_s	true
+6	peace	_	peace	NN	O	(i_2<root> / --LEX--)	~~n:x	()	5	APP_o	true
+7	for	_	for	IN	O	(i_4<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_6<o>))	~~p:e-u-i	(o(), s())	6	MOD_s	true
+8	all	_	all	DT	O	(i_2<root> / --LEX--)	~~q:i-h-h	()	7	APP_o	true
+9	,	_	_	,	O	_	_	_	0	IGNORE	true
+10	and	_	and+then	CC	O	_	_	_	0	IGNORE	true
+11	then	_	and+then	RB	O	_	_	_	0	IGNORE	true
+12	prepare	_	prepare	VB	O	(i_18<root> / --LEX--  :ARG1 (i_9<s>)  :ARG2 (i_19<o>)  :_and+then_c-of (i_11<coord>))	~~v_for:e-i-i	(coord(), o(), s())	2	MOD_coord	true
+13	for	_	for	IN	O	_	_	_	0	IGNORE	true
+14	war	_	war	NN	CAUSE_OF_DEATH	(i_2<root> / --LEX--)	~~n:x	()	12	APP_o	true
+15	.	_	_	.	O	_	_	_	0	IGNORE	true
+16	”	_	_	''	O	_	_	_	0	IGNORE	true
+17	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_2<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+
+#id:#22052006
+1	Those	_	those	DT	O	(i_2<root> / --LEX--)	~~x:x	()	8	APP_s	true
+2	who	_	who	WP	O	_	_	_	0	IGNORE	true
+3	bought	_	buy	VBD	O	(i_4<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_6<o>))	~~v:e-i-p	(o(), s())	1	MOD_s	true
+4	that	_	that	DT	O	(i_4<root> / --LEX--  :BV (i_6<det>))	~~q_dem:i-h-h	(det())	5	MOD_det	true
+5	illusion	_	illusion	NN	O	(i_2<root> / --LEX--)	~~n:x	()	3	APP_o	true
+6	are	_	are	VBP	O	_	_	_	0	IGNORE	true
+7	now	_	now	RB	DATE	(i_3<root> / --LEX--  :ARG1 (i_2<s>))	~~a:e-e	(s())	8	MOD_s	true
+8	bewildered	_	bewilder	VBN	O	(i_1<root> / --LEX--  :ARG2 (i_2<s>))	~~v:e-i-p	(s())	10	APP_art-snt1	true
+9	.	_	_	.	O	_	_	_	0	IGNORE	true
+10	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_2<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+

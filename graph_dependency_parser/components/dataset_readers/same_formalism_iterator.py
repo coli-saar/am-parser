@@ -1,10 +1,11 @@
+import math
 from collections import deque
-from typing import Iterable, Deque, List, Tuple
+from typing import Iterable, Deque, List, Tuple, Optional, Dict
 import logging
 import random
 from collections import defaultdict
 
-from allennlp.common.util import lazy_groups_of
+from allennlp.common.util import lazy_groups_of, is_lazy, ensure_list
 from allennlp.data import Vocabulary
 from allennlp.data.instance import Instance
 from allennlp.data.iterators import BucketIterator
@@ -33,6 +34,7 @@ class SameFormalismIterator(DataIterator):
     """
     def __init__(self, formalisms: List[str],
                  batch_size,
+                 batch_sizes : Optional[Dict[str, int]] = None,
                  cache_instances:bool = False,
                  track_epoch:bool = False,
                  padding_noise:float = 0.1,
@@ -47,10 +49,22 @@ class SameFormalismIterator(DataIterator):
                          instances_per_epoch=instances_per_epoch,
                          max_instances_in_memory=max_instances_in_memory,
                          maximum_samples_per_batch=maximum_samples_per_batch)
+
         self.bucket_iterators = dict()
+
+        self.batch_size : int = batch_size
+        self.batch_sizes = dict()
+
+        self.formalisms = formalisms
+
         for formalism in formalisms:
+            current_batch_size = batch_size
+            if batch_sizes is not None:
+                current_batch_size = batch_sizes[formalism]
+            self.batch_sizes[formalism] = current_batch_size
+
             self.bucket_iterators[formalism] = BucketIterator(sorting_keys=[("words","num_tokens")],
-                                                              batch_size=batch_size,
+                                                              batch_size=current_batch_size,
                                                               track_epoch=track_epoch,
                                                               padding_noise=padding_noise,
                                                               biggest_batch_first=biggest_batch_first)
@@ -62,10 +76,26 @@ class SameFormalismIterator(DataIterator):
 
     def _create_batches(self, instances: Iterable[Instance], shuffle: bool) -> Iterable[Batch]:
         # First break the dataset into memory-sized lists:
-        for instance_list in self._memory_sized_lists(instances):
+        if all( bs == self.batch_size for bs in self.batch_sizes.values()): #old implementation used in ACL 2019 experiments, MRP shared task
+            for instance_list in self._memory_sized_lists(instances):
+                available_formalisms = list(self.bucket_iterators.keys())
+                formalism_specific_iterator = [None] * len(available_formalisms)
+                instances_by_formalism = split_by_formalism(instance_list)
+                for formalism, instances in instances_by_formalism.items():
+                    formalism_specific_iterator[available_formalisms.index(formalism)] = self.bucket_iterators[formalism]._create_batches(instances, shuffle)
+
+                available_batches = np.array([self.bucket_iterators[f].get_num_batches(instances_by_formalism[f]) for f in available_formalisms])
+                while any(x > 0 for x in available_batches):
+                    #select formalism of batch with probability proportional to number of batches left of this formalism.
+                    formalism = np.random.choice(range(len(available_formalisms)), p = available_batches/np.sum(available_batches))
+                    batch = next(formalism_specific_iterator[formalism])
+                    available_batches[formalism] -= 1
+                    yield batch
+
+        else: #new implementation for case where we have different batch sizes for different formalisms (uniformify):
             available_formalisms = list(self.bucket_iterators.keys())
             formalism_specific_iterator = [None] * len(available_formalisms)
-            instances_by_formalism = split_by_formalism(instance_list)
+            instances_by_formalism = split_by_formalism(instances)
             for formalism, instances in instances_by_formalism.items():
                 formalism_specific_iterator[available_formalisms.index(formalism)] = self.bucket_iterators[formalism]._create_batches(instances, shuffle)
 
@@ -77,3 +107,19 @@ class SameFormalismIterator(DataIterator):
                 available_batches[formalism] -= 1
                 yield batch
 
+
+    def get_num_batches(self, instances: Iterable[Instance]) -> int:
+        """
+        Returns the number of batches that ``dataset`` will be split into; if you want to track
+        progress through the batch with the generator produced by ``__call__``, this could be
+        useful.
+        """
+        if is_lazy(instances) and self._instances_per_epoch is None:
+            # Unable to compute num batches, so just return 1.
+            return 1
+        else:
+            number_of_instances = { f : 0  for f in self.formalisms}
+            for instance in instances:
+                formalism = instance.fields['metadata'].metadata['formalism']
+                number_of_instances[formalism] += 1
+            return sum(math.ceil(num_instances / self.batch_sizes[formalism]) for formalism, num_instances in number_of_instances.items())

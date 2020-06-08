@@ -1,3 +1,6 @@
+import socket
+import sys
+import time
 from typing import Dict, Any
 import logging
 import json
@@ -54,6 +57,8 @@ parser.add_argument('--edge-label-limit',
                          type=int,
                          default=30,
                          help='How many labels per edge to include in the scores file')
+
+parser.add_argument("--batch_size", type=int, default=None, help="Overwrite batch size.")
 
 parser.add_argument('--weights-file',
                        type=str,
@@ -127,10 +132,26 @@ instances = dataset_reader.read([[formalism, args.input_file]])  # we need to gi
 model.train(False)
 data_iterator = DataIterator.from_params(config.pop('iterator'))
 
+assert isinstance(data_iterator, SameFormalismIterator)
+
+if args.batch_size is not None:
+    data_iterator : SameFormalismIterator = data_iterator # to get code completion.
+    data_iterator = SameFormalismIterator(data_iterator.formalisms, args.batch_size)
+
 with open (args.input_file) as f:
     conll_sentences = list(amconll_tools.parse_amconll(f))
 
+# The following just has the effect that we compute softmax scores (see below)
+# within the part of the code that measures computation time.
+# It's easier to compute this twice.
+
+for task in model.tasks.values():
+    task.compute_softmax_for_scores = True
+
+t0 = time.time()
 predictions = dataset_reader.restore_order(forward_on_instances(model, instances, data_iterator))
+t1 = time.time()
+print("Scoring took", t1-t0, "seconds")
 
 i2edge_label = [model.vocab.get_token_from_index(i, namespace=formalism + "_head_tags") for i in
                 range(model.vocab.get_vocab_size(formalism + "_head_tags"))]
@@ -158,7 +179,6 @@ with zipfile.ZipFile(args.output_path,"w",compression=zipfile.ZIP_DEFLATED, comp
     modified_conll_sentences = []
     with myzip.open("opProbs.txt","w") as fp:
         for sentence_id,pred in enumerate(predictions):
-            attributes = pred["attributes"]
 
             if "supertag_scores" in pred:
                 all_supertag_scores = F.log_softmax(torch.from_numpy(pred["supertag_scores"]),1) #shape (sent length, num supertags)
@@ -176,6 +196,12 @@ with zipfile.ZipFile(args.output_path,"w",compression=zipfile.ZIP_DEFLATED, comp
             modified_sent = conll_sentences[sentence_id].set_heads(pred["predicted_heads"])
             if "lexlabels" in pred:
                 modified_sent = modified_sent.set_lexlabels(pred["lexlabels"])
+
+            attributes = pred["attributes"]
+            attributes["batch_size"] = str(pred["batch_size"])
+            attributes["normalized_nn_time"] = str(pred["batch_time"] / pred["batch_size"])
+            attributes["nn_host"] = socket.gethostname()
+            modified_sent.attributes = attributes
 
             modified_conll_sentences.append(modified_sent)
 
