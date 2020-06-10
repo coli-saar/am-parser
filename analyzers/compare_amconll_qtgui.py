@@ -5,11 +5,11 @@ Compare two AMCONLL files
 Prerequistites:
 - Dot has to be installed (see https://graphviz.org/download/ )
 - Ppdflatex has to be installed (see https://www.latex-project.org/get/ )
-- PyQt5 (pip install pyqt5 , see https://pypi.org/project/PyQt5/ )
+- PyQt5 ( pip install pyqt5 , see https://pypi.org/project/PyQt5/ )
 
 Setup:
 
-1.) Define is_interesting in way that suits you
+1.) Define is_interesting in compare_amconll.py in way that suits you
 
 Usage:
 
@@ -19,184 +19,54 @@ will first compute the overlap,
 then filter according to the is_interesting function.
 If there is still a non-empty set of common sentences,
 will shuffle remaining sentences and show them in a random order in a new window
+Use the --useid option to compare sentence based on id rather than string
+equality (e.g. AMR and PSD might not have the same ids, but DM and PSD have...)
 
 author: pia
+tested using Ubuntu 18.04 , Python 3.7.4 , pyqt 5.9.2 , graphviz version 2.40.1,
+pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian)
 """
 # ../similarity2020/corpora/AMR/2017/gold-dev/gold-dev.amconll
 # ../similarity2020/corpora/SemEval/2015/PSD/train/train.amconll
 
-# tested on Ubuntu 18.04
-# python 3.7.4
-# pyqt 5.9.2
-# pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian)
-# dot - graphviz version 2.40.1 (20161225.0304)
-
-# todo: [GUI] get rid of blank space on top of main window
-# todo: amr named entities with underscores cause problems?
-#  (to-tex-svg escape needed?) also mod_UNIFY_s ?
-# todo: better comparison based on sentence as key (special chars...)
 # todo: add set-random-number command line option
-# todo: [enhancement] make is_interesting more robust wrt. sent length
-# todo: [enhancement] add fscore computation (filter by fscore)
 # todo: [enhancement] add visualization of graph itself, not its decomposition?
 # todo: [enhancement][GUI] list to scroll for sentences (~MaltEval)
 # todo: [enhancement][GUI] save image (dialog window) to file.
 # todo: [enhancement][GUI] border around images, keep ration during resize
 # todo: [enhancement][GUI] select sentence by entering sentence number
 
+import sys
 import os
 import argparse
-import random
 from tempfile import TemporaryDirectory
 # GUI
-from PyQt5.QtWidgets import QApplication, \
-    QWidget, QLabel, QGridLayout, \
-    QPushButton, QMainWindow, QDialog, QDialogButtonBox, QVBoxLayout
-from PyQt5 import QtSvg, QtCore, Qt
+from PyQt5 import QtSvg, QtCore, QtGui
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QGridLayout, QVBoxLayout
+from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton
 
-import sys
-
-from PyQt5 import QtGui
-
-sys.path.append("..")  # Adds higher directory to python modules path.
-# needed for graph dependency parser imports:
-
-from graph_dependency_parser.components.dataset_readers import amconll_tools
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
-
-
-def normalize_toks(tokens: list) -> list:
-    # todo [enhancement] faster and smarter way to replace...
-    # todo [enhancement] more replacements: html escaped chars, NEs
-    repls = [("-LRB-", "("), ("-RRB-", ")"), ("’", "'"),
-             ("_", " "), ("”", "''"), ("“", "``"), ("--", "–")]
-    if tokens[-1] == "ART-ROOT":
-        tokens = tokens[:-1]
-        # toks[-1] = '.'
-    newtokens = []
-    for token in tokens:
-        newt = token
-        for old, new in repls:
-            newt = newt.replace(old, new)
-        if "-" in newt and " - " not in newt and newt != "-":
-            # exclude if "-" token and tokes containing " - "
-            # for all other hypens, add whitespace around them
-            # right now also changes 10-10-2020 to 10 - 10 - 2020 ?
-            newtokens.append(newt.replace("-", " - "))
-        else:
-            newtokens.append(newt)
-    return newtokens
-
-
-def is_interesting(instance: AMSentence):
-    """
-    Define what to filter for.
-    instance: AMSentence
-    """
-    # todo [enhancement] possible to compute graph props like #edges, #nodes..?
-    # todo [enhancement] fscore with other graph as criterium
-    # what if different length due to one with ART-root different tokeniz?
-    # better call normalize_toks, split whitespace and count
-    tokens = normalize_toks(instance.get_tokens(shadow_art_root=False))
-    newtokens = ' '.join(tokens).split(" ")
-    if 5 < len(newtokens) < 15:
-        return True
-    # if 5 < len(instance) < 10:
-    #     return True
-    return False
-
-
-def get_amsents(filename, use_id_as_key: bool = True):
-    # todo [enhancement] input validation?
-    graphs = dict()  # id -> AMSentence
-    with open(file=filename, mode="r") as fileobj:
-        for _, sent in enumerate(amconll_tools.parse_amconll(fileobj, validate=False), 1):
-            # todo what if sentence don't have id, but want to use id as keystr?
-            # todo check sentence shadow art root really removed?
-            # keystr = ''
-            if not use_id_as_key:
-                toks = sent.get_tokens(shadow_art_root=False)
-                toks = normalize_toks(tokens=toks)
-                keystr = ' '.join(toks)
-                # if keystr.startswith("The total of"):
-                #   print(keystr) # about double hypens
-            else:
-                # todo [enhancement] delete # from id? (for LaTeX or bash?)
-                keystr = sent.attributes["id"]
-            graphs[keystr] = sent
-            # if opts.id == sent.attributes["id"] or \
-            #        (opts.id is None and i == opts.i):
-            #    sent.to_tex_svg(opts.direc)
-            #    found = True
-            #    break
-    return graphs
-
-
-def get_key_amsentpairs(file1: str, file2: str, use_id: bool=False) -> dict:
-    """
-    Read AMSentences from files, calculate intersection and return it
-
-    :param file1: string, path to amconll file
-    :param file2: string, path to amconll file
-    :param use_id: whether an id should be used as key (and for equality check)
-    :return: dict with id or sentence as key, and pair of AMSentence as value
-    """
-    assert(os.path.isfile(file1) and os.path.isfile(file2))
-    am_sents_f1 = get_amsents(file1, use_id_as_key=use_id)
-    am_sents_f2 = get_amsents(file2, use_id_as_key=use_id)
-    common_keys = set.intersection(set(am_sents_f1.keys()),
-                                   set(am_sents_f2.keys()))
-
-    # print number of overlap sentences
-    print(f";; Sentences in File 1:    {len(am_sents_f1)}")
-    print(f";; Sentences in File 2:    {len(am_sents_f2)}")
-    print(
-        f";; Sentences in summed:       {len(am_sents_f2) + len(am_sents_f1)}")
-    if len(am_sents_f1) + len(am_sents_f2) == 0:
-        raise ValueError("No AM sentences found!")
-    print(f";; Sentences in intersection: {len(common_keys)} ("
-          f"{100*len(common_keys)/(len(am_sents_f1)+len(am_sents_f2)):3.2f} %)")
-    # for sent in sorted(list(common_keys)):
-    #     print(sent)
-
-    if len(common_keys) == 0:
-        # f_ks = sorted(am_sents_f1.keys())
-        # g_ks = sorted(am_sents_f2.keys())
-        # have you used id, but ids are not the same in both files?
-        # do you compare the right files? (psd-train,dm-dev won't work)
-        raise ValueError("No common sentences found!")
-
-    # filter
-    # todo KeyError possible if is_interesting returns True for only one file,
-    #  but not for the other (e.g. function implemented such that it relies on
-    #  framework specific things (art-root, tokenisation, edge name))
-    am_sents_f1 = {k: v for k, v in am_sents_f1.items() if
-                   is_interesting(v) and k in common_keys}
-    am_sents_f2 = {k: v for k, v in am_sents_f2.items() if
-                   is_interesting(v) and k in common_keys}
-    key_to_f1f2amsent = {k1: (am_sents_f1[k1], v1)
-                         for (k1, v1) in am_sents_f2.items()}
-    # again with filter applied
-    if len(am_sents_f1) == 0 or len(am_sents_f2) == 0:
-        raise ValueError("No AM sentences found to compare! "
-                         "Check your filter function")
-    print(f";; Sentences after filtering: {len(key_to_f1f2amsent)} "
-          f"({100 * (len(key_to_f1f2amsent)) / (len(common_keys)):3.2f} "
-          f"% of common)")
-    return key_to_f1f2amsent
+from compare_amconll import get_key_amsentpairs, get_list_of_keys
 
 
 class DialogSvgMaximized(QDialog):
     """
-    Dialog window class for enlarged svgs
+    Dialog window class for enlarged SVGs
 
-    >>> app = QApplication([])
-    >>> dlg = DialogSvgMaximized("filename.svg")
-    >>> dlg.show()
-    >>> sys.exit(app.exec_())
+    Containing just this SVG (starts as maximized) and a 'Close' button
+    >> app = QApplication([])
+    >> dlg = DialogSvgMaximized("filename.svg")
+    >> dlg.show()
+    >> sys.exit(app.exec_())
     """
 
     def __init__(self, svgfilename: str, parent=None):
+        """
+        Initialize maximized dialog window displaying SVG (and a 'Close' button)
+
+        :param svgfilename: File to be displayed inside the dialog window
+        """
         super().__init__(parent)
         self.setWindowTitle("Enlarged SVG image")
         # Set the central widget and the general layout
@@ -211,11 +81,11 @@ class DialogSvgMaximized(QDialog):
         # button to cancel
         self.btn_cnl = QPushButton("Close")
         self.btn_cnl.clicked.connect(self.close)
-        # button to save file todo button save file
+        # button to save file todo button save file (or put in PyCompareUi)
         # start here: https://pythonprogramming.net/file-saving-pyqt-tutorial/
-        #self.btn_save = QPushButton("Save file")
-        #self.btn_save.clicked.connect(self.sav)
-        #self.dlgLayout.addWidget(self.btn_save)
+        # self.btn_save = QPushButton("Save file")
+        # self.btn_save.clicked.connect(self.SAVEFUN-not-implemented-yet)
+        # self.dlgLayout.addWidget(self.btn_save)
         self.dlgLayout.addWidget(self.btn_cnl)
         self.showMaximized()  # full screen
         return
@@ -225,14 +95,14 @@ class PyCompareUi(QMainWindow):
     """PyCompare's View (GUI)."""
 
     def __init__(self, direc: TemporaryDirectory, useid: bool, amf1gf: dict,
-                 target_keys: list):
+                 sent_keys: list):
         """
         Initializes GUI
 
         :param direc: TemporaryDirectory: where svg files and such are saved...
         :param useid: id or sentence as key? (-> displayed in sentence label)
         :param amf1gf: dict(key: str -> (file1: AMSentence, goldf: AMSentence))
-        :param target_keys: keys for amf1gf (sorted)
+        :param sent_keys: keys for amf1gf (sorted)
         """
         super().__init__()
         # Set some main window's properties
@@ -245,20 +115,20 @@ class PyCompareUi(QMainWindow):
         # create and display some widgets
         self._create()
         # todo input validation (keys match amf1gf)
-        if len(target_keys) == 0:
+        if len(sent_keys) == 0:
             raise RuntimeError
         self.useid = useid
         self.direc = direc  # .name
         self.amf1gf = amf1gf  # key -> (f1: Amconllsent,gf: Amconllsent)
-        self.target_keys = target_keys
-        self.total = len(target_keys)
+        self.sent_keys = sent_keys
+        self.total = len(sent_keys)
         self.current_idx = 0
         self._update()
         self.showMaximized()  # full screen
         return
 
     def get_current_key(self):
-        return self.target_keys[self.current_idx]
+        return self.sent_keys[self.current_idx]
 
     def get_svgs(self):
         """
@@ -327,25 +197,25 @@ class PyCompareUi(QMainWindow):
         """Disables buttons if needed (for last and first sentence)"""
         isfirst = (self.current_idx == 0)
         self.btn_prev.setDisabled(isfirst)
-        islast = (self.current_idx == len(self.target_keys)-1)
+        islast = (self.current_idx == len(self.sent_keys) - 1)
         self.btn_next.setDisabled(islast)
         return
 
     def _next_sent(self):
         """What needs to happen when the next sentence button is clicked"""
-        assert(0 <= self.current_idx < len(self.target_keys))
+        assert(0 <= self.current_idx < len(self.sent_keys))
         self.current_idx += 1
         self._update()
         return
 
     def _prev_sent(self):
         """What needs to happen when the previous sentence button is clicked"""
-        assert(0 <= self.current_idx < len(self.target_keys))
+        assert(0 <= self.current_idx < len(self.sent_keys))
         self.current_idx -= 1
         self._update()
         return
 
-    def _enlarge_svg(self, filename:str):
+    def _enlarge_svg(self, filename: str):
         self.dlg = DialogSvgMaximized(filename)
         # block main window: need to close dialog in order to use main window
         self.dlg.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -362,28 +232,28 @@ class PyCompareUi(QMainWindow):
         """Create GUI"""
         # Sentence number (integer index in list, not identifier)
         height = 30
-        font = QtGui.QFont('SansSerif', 13)
+        # font = QtGui.QFont('SansSerif', 13)  # default font is quite tiny
         self.lbl_no = QLabel(text="<No>", parent=self._centralWidget)
-        self.lbl_no.setFont(font)
+        # self.lbl_no.setFont(font)
         self.lbl_no.setToolTip("Sentence no. X / Y total sentences")
-        #self.lbl_no.setFixedSize(height, height)
+        # self.lbl_no.setFixedSize(height, height)
         self.generalLayout.addWidget(self.lbl_no, 0, 0)
         # Sentence
         self.lbl_sent = QLabel(text="<Sentence>", parent=self._centralWidget)
-        #self.lbl_sent.setFixedHeight(height)
-        self.lbl_sent.setFont(font)
+        # self.lbl_sent.setFixedHeight(height)
+        # self.lbl_sent.setFont(font)
         self.lbl_sent.setToolTip("Current sentence")
         # setAlignment(Qt.AlignRight)
         # .setReadOnly(True)
         self.generalLayout.addWidget(self.lbl_sent, 0, 1)
         # buttons
-        #  previous button
+        #  'previous' button
         self.btn_prev = QPushButton(text="Prev", parent=self._centralWidget)
         self.btn_prev.setFixedSize(height*2, height)
         self.btn_prev.setToolTip("Change to previous sentence")
         self.btn_prev.clicked.connect(self._prev_sent)
         self.generalLayout.addWidget(self.btn_prev, 0, 2)
-        #  next button
+        #  'next' button
         self.btn_next = QPushButton(text="Next", parent=self._centralWidget)
         self.btn_next.setFixedSize(height*2, height)
         self.btn_next.setToolTip("Change to next sentence")
@@ -400,10 +270,9 @@ class PyCompareUi(QMainWindow):
         self.wdg_svg2 = QtSvg.QSvgWidget(parent=self._centralWidget)
         # self.wdg_svg2.clicked.connect(self._enlarge_svg2)
         self.generalLayout.addWidget(self.wdg_svg2, 2, 0, 1, 3)
-        # https://realpython.com/python-pyqt-gui-calculator/#learning-the-basics-of-pyqt
-        # QDialog
+        # 'Maximize' buttons
         # todo [GUI][add] scroll list of sents
-        # todo [GUI][add] add image maximize buttons, specify resizing...
+        # todo [GUI][add] image save2file, resizing/scaling and minSize?, ...
         self.btn_enlarge1 = QPushButton(text="Max.", parent=self._centralWidget)
         self.btn_enlarge2 = QPushButton(text="Max.", parent=self._centralWidget)
         self.btn_enlarge1.setToolTip("Show image in separate window, maximized")
@@ -415,12 +284,38 @@ class PyCompareUi(QMainWindow):
         return
 
 
+def main_gui(sent_keys: list, am_f1gf: dict, use_id: bool):
+    """
+    Starts PyQt5 GUI comparing to amconll files (their intersection)
+
+    :param sent_keys: list of keys of am_f1gf: ordering of sent. presentation
+    :param am_f1gf: key is id/sentence, value if (AMSentence,AMSentence) pair
+    :param use_id: whether the keys in sent_keys are ids or sentence strings
+    :return: None
+    """
+    # Note: no input validation is done: specifically if all k in sent_keys
+    # are valid keys of am_f1gf
+    app = QApplication([])
+    with TemporaryDirectory() as direc:  # for svg, tex files..
+        view = PyCompareUi(direc=direc, useid=use_id, amf1gf=am_f1gf,
+                           sent_keys=sent_keys)
+        view.show()
+        # exec_ listens for events
+        sys.exit(app.exec_())
+
+
 def main(argv):
-    """Main function."""
+    """
+    Start PyQt5 GUI comparing two amconll files (at least, their intersection)
+
+    Given two amconll files (system file and gold file), computes intersection
+    and displays it in a GUI. Sentence equality is either determined by
+    sentence ID equality (--useid) or sentence string equality
+    (modulo some very basic handling for special characters and such).
+    """
     optparser = argparse.ArgumentParser(
         add_help=True,
-        description="compares two amconll files and spits out list of ids "
-                    "with discrepencies/or visualizes them directly")
+        description="compares two amconll files (GUI version)")
     optparser.add_argument("file1", help="system output", type=str)
     optparser.add_argument("gold_file", help="gold file", type=str)
     optparser.add_argument("--useid", action="store_true",
@@ -438,22 +333,16 @@ def main(argv):
     use_id = opts.useid  # if False, uses sentence string, otherwise id
     am_f1gf = get_key_amsentpairs(use_id=use_id, file1=file1, file2=gold_file)
 
-    target_keys = list(am_f1gf.keys())
-    target_keys = sorted(target_keys)
-    random_number = 42
-    if random_number:
-        print(f";; Shuffle target_keys with random number {str(random_number)}")
-        random.seed(random_number)
-        random.shuffle(target_keys)
+    # get list of keys of am_f1gf (optional: random shuffling)
+    # remember keys are either sentence ids (--useid) or sentence strings (else)
+    seed = 42
+    if seed is not None:
+        print(f";; Shuffle keys using random seed {str(seed)}")
+    target_keys = get_list_of_keys(d=am_f1gf, randomseed=seed)
 
-    # Create an instance of QApplication
-    app = QApplication([])
-    # Show the x GUI
-    with TemporaryDirectory() as direc:
-        view = PyCompareUi(direc=direc, useid=use_id, amf1gf=am_f1gf, target_keys=target_keys)
-        view.show()
-        # Execute the calculator's main loop
-        sys.exit(app.exec_())
+    # start GUI
+    main_gui(sent_keys=target_keys, am_f1gf=am_f1gf, use_id=use_id)
+    return
 
 
 if __name__ == '__main__':
