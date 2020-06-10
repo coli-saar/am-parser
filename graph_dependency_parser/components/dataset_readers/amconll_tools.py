@@ -158,7 +158,8 @@ class AMSentence:
                 string = "\\" + string
             # todo what if '\'
             # todo replace special char in longer string ('5$'->'5\$')
-            return string
+            # todo escape underscores? can this cause problems?
+            return string.replace("_","\\_")
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
         \\usepackage{tikz-dependency}
