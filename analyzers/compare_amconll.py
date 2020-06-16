@@ -6,7 +6,7 @@ Prerequistites:
 - Dot has to be installed (see https://graphviz.org/download/ )
 - Ppdflatex has to be installed (see https://www.latex-project.org/get/ )
 - [except if --nogui] PyQt5 ( pip install pyqt5 ,
-  see https://pypi.org/project/PyQt5/ )
+  see https://pypi.org/project/PyQt5/; for anaconda:  conda install -c anaconda pyqt)
 - [for --viz] Imagemagick has to be installed
   (see https://imagemagick.org/index.php )
 
