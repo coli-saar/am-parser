@@ -67,6 +67,13 @@ will create a file `DM.sdp` in the `example` folder with graphs for the sentence
 * In contrast to the ACL 2019 experiments, we now use a [new formalization of the type system](http://www.coli.uni-saarland.de/~jonasg/thesis.pdf). 
 If you absolutely want to use the old implementation and formalization, use the `old_types` branch and a version of am-tools from February 2020.
 
+After the bugix in AMR postprocessing, the parser achieves the following Smatch scores on the test set (average of 5 runs and standard deviations):
+
+|  | AMR 2015 | AMR 2017 |
+| --- | --- | --- |
+| Single task, GloVe | 70.0 +- 0.1 | 71.2 +- 0.1 |
+| Single task, BERT | 75.1 +- 0.1 | 76.0 +- 0.2 |
+
 ## Things to play around with
 When training your own model, the configuration files have many places where you can make changes and see how it affects parsing performance.
 There are currently two edge models implemented, the Dozat & Manning 2016 and the Kiperwasser & Goldberg 2016 one.
