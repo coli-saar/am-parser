@@ -37,6 +37,11 @@ def none_or_else(exp, val):
         return val
     return None
 
+def mix_loss(coefficient, tensor):
+    if abs(coefficient - 1.0) < 0.0001:
+        return tensor
+    return coefficient * tensor
+
 class AMTask(Model):
     """
     A class that implements a task-specific model. It conceptually belongs to a formalism or corpus.
@@ -222,11 +227,12 @@ class AMTask(Model):
             else:
                 lexlabel_nll = None
 
-            loss = self.loss_mixing["edge_existence"] * edge_existence_loss +  self.loss_mixing["edge_label"] * edge_label_loss
+            loss = mix_loss(self.loss_mixing["edge_existence"], edge_existence_loss) +  mix_loss(self.loss_mixing["edge_label"], edge_label_loss)
+
             if supertagging_nll is not None:
-                loss += self.loss_mixing["supertagging"] * supertagging_nll
+                loss += mix_loss(self.loss_mixing["supertagging"], supertagging_nll)
             if lexlabel_nll is not None:
-                loss += self.loss_mixing["lexlabel"] * lexlabel_nll
+                loss += mix_loss(self.loss_mixing["lexlabel"], lexlabel_nll)
 
             # Compute LAS/UAS/Supertagging acc/Lex label acc:
             evaluation_mask = self._get_mask_for_eval(mask[:, 1:], pos_tags)
