@@ -156,6 +156,20 @@ else:
 
 params.assert_empty('base train command')
 
+#Check that we have am-tools.jar ready
+eval_commands = json.loads(_jsonnet.evaluate_file("configs/eval_commands.libsonnet"))
+
+if not os.path.exists(eval_commands["am-tools"]):
+    raise ConfigurationError(f"Could not find am-tools, file {eval_commands['am-tools']} does not exist")
+
+#Check extra dependencies such as wordnet
+
+for formalism in trainer.model.tasks.keys():
+    if formalism in eval_commands["extra_dependencies"]:
+        for dependency in eval_commands["extra_dependencies"][formalism]:
+            if not os.path.exists(dependency):
+                raise ConfigurationError(f"Could not find resource '{dependency}', which is needed for {formalism}")
+
 if args.comet is not None:
     experiment = Experiment(api_key=args.comet, workspace=args.workspace, project_name=args.project,parse_args=False,auto_output_logging=None)
     if args.tags:
