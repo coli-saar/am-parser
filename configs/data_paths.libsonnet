@@ -3,7 +3,7 @@ local ud_prefix = "data/UD/corenlp/";
 local MRP_AMR_SUBPATH = "clean_decomp";
 local MRP_UCCA_SUBPATH = "very_first";
 
-local SDP_prefix = "data/SemEval/2015/";
+local SDP_prefix = "/proj/irtg/sempardata/uniformify2020/original_decompositions/";
 
 {
     "GLOVE_DIR" : "/local/mlinde/glove/",
