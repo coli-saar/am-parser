@@ -1,3 +1,21 @@
+#
+# Copyright (c) 2020 Saarland University.
+#
+# This file is part of AM Parser
+# (see https://github.com/coli-saar/am-parser/).
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 [10/Bryan-Michael Cox -U-> 11/-; 30/Non-Terminal -C-> 29/Non-Terminal; 29 -D-> 16/new; 24/Non-Terminal -P-> 26/Non-Terminal; 21/Non-Terminal -A-> 1/collaborators; 24 -A-> 25/Non-Terminal; 29 -A-> 17/collaborators; 28/Non-Terminal -N-> 12/and; 25 -U-> 14/,; 28 -C-> 13/Randy Jackson; 28 -C-> 6/Jermaine Dupri; 21 -T-> 0/Longtime; 25 -N-> 15/as well as; 27/Non-Terminal -C-> 28; 30 -E-> 31/Non-Terminal; 28 -C-> 8/Johntá Austin; 25 -C-> 30; 28 -U-> 9/,; 31 -R-> 18/such as; 31 -C-> 19/Marc Shaiman; 23/Non-Terminal -H-> 24; 26 -R-> 2/for; 28 -U-> 7/,; 22/Non-Terminal -E-> 27; 26 -C-> 4/project; 27 -R-> 5/included; 22 -C-> 21; 28 -C-> 10; 25 -C-> 22; 26 -E-> 3/the; 31 -U-> 20/.]
 
 

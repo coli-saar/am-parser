@@ -1,3 +1,21 @@
+#
+# Copyright (c) 2020 Saarland University.
+#
+# This file is part of AM Parser
+# (see https://github.com/coli-saar/am-parser/).
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from time import time
 from typing import Dict, Optional, List, Any
 
@@ -36,6 +54,11 @@ def none_or_else(exp, val):
     if exp is not None:
         return val
     return None
+
+def mix_loss(coefficient, tensor):
+    if abs(coefficient - 1.0) < 0.0001:
+        return tensor
+    return coefficient * tensor
 
 class AMTask(Model):
     """
@@ -222,11 +245,12 @@ class AMTask(Model):
             else:
                 lexlabel_nll = None
 
-            loss = self.loss_mixing["edge_existence"] * edge_existence_loss +  self.loss_mixing["edge_label"] * edge_label_loss
+            loss = mix_loss(self.loss_mixing["edge_existence"], edge_existence_loss) +  mix_loss(self.loss_mixing["edge_label"], edge_label_loss)
+
             if supertagging_nll is not None:
-                loss += self.loss_mixing["supertagging"] * supertagging_nll
+                loss += mix_loss(self.loss_mixing["supertagging"], supertagging_nll)
             if lexlabel_nll is not None:
-                loss += self.loss_mixing["lexlabel"] * lexlabel_nll
+                loss += mix_loss(self.loss_mixing["lexlabel"], lexlabel_nll)
 
             # Compute LAS/UAS/Supertagging acc/Lex label acc:
             evaluation_mask = self._get_mask_for_eval(mask[:, 1:], pos_tags)

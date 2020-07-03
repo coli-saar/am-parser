@@ -1,3 +1,21 @@
+#
+# Copyright (c) 2020 Saarland University.
+#
+# This file is part of AM Parser
+# (see https://github.com/coli-saar/am-parser/).
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 The ``train`` subcommand can be used to train a model.
 It requires a configuration file and a directory in
@@ -155,6 +173,20 @@ else:
     raise ConfigurationError("Need to use am-trainer.")
 
 params.assert_empty('base train command')
+
+#Check that we have am-tools.jar ready
+eval_commands = json.loads(_jsonnet.evaluate_file("configs/eval_commands.libsonnet"))
+
+if not os.path.exists(eval_commands["am-tools"]):
+    raise ConfigurationError(f"Could not find am-tools, file {eval_commands['am-tools']} does not exist")
+
+#Check extra dependencies such as wordnet
+
+for formalism in trainer.model.tasks.keys():
+    if formalism in eval_commands["extra_dependencies"]:
+        for dependency in eval_commands["extra_dependencies"][formalism]:
+            if not os.path.exists(dependency):
+                raise ConfigurationError(f"Could not find resource '{dependency}', which is needed for {formalism}")
 
 if args.comet is not None:
     experiment = Experiment(api_key=args.comet, workspace=args.workspace, project_name=args.project,parse_args=False,auto_output_logging=None)

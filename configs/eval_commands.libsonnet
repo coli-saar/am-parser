@@ -21,6 +21,22 @@ local sdp_regexes = {
 };
 
 {
+
+/*
+ This allows us to check if the dependencies seem to be met at start of training.
+*/
+  "am-tools" : ALTO_PATH,
+
+  "extra_dependencies" : {
+    "AMR-2015" : [WORDNET],
+    "AMR-2017" : [WORDNET],
+    "MRP-DM" : [MTOOL],
+    "MRP-PSD" : [MTOOL],
+    "MRP-EDS" : [MTOOL],
+    "MRP-AMR" : [CONCEPTNET, MTOOL],
+    "MRP-UCCA" : [MTOOL]
+  },
+
  "commands" : { #commands to evaluate the different formalisms
      "DM" : {
         "type" : "bash_evaluation_command",

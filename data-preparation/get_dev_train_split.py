@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
-# get_dev_train_split.py
-# author                Pia Weißenhorn  piaw@coli.uni-saarland.de
-# last changed          09.07.2019
-# OS                    Windows 8.1 Pro
-# Python                3.7.3
-# Given a directory with corpus files in it, splits it into dev and train
-# and outputs dev and train corpus into separate directories.
-# Parameterized for the percentage (type 3 for 3 %) of dev corpus to whole corpus.
-# Note that the output are only two files (dev and train) no matter 
-# how many corpus files there are in INDIR.
-# ids will start with the corpus file name followed by ___ then original id
-# requires the input to be in mrp format, each line is considered one graph and MUST start with  {"id": "ID-OF-GRAPH-HERE"
-# the output is also mrp format (todo: change to amr?)
 #
-# usage: 
-# python3 get_dev_train_split.py INDIR DEVDIR TRAINDIR --devpercentage PERCENTAGEDEV
-# e.g. 
-# python3 get_dev_train_split.py ./mrp ./dev ./train --devpercentage 3
-# the output can be found in  DEVDIR/devcorpus.amr  and TRAINDIR/traincorpus.amr
+# Copyright (c) 2020 Saarland University.
+#
+# This file is part of AM Parser
+# (see https://github.com/coli-saar/am-parser/).
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 # todo do conversion mrp to amr inside this script? not done yet (output currently mrp)
 # todo does this work on a server?
