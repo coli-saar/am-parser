@@ -1,0 +1,1 @@
+python -u train.py jsonnets/minimalDM.jsonnet -s example/minimalDMoutput/ -f --file-friendly-logging  &> example/minimalDM.log

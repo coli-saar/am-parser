@@ -1,0 +1,1 @@
+minimalDM.amconll was created with the EM algorithm in alto
