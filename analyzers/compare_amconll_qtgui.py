@@ -49,7 +49,6 @@ pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian)
 
 # todo: add set-random-number command line option
 # todo: [enhancement] add visualization of graph itself, not its decomposition?
-# todo: [enhancement][GUI] list to scroll for sentences (~MaltEval)
 # todo: [enhancement][GUI] save image (dialog window) to file.
 # todo: [enhancement][GUI] border around images, keep ration during resize
 # todo: [enhancement][GUI] select sentence by entering sentence number
@@ -63,7 +62,8 @@ from PyQt5 import QtSvg, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QGridLayout, QVBoxLayout
 from PyQt5.QtWidgets import QMainWindow, QDialog
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QListWidget, QListWidgetItem
+from PyQt5.QtWidgets import QAbstractItemView
 
 from compare_amconll import get_key_amsentpairs, get_list_of_keys
 
@@ -130,8 +130,7 @@ class PyCompareUi(QMainWindow):
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
-        # create and display some widgets
-        self._create()
+
         # todo input validation (keys match amf1gf)
         if len(sent_keys) == 0:
             raise RuntimeError
@@ -140,6 +139,10 @@ class PyCompareUi(QMainWindow):
         self.amf1gf = amf1gf  # key -> (f1: Amconllsent,gf: Amconllsent)
         self.sent_keys = sent_keys
         self.total = len(sent_keys)
+
+        # create and display some widgets
+        self._create()
+
         self.current_idx = 0
         self._update()
         self.showMaximized()  # full screen
@@ -196,6 +199,11 @@ class PyCompareUi(QMainWindow):
         - Disables previous/next buttons if needed (new sentence is last/first)
         :return: None
         """
+        # scroll list: select (highlight) new current sentence &
+        # scroll such that it is the top one displayed
+        self.current_item.setSelected(True)
+        self.sents_scroll.scrollToItem(self.current_item,
+                                       QAbstractItemView.PositionAtTop)
         # update displayed number
         self.lbl_no.setText(f"{self.current_idx+1} / {self.total}")
         # update displayed sentence
@@ -222,14 +230,26 @@ class PyCompareUi(QMainWindow):
     def _next_sent(self):
         """What needs to happen when the next sentence button is clicked"""
         assert(0 <= self.current_idx < len(self.sent_keys))
+        self.current_item.setSelected(False)
         self.current_idx += 1
+        self.current_item = self.sents_scroll.item(self.current_idx)
         self._update()
         return
 
     def _prev_sent(self):
         """What needs to happen when the previous sentence button is clicked"""
         assert(0 <= self.current_idx < len(self.sent_keys))
+        self.current_item.setSelected(False)
         self.current_idx -= 1
+        self.current_item = self.sents_scroll.item(self.current_idx)
+        self._update()
+        return
+
+    def _on_item_changed(self, curr, prev):
+        """clicked on a different item in the sentence list (just like prev/next button"""
+        prev.setSelected(False)
+        self.current_idx = self.sents_scroll.indexFromItem(curr).row()
+        self.current_item = curr
         self._update()
         return
 
@@ -248,35 +268,26 @@ class PyCompareUi(QMainWindow):
 
     def _create(self):
         """Create GUI"""
-        # Sentence number (integer index in list, not identifier)
         height = 30
-        # font = QtGui.QFont('SansSerif', 13)  # default font is quite tiny
         self.lbl_no = QLabel(text="<No>", parent=self._centralWidget)
-        # self.lbl_no.setFont(font)
         self.lbl_no.setToolTip("Sentence no. X / Y total sentences")
         # self.lbl_no.setFixedSize(height, height)
-        self.generalLayout.addWidget(self.lbl_no, 0, 0)
         # Sentence
         self.lbl_sent = QLabel(text="<Sentence>", parent=self._centralWidget)
-        # self.lbl_sent.setFixedHeight(height)
-        # self.lbl_sent.setFont(font)
         self.lbl_sent.setToolTip("Current sentence")
         # setAlignment(Qt.AlignRight)
         # .setReadOnly(True)
-        self.generalLayout.addWidget(self.lbl_sent, 0, 1)
         # buttons
         #  'previous' button
         self.btn_prev = QPushButton(text="Prev", parent=self._centralWidget)
         self.btn_prev.setFixedSize(height*2, height)
         self.btn_prev.setToolTip("Change to previous sentence")
         self.btn_prev.clicked.connect(self._prev_sent)
-        self.generalLayout.addWidget(self.btn_prev, 0, 2)
         #  'next' button
         self.btn_next = QPushButton(text="Next", parent=self._centralWidget)
         self.btn_next.setFixedSize(height*2, height)
         self.btn_next.setToolTip("Change to next sentence")
         self.btn_next.clicked.connect(self._next_sent)
-        self.generalLayout.addWidget(self.btn_next, 0, 3)
         # image 1
         # https://doc.qt.io/qt-5/qtsvg-index.html
         # https://stackoverflow.com/questions/44776474/display-svg-image-in-qtwebview-with-the-right-size
@@ -284,10 +295,9 @@ class PyCompareUi(QMainWindow):
         # self.wdg_svg1.clicked.connect(self._enlarge_svg1)
         # self.wdg_svg1.load(file="")
         # row, col, rows spanned, cols spanned
-        self.generalLayout.addWidget(self.wdg_svg1, 1, 0, 1, 3)
         self.wdg_svg2 = QtSvg.QSvgWidget(parent=self._centralWidget)
         # self.wdg_svg2.clicked.connect(self._enlarge_svg2)
-        self.generalLayout.addWidget(self.wdg_svg2, 2, 0, 1, 3)
+
         # 'Maximize' buttons
         # todo [GUI][add] scroll list of sents
         # todo [GUI][add] image save2file, resizing/scaling and minSize?, ...
@@ -297,8 +307,30 @@ class PyCompareUi(QMainWindow):
         self.btn_enlarge2.setToolTip("Show image in separate window, maximized")
         self.btn_enlarge1.clicked.connect(self._enlarge_svg1)
         self.btn_enlarge2.clicked.connect(self._enlarge_svg2)
-        self.generalLayout.addWidget(self.btn_enlarge1, 1, 3)
-        self.generalLayout.addWidget(self.btn_enlarge2, 2, 3)
+
+        # List of all sentences: scrollable, can click on sentences
+        # see also stackoverflow.com how-to-scroll-qlistwidget-to-selected-item
+        self.sents_scroll = QListWidget(parent=self._centralWidget)
+        self.sents_scroll.setMinimumSize(100, 50)
+        for i, sent in enumerate(self.sent_keys):
+            it = QListWidgetItem(f"{i+1:02} || {sent}",
+                                 parent=self.sents_scroll)
+            if i == 0:
+                self.current_item = it
+        self.sents_scroll.setCurrentItem(self.current_item)
+        self.current_item.setSelected(True)
+        self.sents_scroll.currentItemChanged.connect(self._on_item_changed)
+
+        # organize widgets in grid layout
+        self.generalLayout.addWidget(self.lbl_no, 0, 1)
+        self.generalLayout.addWidget(self.lbl_sent, 0, 0)
+        self.generalLayout.addWidget(self.btn_prev, 3, 1)
+        self.generalLayout.addWidget(self.btn_next, 4, 1)
+        self.generalLayout.addWidget(self.wdg_svg1, 1, 0, 1, 1)
+        self.generalLayout.addWidget(self.wdg_svg2, 2, 0, 1, 1)
+        self.generalLayout.addWidget(self.btn_enlarge1, 1, 1)
+        self.generalLayout.addWidget(self.btn_enlarge2, 2, 1)
+        self.generalLayout.addWidget(self.sents_scroll, 3, 0, 2, 1)
         return
 
 
