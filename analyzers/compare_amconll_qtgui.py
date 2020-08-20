@@ -20,10 +20,13 @@
 """
 Compare two AMCONLL files
 
-Prerequistites:
+Prerequisites:
 - Dot has to be installed (see https://graphviz.org/download/ )
-- Ppdflatex has to be installed (see https://www.latex-project.org/get/ )
+- Inkscape has to be installed (see https://inkscape.org/ )
+- Pdflatex has to be installed (see https://www.latex-project.org/get/ )
+- command line `cat' and `tr' commands
 - PyQt5 ( pip install pyqt5 , see https://pypi.org/project/PyQt5/ )
+The first four are called in to_tex_svg(), the last is needed for the GUI
 
 Setup:
 
@@ -42,28 +45,29 @@ equality (e.g. AMR and PSD might not have the same ids, but DM and PSD have...)
 
 author: pia
 tested using Ubuntu 18.04 , Python 3.7.4 , pyqt 5.9.2 , graphviz version 2.40.1,
-pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian)
+Inkscape 0.92.3, pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian)
 """
 # ../similarity2020/corpora/AMR/2017/gold-dev/gold-dev.amconll
 # ../similarity2020/corpora/SemEval/2015/PSD/train/train.amconll
 
 # todo: add set-random-number command line option
 # todo: [enhancement] add visualization of graph itself, not its decomposition?
-# todo: [enhancement][GUI] save image (dialog window) to file.
-# todo: [enhancement][GUI] border around images, keep ration during resize
-# todo: [enhancement][GUI] select sentence by entering sentence number
+# todo: [enhancement][GUI] keep ratio during resize?
+# todo: [enhancement][GUI] select sentence by entering sentence number??
 
 import sys
 import os
+import shutil  # for copying files (svg file: save file dialog)
 import argparse
 from tempfile import TemporaryDirectory
 # GUI
 from PyQt5 import QtSvg, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QGridLayout, QVBoxLayout
-from PyQt5.QtWidgets import QMainWindow, QDialog
+from PyQt5.QtWidgets import QMainWindow, QDialog, QFileDialog
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QListWidget, QListWidgetItem
 from PyQt5.QtWidgets import QAbstractItemView
+from PyQt5.QtWidgets import QSizePolicy
 
 from compare_amconll import get_key_amsentpairs, get_list_of_keys
 
@@ -90,20 +94,15 @@ class DialogSvgMaximized(QDialog):
         # Set the central widget and the general layout
         self.dlgLayout = QVBoxLayout()
         self.setLayout(self.dlgLayout)
-        # todo proper input validation
+        # todo [input validation] (svg file exists)
         assert(os.path.isfile(svgfilename))
-        # todo [enhancement] maybe add buttons to save to file, zoom in/out???
+        # todo [enhancement] maybe add buttons to zoom in/out???
         self.wdg_svg = QtSvg.QSvgWidget()
         self.wdg_svg.load(svgfilename)
         self.dlgLayout.addWidget(self.wdg_svg)
         # button to cancel
         self.btn_cnl = QPushButton("Close")
         self.btn_cnl.clicked.connect(self.close)
-        # button to save file todo button save file (or put in PyCompareUi)
-        # start here: https://pythonprogramming.net/file-saving-pyqt-tutorial/
-        # self.btn_save = QPushButton("Save file")
-        # self.btn_save.clicked.connect(self.SAVEFUN-not-implemented-yet)
-        # self.dlgLayout.addWidget(self.btn_save)
         self.dlgLayout.addWidget(self.btn_cnl)
         self.showMaximized()  # full screen
         return
@@ -131,7 +130,7 @@ class PyCompareUi(QMainWindow):
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
 
-        # todo input validation (keys match amf1gf)
+        # todo [input validation] keys match amf1gf
         if len(sent_keys) == 0:
             raise RuntimeError
         self.useid = useid
@@ -155,7 +154,8 @@ class PyCompareUi(QMainWindow):
         """
         Given the current key (and hence sentence) call to_tex_svg
 
-        -> Need pdflatex and dot installed, assumes valid AMSentence and
+        -> Need pdflatex, inkscape and dot installed (plus command line
+        cat and tr commands), assumes valid AMSentence and
         let's hope that there is no special character escaping stuff missing
         :raises RuntimeError if svg files couldn't be produced
         :return: pair of filepath to file1 and goldfile svgs
@@ -175,7 +175,7 @@ class PyCompareUi(QMainWindow):
 
     def get_sentence(self) -> str:
         """
-        Get string representation of sentence (eventulally + id)
+        Get string representation of sentence (eventually + id)
 
         Uses gold file string
         :return: sentence string. if self.useid, prefixed with id
@@ -253,6 +253,19 @@ class PyCompareUi(QMainWindow):
         self._update()
         return
 
+    def _save_svg(self, filename: str):
+        newname, suffix = QFileDialog.getSaveFileName(self, filter=".svg",
+                                                      caption="Save SVG file")
+        if newname != '':
+            shutil.copy2(src=filename, dst=newname+suffix)
+        return
+
+    def _save_svg1(self):
+        self._save_svg(filename=self.svg1_filen)
+
+    def _save_svg2(self):
+        self._save_svg(filename=self.svg2_filen)
+
     def _enlarge_svg(self, filename: str):
         self.dlg = DialogSvgMaximized(filename)
         # block main window: need to close dialog in order to use main window
@@ -267,46 +280,68 @@ class PyCompareUi(QMainWindow):
         self._enlarge_svg(filename=self.svg2_filen)
 
     def _create(self):
-        """Create GUI"""
-        height = 30
+        """Create GUI: initialize all necessary widgets and arrange them"""
+        btn_size = 30
         self.lbl_no = QLabel(text="<No>", parent=self._centralWidget)
         self.lbl_no.setToolTip("Sentence no. X / Y total sentences")
-        # self.lbl_no.setFixedSize(height, height)
+
         # Sentence
         self.lbl_sent = QLabel(text="<Sentence>", parent=self._centralWidget)
         self.lbl_sent.setToolTip("Current sentence")
-        # setAlignment(Qt.AlignRight)
-        # .setReadOnly(True)
-        # buttons
-        #  'previous' button
+        self.lbl_sent.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+
+        # buttons: 'previous' and 'next' button
         self.btn_prev = QPushButton(text="Prev", parent=self._centralWidget)
-        self.btn_prev.setFixedSize(height*2, height)
-        self.btn_prev.setToolTip("Change to previous sentence")
-        self.btn_prev.clicked.connect(self._prev_sent)
-        #  'next' button
         self.btn_next = QPushButton(text="Next", parent=self._centralWidget)
-        self.btn_next.setFixedSize(height*2, height)
+        self.btn_prev.setToolTip("Change to previous sentence")
         self.btn_next.setToolTip("Change to next sentence")
+        self.btn_prev.setFixedSize(btn_size*2, btn_size)
+        self.btn_next.setFixedSize(btn_size * 2, btn_size)
+        self.btn_prev.clicked.connect(self._prev_sent)
         self.btn_next.clicked.connect(self._next_sent)
-        # image 1
+
+        # SVGs (the AM dependency trees)
         # https://doc.qt.io/qt-5/qtsvg-index.html
         # https://stackoverflow.com/questions/44776474/display-svg-image-in-qtwebview-with-the-right-size
         self.wdg_svg1 = QtSvg.QSvgWidget(parent=self._centralWidget)
         # self.wdg_svg1.clicked.connect(self._enlarge_svg1)
         # self.wdg_svg1.load(file="")
-        # row, col, rows spanned, cols spanned
         self.wdg_svg2 = QtSvg.QSvgWidget(parent=self._centralWidget)
-        # self.wdg_svg2.clicked.connect(self._enlarge_svg2)
+        # svg_style = "border-radius: 5px; border: 2px solid black; " \
+        #             "background-color: rgb(235,235,235)"
+        # self.wdg_svg1.setStyleSheet(svg_style)
+        # self.wdg_svg2.setStyleSheet(svg_style)
 
+        # Maximize and save buttons (right to the respective SVG image)
+        self._perfile_layout1 = QVBoxLayout()
+        self._perfile_layout2 = QVBoxLayout()
+        self.perfile_buttons1 = QWidget(parent=self._centralWidget)
+        self.perfile_buttons2 = QWidget(parent=self._centralWidget)
+        self.perfile_buttons1.setLayout(self._perfile_layout1)
+        self.perfile_buttons2.setLayout(self._perfile_layout2)
         # 'Maximize' buttons
-        # todo [GUI][add] scroll list of sents
-        # todo [GUI][add] image save2file, resizing/scaling and minSize?, ...
-        self.btn_enlarge1 = QPushButton(text="Max.", parent=self._centralWidget)
-        self.btn_enlarge2 = QPushButton(text="Max.", parent=self._centralWidget)
+        self.btn_enlarge1 = QPushButton(text="Max.", parent=self.perfile_buttons1)
+        self.btn_enlarge2 = QPushButton(text="Max.", parent=self.perfile_buttons2)
         self.btn_enlarge1.setToolTip("Show image in separate window, maximized")
         self.btn_enlarge2.setToolTip("Show image in separate window, maximized")
+        self.btn_enlarge1.setFixedSize(btn_size*2, btn_size)
+        self.btn_enlarge2.setFixedSize(btn_size*2, btn_size)
         self.btn_enlarge1.clicked.connect(self._enlarge_svg1)
         self.btn_enlarge2.clicked.connect(self._enlarge_svg2)
+        # 'Save' buttons
+        self.btn_savesvg1 = QPushButton(text="Save", parent=self.perfile_buttons1)
+        self.btn_savesvg2 = QPushButton(text="Save", parent=self.perfile_buttons2)
+        self.btn_savesvg1.setToolTip("Save SVG to file")
+        self.btn_savesvg2.setToolTip("Save SVG to file")
+        self.btn_savesvg1.setFixedSize(btn_size*2, btn_size)
+        self.btn_savesvg2.setFixedSize(btn_size*2, btn_size)
+        self.btn_savesvg1.clicked.connect(self._save_svg1)
+        self.btn_savesvg2.clicked.connect(self._save_svg2)
+        # add widgets to per file layout
+        self._perfile_layout1.addWidget(self.btn_enlarge1)
+        self._perfile_layout1.addWidget(self.btn_savesvg1)
+        self._perfile_layout2.addWidget(self.btn_enlarge2)
+        self._perfile_layout2.addWidget(self.btn_savesvg2)
 
         # List of all sentences: scrollable, can click on sentences
         # see also stackoverflow.com how-to-scroll-qlistwidget-to-selected-item
@@ -321,16 +356,36 @@ class PyCompareUi(QMainWindow):
         self.current_item.setSelected(True)
         self.sents_scroll.currentItemChanged.connect(self._on_item_changed)
 
-        # organize widgets in grid layout
+        # organize widgets in (main) grid layout
+        # - row 0:    sentence ...................... and  X/Y sents
+        # - row 1/2:  SVG1 / 2 ...................... and  maximize/save button
+        # - row 3:    list (scrollable) of sentences  and  previous/next buttons
         self.generalLayout.addWidget(self.lbl_no, 0, 1)
         self.generalLayout.addWidget(self.lbl_sent, 0, 0)
-        self.generalLayout.addWidget(self.btn_prev, 3, 1)
-        self.generalLayout.addWidget(self.btn_next, 4, 1)
+        self.generalLayout.addWidget(self.btn_prev, 3, 1, alignment=QtCore.Qt.AlignBottom)
+        self.generalLayout.addWidget(self.btn_next, 4, 1, alignment=QtCore.Qt.AlignTop)
         self.generalLayout.addWidget(self.wdg_svg1, 1, 0, 1, 1)
         self.generalLayout.addWidget(self.wdg_svg2, 2, 0, 1, 1)
-        self.generalLayout.addWidget(self.btn_enlarge1, 1, 1)
-        self.generalLayout.addWidget(self.btn_enlarge2, 2, 1)
+        self.generalLayout.addWidget(self.perfile_buttons1, 1, 1, alignment=QtCore.Qt.AlignTop)
+        self.generalLayout.addWidget(self.perfile_buttons2, 2, 1, alignment=QtCore.Qt.AlignTop)
         self.generalLayout.addWidget(self.sents_scroll, 3, 0, 2, 1)
+
+        # Sizing and what changes when the window is resized:
+        # Rows with SVG should occupy most of the available space,
+        # the top row shouldn't consume much space (no matter what window size),
+        # the last row (scrollbar) can consume more space if window size
+        # increases, but prefer to give more room to the SVGs
+        # https://doc.qt.io/qtforpython/PySide2/QtWidgets/QSizePolicy.html
+        # self.generalLayout.setSpacing(0)
+        self.lbl_sent.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.lbl_no.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.wdg_svg1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.wdg_svg2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.sents_scroll.setSizePolicy(QSizePolicy.Preferred,
+                                        QSizePolicy.Expanding)
+        self.generalLayout.setRowStretch(1, 8)  # increase SVG size more
+        self.generalLayout.setRowStretch(2, 8)
+        self.generalLayout.setRowStretch(3, 1)  # increase scroll bar size less
         return
 
 
