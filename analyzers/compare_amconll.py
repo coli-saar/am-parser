@@ -20,9 +20,11 @@
 """
 Compare two AMCONLL files
 
-Prerequistites:
+Prerequisites:
 - Dot has to be installed (see https://graphviz.org/download/ )
-- Ppdflatex has to be installed (see https://www.latex-project.org/get/ )
+- Inkscape has to be installed (see https://inkscape.org/ )
+- command line `cat' and `tr' commands
+- Pdflatex has to be installed (see https://www.latex-project.org/get/ )
 - [except if --nogui] PyQt5 ( pip install pyqt5 ,
   see https://pypi.org/project/PyQt5/; for anaconda:  conda install -c anaconda pyqt)
 - [for --viz] Imagemagick has to be installed
@@ -47,7 +49,8 @@ If --viz is specified,  will visualize the am dependency trees using imagemagick
 
 author: pia
 tested using Ubuntu 18.04 , Python 3.7.4 , pyqt 5.9.2 , graphviz version 2.40.1,
-pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian), ImageMagick 6.9.7-4
+Inkscape 0.92.3, pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian),
+ImageMagick 6.9.7-4
 """
 # --viz --maxshow 10
 # ../similarity2020/corpora/AMR/2017/gold-dev/gold-dev.amconll
