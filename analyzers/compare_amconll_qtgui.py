@@ -173,15 +173,16 @@ class PyCompareUi(QMainWindow):
             raise RuntimeError("Couldn't find SVG files for sentence!")
         return fname_svg1, fname_svg2
 
-    def get_sentence(self) -> str:
+    def get_sentence(self, key: str) -> str:
         """
         Get string representation of sentence (eventually + id)
 
         Uses gold file string
+        :param key: str; key for sentence dictionary (either id or sentence)
         :return: sentence string. if self.useid, prefixed with id
         """
-        _, sent_gf = self.amf1gf[self.get_current_key()]
-        sentence = self.get_current_key()
+        _, sent_gf = self.amf1gf[key]
+        sentence = key
         if self.useid:
             sentence += " " + \
                         ' '.join(sent_gf.get_tokens(shadow_art_root=False))
@@ -207,7 +208,7 @@ class PyCompareUi(QMainWindow):
         # update displayed number
         self.lbl_no.setText(f"{self.current_idx+1} / {self.total}")
         # update displayed sentence
-        sentence = self.get_sentence()
+        sentence = self.get_sentence(key=self.get_current_key())
         self.lbl_sent.setText(sentence)
         # update images
         f1svg, gfsvg = self.get_svgs()
@@ -347,8 +348,9 @@ class PyCompareUi(QMainWindow):
         # see also stackoverflow.com how-to-scroll-qlistwidget-to-selected-item
         self.sents_scroll = QListWidget(parent=self._centralWidget)
         self.sents_scroll.setMinimumSize(100, 50)
-        for i, sent in enumerate(self.sent_keys):
-            it = QListWidgetItem(f"{i+1:02} || {sent}",
+        for i, sent_key in enumerate(self.sent_keys):
+            sentence = self.get_sentence(key=sent_key) # (id +) sentence
+            it = QListWidgetItem(f"{i+1:02} || {sentence}",
                                  parent=self.sents_scroll)
             if i == 0:
                 self.current_item = it
