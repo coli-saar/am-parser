@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Dict, Tuple, List, Any
+from typing import Dict, Tuple, List, Any, Iterable
 import logging
 
 from overrides import overrides
@@ -53,7 +53,7 @@ class AMConllDatasetReader(DatasetReader):
         self.fraction = fraction
         self.only_read_fraction_if_train_in_filename = only_read_fraction_if_train_in_filename
 
-    def _read_one_file(self, formalism:str, file_path: str):
+    def _read_one_file(self, formalism:str, file_path: str) -> Iterable[Instance]:
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
         if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
@@ -70,7 +70,7 @@ class AMConllDatasetReader(DatasetReader):
                     yield self.text_to_instance(formalism,i,am_sentence)
 
     @overrides
-    def _read(self, file_paths: List[List[str]]):
+    def _read(self, file_paths: List[List[str]]) -> Iterable[Instance]:
         for per_formalism in file_paths:
             assert len(per_formalism)==2, f"list per formalism must have length two and must be structured as [task_name, path_to_data], got {per_formalism}"
             formalism, path = per_formalism
