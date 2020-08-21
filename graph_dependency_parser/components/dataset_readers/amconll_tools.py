@@ -181,6 +181,8 @@ class AMSentence:
         r = """\\documentclass{standalone}
         \\usepackage[utf8]{inputenc}
         \\usepackage{tikz-dependency}
+        \\usepackage{microtype}%svg weird output (second char lost in ligatures, idk why)
+        \\DisableLigatures[f]{encoding = *, family = *} %% <- only disables f-ligatures
         \\usepackage{amsmath}
         \\usepackage{amsfonts}
 
@@ -217,13 +219,12 @@ class AMSentence:
             cluster, _ = penman_to_dot(graph_fragment, word.lexlabel, word.lemma, word.token, word.replacement, word.pos_tag, "n")
             fname = os.path.join(directory, "w"+str(i))
             with open(fname+".dot","w") as f:
-                # todo for dots files increase font (less white space)
-                # todo try: node [fontsize=18,margin="0.05,0.005"]; # tested with 0.8,0.8
+                graphstyle = 'margin=0; bgcolor=transparent; node [fontsize=18,margin="0.05,0.005"]; '
                 if len(graph_fragment.instances()) == 1:
                     #make smaller graph, otherwise node will look too large.
-                    f.write('digraph{ graph [size="0.4,0.4"]; margin=0; bgcolor=transparent; ' + cluster + "}")
+                    f.write('digraph{ graph [size="0.4,0.4"]; ' + graphstyle + cluster + "}")
                 else:
-                    f.write('digraph{ graph [size="0.8,0.8"]; margin=0; bgcolor=transparent; ' + cluster + "}")
+                    f.write('digraph{ graph [size="0.8,0.8"]; ' + graphstyle + cluster + "}")
             dot_filenames.append(fname)
 
             #os.system("dot -Tpdf "+fname+".dot -o "+fname+".pdf")
