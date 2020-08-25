@@ -22,7 +22,7 @@
 import pyximport; pyximport.install()
 from graph_dependency_parser.am_algebra.dag import DiGraph
 
-from typing import Set, Dict, Tuple, List, Iterator, Optional
+from typing import Set, Dict, Tuple, List, Iterator, Optional, Iterable, FrozenSet
 import re
 
 
