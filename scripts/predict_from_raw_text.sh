@@ -115,6 +115,9 @@ if [ "$output" = "" ]; then
     exit 1
 fi
 
+#Download spacy model we need to pre-process the raw text given.
+python -m spacy download en_core_web_md
+
 
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing raw text file $input with model $model to $type graphs, output in $output"

@@ -18,7 +18,7 @@
 ## limitations under the License.
 ##
 
-
+export LC_ALL=en_US.UTF-8
 
 usage="Preprocess an DM 2015 Shared task corpus, in ACL 2019 style.\n\n
 
