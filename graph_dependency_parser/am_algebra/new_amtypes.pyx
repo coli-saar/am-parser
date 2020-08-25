@@ -48,19 +48,25 @@ def extract_constituents(depths) -> List[Tuple[int,int]]:
 UNIFY_PATTERN : re.Pattern = re.compile("(.+)_UNIFY_(.+)")
 UNIFY = "_UNIFY_"
 
+class NonAMTypeException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
 class AMType(DiGraph):
     
     def __init__(self):
         super().__init__()
         self.is_bot : bool = False #\bot type?
-        
-            
+
+
     def process_updates(self):
         self.closure()
-        
-        assert not self.has_cycle()
-        
-        assert self.verify()
+
+        if self.has_cycle():
+            raise NonAMTypeException("Supposed type has a cycle")
+
+        if not self.verify():
+            raise NonAMTypeException("verify failed")
             
         
     def verify(self) -> bool:
@@ -91,8 +97,8 @@ class AMType(DiGraph):
             t = AMType()
             t.is_bot = True
             return t
-        
-        assert tokens[-1] == ")"
+        if tokens[-1] != ")":
+            raise NonAMTypeException("Ill-formed string: "+s)
         
         t = AMType._parse_tokens(tokens[:-1])
         
@@ -102,7 +108,8 @@ class AMType(DiGraph):
         
     @staticmethod
     def _parse_tokens(s : List[str], parent = None, typ : "AMType" = None) -> "AMType":
-        assert s[0] == "("
+        if s[0] != "(":
+            raise NonAMTypeException("Ill-formed string: "+s)
         s = s[1:]
         depth = 0
         depths = []
@@ -233,8 +240,8 @@ class AMType(DiGraph):
         Is this the empty type?
         """
         return self.is_empty() and not self.is_bot
-    
-    
+
+
     def get_apply_set(self, target : "AMType") -> Optional[Set[str]]:
         """
         Returns the set of source names such that if we call apply for all those
@@ -245,23 +252,36 @@ class AMType(DiGraph):
             if target.is_bot:
                 return set()
             return None
-        
+
         if not isinstance(target, AMType) or not target.is_compatible_with(self):
             return None
-        
+
         #return value is all sources in this type that are not in target
         ret = set(self.nodes()) - set(target.nodes())
-        
-        
+
+        changed = True
+        term_type = self.copy()
+        while changed:
+            changed = False
+            for o in term_type.origins & ret:
+                term_type.remove_node(o)
+                changed = True
+
+        if term_type != target:
+            return None
+
+        return ret
+
+
         # but if any source s in ret is a descendant of a node t in target,
         # then we can't remove s via apply without removing t before.
         # Can check for that by just looking at the children of the nodes in target.
-        
-        for node in target.nodes():
-            if set(self.get_children(node)) & ret:
-                return None
-            
-        return ret
+
+        # ~ for node in target.nodes():
+            # ~ if set(self.get_children(node)) & ret:
+                # ~ return None
+
+        # ~ return ret
     
     def can_apply_to(self, argument : "AMType", source : str) -> bool:
         """
@@ -393,14 +413,124 @@ class CombinationCache:
     
     def __init__(self):
         self.cache = dict()
-        
-    def combinations(self,head,dependent) -> Set[Tuple[str,str]]:
+    def combinations(self,head : AMType, dependent : AMType) -> Set[Tuple[str,str]]:
         try:
             return self.cache[(head,dependent)]
         except KeyError:
             combis = set(combinations(head,dependent))
             self.cache[(head,dependent)] = combis
             return combis
+
+
+class ReadCache:
+
+    def __init__(self):
+        self.cache = dict()
+
+    def parse_str(self, s : str) -> AMType:
+        if s in self.cache:
+            return self.cache[s]
+        t = AMType.parse_str(s)
+        self.cache[s] = t
+        return t
+
+
+class ModCache:
+    def __init__(self, omega : Iterable[AMType]):
+        self.can_be_modified_by : Dict[AMType, Dict[str, Set[AMType]]] = {t : dict() for t in omega}
+        #self.can_be_modified_by : Dict[AMType, Set[Tuple[str, AMType]]] = {t : set() for t in omega}
+
+        for t1 in omega:
+            for t2 in omega:
+                for source in t2.origins:
+                    if t1.can_be_modified_by(t2, source):
+                        if source not in self.can_be_modified_by[t1]:
+                            self.can_be_modified_by[t1][source] = set()
+                        self.can_be_modified_by[t1][source].add(t2)
+
+    def get_modifiers(self, t : AMType) -> Iterable[Tuple[str, AMType]]:
+        """
+        Return all types t' that such that MOD_x(t,t') is well-typed for some source x.
+        :param t:
+        :return:
+        """
+        for source in self.can_be_modified_by[t]:
+            for typ in self.can_be_modified_by[t][source]:
+                yield source, typ
+
+    def get_modifiers_with_source(self, lex_type : AMType, source : str) -> Iterable[AMType]:
+        return iter(self.can_be_modified_by[lex_type][source])
+
+class CandidateLexType:
+
+    def __init__(self, omega : Set[AMType]):
+        self.cache : Dict[AMType, Dict[int, Set[AMType]]]= dict()
+        self.cache_with_apply_sets : Dict[AMType, Dict[int, Set[Tuple[AMType, Set[str]]]]]= dict()
+        self.omega = omega
+
+    def get_candidates(self, term_type : AMType, n : int) -> Iterable[AMType]:
+        """
+        Return all lexical types such that it takes at most n APP operation to
+        reach the given term_type.
+        """
+
+        if term_type not in self.cache:
+            self.cache[term_type] = dict()
+            for lex_type in self.omega:
+                A = lex_type.get_apply_set(term_type)
+                if A is not None:
+                    if len(A) not in self.cache[term_type]:
+                        self.cache[term_type][len(A)] = set()
+
+                    self.cache[term_type][len(A)].add(lex_type)
+
+        for d in self.cache[term_type]:
+            if d <= n:
+                for t in self.cache[term_type][d]:
+                    yield t
+
+    def get_candidates_with_apply_set(self, term_type : AMType, apply_set_prefix : Set[str], n : int) -> Iterable[Tuple[AMType, FrozenSet[str]]]:
+        if term_type not in self.cache_with_apply_sets:
+            self.cache_with_apply_sets[term_type] = dict()
+            for lex_type in self.omega:
+                A = lex_type.get_apply_set(term_type)
+                if A is not None:
+                    if len(A) not in self.cache_with_apply_sets[term_type]:
+                        self.cache_with_apply_sets[term_type][len(A)] = set()
+
+                    self.cache_with_apply_sets[term_type][len(A)].add((lex_type, frozenset(A)))
+
+        for d in self.cache_with_apply_sets[term_type]:
+            if d <= n:
+                for lex_typ, apply_set in self.cache_with_apply_sets[term_type][d]:
+                    if apply_set_prefix.issubset(apply_set):
+                        yield lex_typ, apply_set
+
+
+    # def get_candidates_for_set(self, term_types : Set[AMType], n : int) -> Iterable[AMType]:
+    #     for term_type in term_types:
+    #         for c in self.get_candidates(term_type, n):
+    #             yield c
+
+
+class ByApplySet:
+
+    def __init__(self, omega : Iterable[AMType]) -> None:
+        self.cache : Dict[Tuple[AMType, FrozenSet[str]], Set[AMType]] = dict()
+
+        for t1 in omega:
+            for t2 in omega:
+                apply_set = t1.get_apply_set(t2)
+                if apply_set is not None:
+                    apply_set = frozenset(apply_set)
+                    if (t2, apply_set) not in self.cache:
+                        self.cache[t2, apply_set]  = set()
+                    self.cache[t2, apply_set].add(t1)
+
+    def by_apply_set(self, term_typ : AMType, apply_set : FrozenSet[str]) -> Iterable[AMType]:
+        return self.cache.get((term_typ, apply_set), set())
+
+
 
 
 if __name__ == "__main__":

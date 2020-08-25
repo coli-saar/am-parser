@@ -17,12 +17,13 @@
 # limitations under the License.
 #
 import subprocess
-from typing import List, Dict, Tuple, Iterable, Union
+from typing import List, Dict, Tuple, Iterable, Union, Optional
 
 from dataclasses import dataclass
 import os
 import multiprocessing as mp
 
+from ...am_algebra.new_amtypes import AMType
 from ...svg.dot_tools import penman_to_dot, parse_penman
 from ...svg.render import DependencyRenderer
 
@@ -60,6 +61,25 @@ class AMSentence:
         """Zero-based indexing."""
         return self.words[i]
 
+    def __eq__(self, other):
+        if not isinstance(other, AMSentence):
+            return False
+        if len(self.words) != len(other.words):
+            return False
+        if self.attributes != other.attributes:
+            return False
+
+        return all( w==o for w,o in zip(self.words, other.words))
+
+    def normalize_types(self) -> "AMSentence":
+        """
+        Parse the types and convert them to strings again to normalize them.
+        :return:
+        """
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, word.lexlabel,
+                                 str(AMType.parse_str(word.typ)), word.head, word.label, word.aligned,word.range)
+                           for i,word in enumerate(self.words)],self.attributes)
+
     def get_tokens(self, shadow_art_root) -> List[str]:
         r = [word.token for word in self.words]
         if shadow_art_root and r[-1] == "ART-ROOT":
@@ -93,10 +113,39 @@ class AMSentence:
     def get_edge_labels(self) -> List[str]:
         return [word.label if word.label != "_" else "IGNORE" for word in self.words] #this is a hack :(, which we need because the dev data contains _
 
+    def fix_dev_edge_labels(self) -> "AMSentence":
+        """
+        Return a copy of this sentence where edge labels that are "_" are replaced by "IGNORE".
+        :return:
+        """
+        labels = self.get_edge_labels()
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, word.lexlabel,
+                                 word.typ, word.head, labels[i], word.aligned,word.range)
+                           for i,word in enumerate(self.words)],self.attributes)
+
     def set_lexlabels(self, labels : List[str]) -> "AMSentence":
         assert len(labels) == len(self.words), f"number of lexical labels must agree with number of words but got {len(labels)} and {len(self.words)}"
         return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, labels[i],
                                  word.typ, word.head, word.label, word.aligned,word.range)
+                           for i,word in enumerate(self.words)],self.attributes)
+
+    def set_labels(self, labels : List[str]) -> "AMSentence":
+        assert len(labels) == len(self.words), f"number of lexical labels must agree with number of words but got {len(labels)} and {len(self.words)}"
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, word.fragment, word.lexlabel,
+                                 word.typ, word.head, labels[i], word.aligned,word.range)
+                           for i,word in enumerate(self.words)],self.attributes)
+
+    def set_supertags(self, supertags : List[str]):
+        assert len(supertags) == len(self.words), f"number of supertags must agree with number of words but got {len(supertags)} and {len(self.words)}"
+        split = [ tag.split("--TYPE--") for tag in supertags]
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, split[i][0], word.lexlabel,
+                                 split[i][1], word.head, word.label, word.aligned,word.range)
+                           for i,word in enumerate(self.words)],self.attributes)
+
+    def set_supertag_tuples(self, supertags : List[Tuple[str,str]]):
+        assert len(supertags) == len(self.words), f"number of supertags must agree with number of words but got {len(supertags)} and {len(self.words)}"
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, supertags[i][0], word.lexlabel,
+                                 supertags[i][1], word.head, word.label, word.aligned,word.range)
                            for i,word in enumerate(self.words)],self.attributes)
 
     def set_heads(self, heads : List[int]) -> "AMSentence":
@@ -128,6 +177,34 @@ class AMSentence:
         if not has_root:
             assert all((w.label == "IGNORE" or w.label=="_") and w.head == 0 for w in self.words), f"Sentence doesn't have a root but seems annotated with trees:\n {self}"
 
+    def strip_annotation(self) -> "AMSentence":
+        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, "_", "_",
+                                 "_", 0, "IGNORE", word.aligned, word.range)
+                           for word in self.words],self.attributes)
+
+    def children_dict(self) -> Dict[int, List[int]]:
+        """
+        Return dictionary of children, 1-based.
+        :return:
+        """
+        r = dict()
+        for i in range(len(self.words)):
+            head = self.words[i].head # head is 1-based
+            if self.words[i].label != "IGNORE":
+                if head not in r:
+                    r[head] = []
+                r[head].append(i+1) #make current position 1-based
+        return r
+
+    def get_root(self) -> Optional[int]:
+        """
+        Returns the index of the root, 0-based.
+        :return:
+        """
+        for i,e in enumerate(self.words):
+            if e.head == 0 and e.label == "ROOT":
+                return i
+
     def __str__(self):
         r = []
         if self.attributes:
@@ -144,11 +221,6 @@ class AMSentence:
 
     def __len__(self):
         return len(self.words)
-
-    def strip_annotation(self) -> "AMSentence":
-        return AMSentence([Entry(word.token, word.replacement, word.lemma, word.pos_tag, word.ner_tag, "_", "_",
-                                 "_", 0, "IGNORE", word.aligned, word.range)
-                           for word in self.words],self.attributes)
 
     def to_dot(self):
         from graph_dependency_parser.svg.dot_tools import penman_to_dot
@@ -248,7 +320,6 @@ class AMSentence:
             return f.read()
 
     def displacy_svg(self):
-        from graph_dependency_parser.am_algebra.new_amtypes import AMType
         renderer = DependencyRenderer({"compact" : True})
         root_node = 0
         d = {"words" :  [ {"text" : w.token, "tag" : str(AMType.parse_str(w.typ)) if w.typ != "_" else "⊥"} for w in self.words] }
