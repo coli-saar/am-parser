@@ -117,7 +117,7 @@ class AMDecoder:
                 try:
                     self.parse_am_type(triple[2])
                     supertag_preds.append(triple)
-                except AssertionError: # skip ill-formed types
+                except new_amtypes.NonAMTypeException: # skip ill-formed types
                     pass
 
             entry.supertags = sorted(supertag_preds, key= lambda triple: triple[0], reverse=True)
