@@ -27,12 +27,12 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 #============TASKS==============
 local my_task = "DM";
-local corpus_path = "example/minimalDM.amconll";
+local corpus_path = "example/minimalDMautomata/automataData.zip";
 local sdp_corpus_path = "example/minimalDM.sdp";
 #===============================
 
 local dataset_reader =  {
-        "type": "amconll",
+        "type": "amconll_automata",
          "token_indexers": {
             "tokens": {
               "type": "single_id",
@@ -109,7 +109,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 			"gold_file": sdp_corpus_path,
 			"use_from_epoch" : 0,
 			"predictor" : {
-                "type" : "amconll_predictor",
+                "type" : "amconll_automata_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : 2,
@@ -133,7 +133,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
      }
      },
     "model": {
-        "type": "graph_dependency_parser",
+        "type": "graph_dependency_parser_automata",
 
         "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],
 

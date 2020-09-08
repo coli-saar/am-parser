@@ -16,6 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import io
+
+import jnius_config
+
+
+jnius_config.add_options('-Xmx2G')
+jnius_config.set_classpath('am-tools.jar')
+from jnius import autoclass
+
+import zipfile
 from typing import Dict, Tuple, List, Any
 import logging
 
@@ -28,15 +38,18 @@ from allennlp.data.fields import Field, TextField, SequenceLabelField, MetadataF
 from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Token
+from graph_dependency_parser.inside_maximization.scyjava import to_python
 
+from graph_dependency_parser.components.dataset_readers.supertag_map_field import SupertagMapField
 from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll, AMSentence
+
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 
-@DatasetReader.register("amconll")
-class AMConllDatasetReader(DatasetReader):
+@DatasetReader.register("amconll_automata")
+class AMConllAutomataDatasetReader(DatasetReader):
     """
     Reads a file in amconll format containing AM dependency trees.
 
@@ -56,18 +69,28 @@ class AMConllDatasetReader(DatasetReader):
     def _read_one_file(self, formalism:str, file_path: str):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
+        AutomataZipReader = autoclass('de.saar.coli.amtools.decomposition.AutomataZipReader')
+        automata_zip_reader = AutomataZipReader(file_path)
         if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
-            with open(file_path, 'r') as amconll_file:
-                logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
-                sents = list(parse_amconll(amconll_file))
-                for i,am_sentence in  enumerate(sents):
-                    if i <= len(sents) * self.fraction:
-                        yield self.text_to_instance(formalism,i,am_sentence)
+            with zipfile.ZipFile(file_path) as z:
+                with io.TextIOWrapper(z.open("corpus.amconll")) as amconll_file:
+                    logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
+                    sents = list(parse_amconll(amconll_file))
+                    for i, am_sentence in  enumerate(sents):
+                        if i <= len(sents) * self.fraction:
+                            yield self._read_one_sentence(formalism, automata_zip_reader, i, am_sentence)
         else:
-            with open(file_path, 'r') as amconll_file:
-                logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-                for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
-                    yield self.text_to_instance(formalism,i,am_sentence)
+            with zipfile.ZipFile(file_path) as z:
+                with io.TextIOWrapper(z.open("corpus.amconll")) as amconll_file:
+                    logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
+                    for i, am_sentence in enumerate(parse_amconll(amconll_file)):
+                        yield self._read_one_sentence(formalism, automata_zip_reader, i, am_sentence)
+
+    def _read_one_sentence(self, formalism:str, automata_zip_reader, position_in_corpus:int, am_sentence: AMSentence):
+        automaton = automata_zip_reader.readAutomaton(position_in_corpus)
+        supertag_map = automata_zip_reader.readSupertagMap(position_in_corpus, automaton)
+        edge_map = automata_zip_reader.readEdgeMap(position_in_corpus, automaton)
+        return self.text_to_instance(formalism, position_in_corpus, am_sentence, supertag_map, edge_map, automaton)
 
     @overrides
     def _read(self, file_paths: List[List[str]]):
@@ -81,7 +104,10 @@ class AMConllDatasetReader(DatasetReader):
     def text_to_instance(self,  # type: ignore
                          formalism: str,
                          position_in_corpus : int,
-                         am_sentence: AMSentence) -> Instance:
+                         am_sentence: AMSentence,
+                         supertag_map,
+                         edge_map,
+                         automaton) -> Instance:
         # pylint: disable=arguments-differ
         """
         Parameters
@@ -105,15 +131,44 @@ class AMConllDatasetReader(DatasetReader):
         fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
         fields["ner_tags"] = SequenceLabelField(am_sentence.get_ner(), tokens, label_namespace="ner_labels")
         fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
-        fields["supertags"] = SequenceLabelField(am_sentence.get_supertags(), tokens, label_namespace=formalism+"_supertag_labels")
+        # fields["supertags"] = SequenceLabelField(am_sentence.get_supertags(), tokens, label_namespace=formalism+"_supertag_labels")
         fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
-        fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace=formalism+"_head_tags") #edge labels
+        # fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace=formalism+"_head_tags") #edge labels
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
-
+        fields["supertag_map"] = SupertagMapField(supertag_map, label_namespace=formalism+"_supertag_labels")
+        fields["edge_map"] = SupertagMapField(edge_map, label_namespace=formalism+"_head_tags")
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
                                             "token_ranges" : am_sentence.get_ranges(),
-                                            "is_annotated" : am_sentence.is_annotated()})
+                                            "is_annotated" : am_sentence.is_annotated(),
+                                            "automaton" : automaton})
+        # checking rule identity across maps and automaton
+        # print("Rules in supertag_map:")
+        # for rule in to_python(supertag_map.keySet()):
+        #     print(rule)
+        #     print(rule.toString(automaton))
+        # print("Rules in edge_map:")
+        # for rule in to_python(edge_map.keySet()):
+        #     print(rule)
+        #     print(rule.toString(automaton))
+        # print("Rules in automaton:")
+        # for rule in to_python(automaton.getRuleSet()):
+        #     print(rule)
+        #     print(rule.toString(automaton))
+        # print("Modifying rules in supertag_map:")
+        # for rule in to_python(supertag_map.keySet()):
+        #     rule.setWeight(0.5)
+        #     print(rule)
+        #     print(rule.toString(automaton))
+        # print("Modifying rules in edge_map:")
+        # for rule in to_python(edge_map.keySet()):
+        #     rule.setWeight(0.2)
+        #     print(rule)
+        #     print(rule.toString(automaton))
+        # print("Modified rules in automaton:")
+        # for rule in to_python(automaton.getRuleSet()):
+        #     print(rule)
+        #     print(rule.toString(automaton))
         return Instance(fields)
 
     @staticmethod

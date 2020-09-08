@@ -1,6 +1,6 @@
 import jnius_config
 jnius_config.add_options('-Xmx2G')
-jnius_config.set_classpath('../../../alto/build/libs/alto-2.3.7-SNAPSHOT-all.jar')
+jnius_config.set_classpath('am-tools.jar')
 from jnius import autoclass
 
 if __name__ == "__main__":

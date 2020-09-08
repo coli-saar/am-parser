@@ -48,7 +48,6 @@ class Predictor (Registrable):
         :param evaluation_command:
         :param model:
         """
-        assert isinstance(dataset_reader, AMConllDatasetReader), "A predictor in the am-parser must take an AMConllDatasetReader"
         self.dataset_reader = dataset_reader
         self.model = model
         self.evaluation_command = evaluation_command
@@ -88,7 +87,7 @@ class Predictor (Registrable):
             with tempfile.TemporaryDirectory() as tmpdirname:
                 filename = tmpdirname+"/prediction"
                 self.parse_and_save(formalism, input_file, filename)
-                return self.evaluation_command.evaluate(filename,gold_file)
+                return self.evaluation_command.evaluate(filename, gold_file)
         else:
             self.parse_and_save(formalism, input_file, filename)
             return self.evaluation_command.evaluate(filename, gold_file)
@@ -118,6 +117,64 @@ class AMconllPredictor(Predictor):
                  evaluation_command: BaseEvaluationCommand = None, model: Model = None, batch_size: int = 64, give_up_k_1 : float = None):
         """
         Creates a predictor from an AMConllDatasetReader, optionally takes an AllenNLP model. The model can also be given later using set_model.
+        If evaluation is required, en evaluation_command can be supplied as well.
+        :param dataset_reader: an AMConllDatasetReader
+        :param k: number of supertags to be used during decoding
+        :param give_up: time limit in seconds before retry parsing with k-1 supertags
+        :param threads: number of parallel threads to parse corpus
+        :param give_up_k_1: if given, how long to wait before skipping sentence entirely ("back off" from k=1 to k=0)
+        :param evaluation_command:
+        :param model:
+        """
+        super().__init__(dataset_reader,data_iterator,evaluation_command,model,batch_size)
+        assert isinstance(dataset_reader, AMConllDatasetReader), "A predictor in the am-parser must take an AMConllDatasetReader"
+        self.k = k
+        self.threads = threads
+        self.give_up = give_up
+        if give_up_k_1 is None:
+            self.give_up_k_1 = give_up
+        else:
+            self.give_up_k_1 = give_up_k_1
+
+    def parse_and_save(self, formalism : str, input_file : str, output_file: str) -> None:
+        """
+        Parses an input file and saves it to some given output file. Old content will be overwritten.
+        :param input_file:
+        :param formalism: the name of the formalism of the input_file
+        :param output_file:
+        :return:
+        """
+        assert self.model, "model must be given, either to the constructor or to set_model"
+        instances = self.dataset_reader.read([[formalism, input_file]]) #we need to give the formalism to amconll dataset_reader
+        prev_training_status = self.model.training
+        self.model.train(False)
+        predictions = self.dataset_reader.restore_order(forward_on_instances(self.model, instances,self.data_iterator))
+        self.model.train(prev_training_status) #reset training status to whatever it was before
+        i2edge_label = [ self.model.vocab.get_token_from_index(i,namespace=formalism+"_head_tags") for i in range(self.model.vocab.get_vocab_size(formalism+"_head_tags"))]
+        decoder = AMDecoder(output_file,i2edge_label)
+        for pred in predictions:
+            attributes = pred["attributes"]
+            attributes["batch_size"] = pred["batch_size"]
+            attributes["normalized_nn_time"] = pred["batch_time"] / pred["batch_size"]
+            attributes["normalized_prepare_ftd_time"] = pred["normalized_prepare_ftd_time"]
+            attributes["host"] = socket.gethostname()
+            attributes["parser"] = "ftd"
+            am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
+            sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
+            decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
+        decoder.decode(self.threads,self.k,self.give_up,self.give_up_k_1)
+
+
+@Predictor.register("amconll_automata_predictor")
+class AMconllAutomataPredictor(Predictor):
+    """
+    Predictor that calls the fixed-tree decoder. Uses source automata instead of explicit AM dependency trees
+    """
+
+    def __init__(self, dataset_reader: DatasetReader, k:int,give_up:float, threads:int = 4,data_iterator: DataIterator = None,
+                 evaluation_command: BaseEvaluationCommand = None, model: Model = None, batch_size: int = 64, give_up_k_1 : float = None):
+        """
+        Creates a predictor from an AMConllAutomataDatasetReader, optionally takes an AllenNLP model. The model can also be given later using set_model.
         If evaluation is required, en evaluation_command can be supplied as well.
         :param dataset_reader: an AMConllDatasetReader
         :param k: number of supertags to be used during decoding
