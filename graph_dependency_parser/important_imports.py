@@ -16,6 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+import jnius_config
+jnius_config.add_options('-Xmx2G')
+jnius_config.set_classpath('am-tools.jar')
+import jnius
+
 import graph_dependency_parser.components.dataset_readers.same_formalism_iterator
 import graph_dependency_parser.components.dataset_readers.amconll
 import graph_dependency_parser.components.dataset_readers.amconll_automata

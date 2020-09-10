@@ -18,11 +18,10 @@
 #
 import io
 
-import jnius_config
 
 
-jnius_config.add_options('-Xmx2G')
-jnius_config.set_classpath('am-tools.jar')
+from graph_dependency_parser.components.dataset_readers.rule_index_field import RuleIndexField
+
 from jnius import autoclass
 
 import zipfile
@@ -126,22 +125,29 @@ class AMConllAutomataDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
+        rule_iterator = automaton.getRuleSet()
+        # for rule in to_python(rule_iterator):
+        #     print(rule.toString(automaton))
+        #     if supertag_map.keySet().contains(rule):
+        #         print(f"Word position: {supertag_map.get(rule).left}")
+        #     else:
+        #         print(f"Edge position: {edge_map.get(rule).left.right}")
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens
         fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
         fields["ner_tags"] = SequenceLabelField(am_sentence.get_ner(), tokens, label_namespace="ner_labels")
         fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
-        # fields["supertags"] = SequenceLabelField(am_sentence.get_supertags(), tokens, label_namespace=formalism+"_supertag_labels")
         fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
-        # fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace=formalism+"_head_tags") #edge labels
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
-        fields["supertag_map"] = SupertagMapField(supertag_map, label_namespace=formalism+"_supertag_labels")
-        fields["edge_map"] = SupertagMapField(edge_map, label_namespace=formalism+"_head_tags")
+        fields["rule_index"] = RuleIndexField(supertag_map, edge_map, rule_iterator, len(tokens) + 1, # +1 for artificial root
+                                              supertag_namespace=formalism+"_supertag_labels",
+                                              edge_namespace=formalism+"_head_tags")
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
                                             "token_ranges" : am_sentence.get_ranges(),
                                             "is_annotated" : am_sentence.is_annotated(),
-                                            "automaton" : automaton})
+                                            "automaton" : automaton,
+                                            "rule_iterator" : rule_iterator})
         # checking rule identity across maps and automaton
         # print("Rules in supertag_map:")
         # for rule in to_python(supertag_map.keySet()):

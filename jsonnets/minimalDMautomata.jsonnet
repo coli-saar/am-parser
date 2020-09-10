@@ -13,7 +13,7 @@ local pos_dim = 2;
 local lemma_dim = 2;
 local word_dim = 8;
 local ner_dim = 2;
-local hidden_dim = 8;
+local hidden_dim = 16;
 
 local eval_commands = import '../configs/eval_commands.libsonnet';
 
@@ -27,7 +27,7 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 #============TASKS==============
 local my_task = "DM";
-local corpus_path = "example/minimalDMautomata/automataData.zip";
+local corpus_path = "example/minimalDMautomata/automataData3S.zip";
 local sdp_corpus_path = "example/minimalDM.sdp";
 #===============================
 
