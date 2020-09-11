@@ -115,7 +115,11 @@ class RuleIndexField(Field):
         padded_rule_count = padding_lengths["rule_count"]
         new_index_list = []
         if sentence_length_diff > 0:
-            for index in enumerate(self.index_list):
+            # print(self.index_list)
+            for index in self.index_list:
+                # print(f"index: {index}")
+                # print(f"sent length: {self.sentence_length}")
+                # print(f"st vocab size: {self.supertag_vocab_size}")
                 if index >= self.sentence_length*self.supertag_vocab_size:
                     new_index_list.append(index+sentence_length_diff*self.supertag_vocab_size)
                 else:

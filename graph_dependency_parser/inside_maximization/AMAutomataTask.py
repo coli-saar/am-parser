@@ -144,6 +144,7 @@ class AMAutomataTask(Model):
                 pos_tags: torch.LongTensor,
                 metadata: List[Dict[str, Any]],
                 rule_index: torch.LongTensor = None,
+                rule_mask: torch.LongTensor = None,
                 lexlabels: torch.LongTensor = None,
                 head_indices: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
         """
@@ -155,7 +156,9 @@ class AMAutomataTask(Model):
         :param mask:  matching the sentence representation of shape (batch_size, seq_len)
         :param pos_tags: the accompanying pos tags (batch_size, seq_len)
         :param metadata:
-        :param rule_index: the accompanying supertags (batch_size, rule_count)
+        :param rule_index: for each rule (same order as in rule_iterator in metadata) what index of neural network
+                            prediction corresponds to the rule (batch_size, rule_count)
+        :param rule_mask: mask for rule_index
         :param lexlabels: the accompanying lexical labels (batch_size, seq_len)
         :param head_indices: the gold edge labels for each word (incoming edge, see amconll files) (batch_size, seq_len)
         :return:
@@ -179,7 +182,6 @@ class AMAutomataTask(Model):
             supertagger_logits = None
             lexlabel_logits = None
 
-
         # Make predictions on data:
         if self.training:
             predicted_heads = self._greedy_decode_arcs(edge_existence_scores, mask)
@@ -193,8 +195,6 @@ class AMAutomataTask(Model):
             edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, predicted_heads)
             # Predict edge labels
             predicted_edge_labels = self._greedy_decode_edge_labels(edge_label_logits)
-
-
 
         output_dict = {
             "heads": predicted_heads,
@@ -254,10 +254,10 @@ class AMAutomataTask(Model):
 
             # automaton loss
             logprobs_for_rules = torch.gather(all_logits, 1, rule_index)
-            print(f"logprobs_for_rules: {logprobs_for_rules}")
+            logprobs_for_rules = logprobs_for_rules * rule_mask
+            print(f"logprobs_for_rules[0]: {logprobs_for_rules[0]}")
             outer_weights_python = []
-            #print(logprobs_for_rules.size())
-            #print(logprobs_for_rules)
+
             # iterate over each entry in batch:
             for logits, meta in zip(logprobs_for_rules, metadata):
                 logits_python = logits.tolist() # need to convert to python primitive to send it to java as a float[]
@@ -269,7 +269,7 @@ class AMAutomataTask(Model):
 
             # back to pytorch tensors
             outer_weights = torch.FloatTensor(outer_weights_python) # TODO does this get the device right automatically?
-            print(f"outer_weights: {outer_weights}")
+            print(f"outer_weights[0]: {outer_weights[0]}")
 
             # compute loss batched, returning a vector with a loss for each entry in the batch
             batch_loss_tensor = -torch.logsumexp(outer_weights+logprobs_for_rules, dim=1)
@@ -283,6 +283,7 @@ class AMAutomataTask(Model):
             # gold_edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, head_indices)
             # edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
             edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
+            print(f"edge_existence loss: {edge_existence_loss}")
 
             # compute loss, remove loss for artificial root
             # if encoded_text_tagging is not None and self.loss_mixing["supertagging"] is not None:
@@ -302,7 +303,9 @@ class AMAutomataTask(Model):
             # if supertagging_nll is not None:
             #     loss += mix_loss(self.loss_mixing["supertagging"], supertagging_nll)
             if lexlabel_nll is not None:
-                loss += mix_loss(self.loss_mixing["lexlabel"], lexlabel_nll)
+                lexlabel_loss = mix_loss(self.loss_mixing["lexlabel"], lexlabel_nll)
+                print(f"lexlabel loss: {lexlabel_loss}")
+                loss += lexlabel_loss
 
             # Compute LAS/UAS/Supertagging acc/Lex label acc:
             evaluation_mask = self._get_mask_for_eval(mask[:, 1:], pos_tags)
@@ -590,13 +593,13 @@ class AMAutomataTask(Model):
 
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         r = self._attachment_scores.get_metric(reset)
-        if self.loss_mixing["supertagging"] is not None:
-            r["Constant_Acc"] = self._supertagging_acc.get_metric(reset)
-            r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
+        # if self.loss_mixing["supertagging"] is not None:
+        #     r["Constant_Acc"] = self._supertagging_acc.get_metric(reset)
+        #     r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
         if self.loss_mixing["lexlabel"] is not None:
             r["Label_Acc"] = self._lexlabel_acc.get_metric(reset)
-        las = r["LAS"]
-        if "Constant_Acc" in r:
-            r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2
+        # las = r["LAS"]
+        # if "Constant_Acc" in r:
+        #     r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2
         return r
 

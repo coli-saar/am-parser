@@ -37,6 +37,8 @@ from allennlp.data.fields import Field, TextField, SequenceLabelField, MetadataF
 from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Token
+
+from graph_dependency_parser.components.dataset_readers.rule_mask_field import RuleMaskField
 from graph_dependency_parser.inside_maximization.scyjava import to_python
 
 from graph_dependency_parser.components.dataset_readers.supertag_map_field import SupertagMapField
@@ -142,6 +144,7 @@ class AMConllAutomataDatasetReader(DatasetReader):
         fields["rule_index"] = RuleIndexField(supertag_map, edge_map, rule_iterator, len(tokens) + 1, # +1 for artificial root
                                               supertag_namespace=formalism+"_supertag_labels",
                                               edge_namespace=formalism+"_head_tags")
+        fields["rule_mask"] = RuleMaskField(rule_iterator, supertag_map, len(tokens) + 1)
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
                                             "token_ranges" : am_sentence.get_ranges(),
