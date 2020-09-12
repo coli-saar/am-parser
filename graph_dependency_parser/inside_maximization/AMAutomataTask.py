@@ -30,6 +30,7 @@ from allennlp.modules import InputVariationalDropout
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.nn.util import get_lengths_from_binary_sequence_mask
 from allennlp.training.metrics import CategoricalAccuracy, AttachmentScores
+from allennlp.training.metrics.average import Average
 from overrides import overrides
 from torch.nn import Module
 
@@ -113,10 +114,10 @@ class AMAutomataTask(Model):
             logger.critical(f"The following loss name(s) are unknown: {not_contained}")
             raise ValueError(f"The following loss name(s) are unknown: {not_contained}")
 
-        self._supertagging_acc = CategoricalAccuracy()
-        self._top_6supertagging_acc = CategoricalAccuracy(top_k=6)
         self._lexlabel_acc = CategoricalAccuracy()
         self._attachment_scores = AttachmentScores()
+        self._inside_metric = Average()
+        self._loss_metric = Average()
         self.current_epoch = 0
 
         tags = self.vocab.get_token_to_index_vocabulary("pos")
@@ -163,7 +164,7 @@ class AMAutomataTask(Model):
         :param head_indices: the gold edge labels for each word (incoming edge, see amconll files) (batch_size, seq_len)
         :return:
         """
-
+        start_time = time()
         encoded_text_parsing = self._dropout(encoded_text_parsing)
         if encoded_text_tagging is not None:
             encoded_text_tagging = self._dropout(encoded_text_tagging)
@@ -172,6 +173,8 @@ class AMAutomataTask(Model):
 
         edge_existence_scores = self.edge_model.edge_existence(encoded_text_parsing,
                                                                mask)  # shape (batch_size, seq_len, seq_len)
+        print(f"edge_existence_scores: {edge_existence_scores}")
+
         # shape (batch_size, seq_len, num_supertags)
         if encoded_text_tagging is not None and self.supertagger is not None and self.lexlabeltagger is not None\
                 and self.loss_mixing["supertagging"] is not None\
@@ -236,10 +239,12 @@ class AMAutomataTask(Model):
             # To be precise, the indices stored in rule_index[i] correspond to indices of all_logits[i] (i = entry in batch)
             st_size = supertagger_logits.size()
             el_size = edge_label_logits.size()
+            print(f"st_size: {st_size}")
+            print(f"el_size: {el_size}")
             supertagger_logprobs = torch.nn.functional.log_softmax(supertagger_logits, dim=2)
             edge_label_logprobs = torch.nn.functional.log_softmax(edge_label_logits, dim=2)
             all_logits = torch.cat([supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
-                                   dim=1) # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
+                                   dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
 
             # printing some information for testing
             # print(f"all_logits.size(): {all_logits.size()}")
@@ -252,33 +257,65 @@ class AMAutomataTask(Model):
             #     print(logit_index)
             #     print(all_logits[0][logit_index])
 
+            print(f"time before automaton loss: {time() - start_time}")
+            start_time = time()
             # automaton loss
             logprobs_for_rules = torch.gather(all_logits, 1, rule_index)
             logprobs_for_rules = logprobs_for_rules * rule_mask
-            print(f"logprobs_for_rules[0]: {logprobs_for_rules[0]}")
-            outer_weights_python = []
+            print(f"rule_mask: {rule_mask}")
+            #print(f"logprobs_for_rules[0]: {logprobs_for_rules[0]}")
 
+            print(f"time for gathering and masking: {time() - start_time}")
+            start_time = time()
+            outer_weights_python = []
             # iterate over each entry in batch:
-            for logits, meta in zip(logprobs_for_rules, metadata):
+            for logits, meta, indices in zip(logprobs_for_rules, metadata, rule_index):
                 logits_python = logits.tolist() # need to convert to python primitive to send it to java as a float[]
                 rule_iterator = meta["rule_iterator"]
                 automaton = meta["automaton"]
                 outer_weights_python.append(PyjniusHelper.computeOuterProbabilities(logits_python, rule_iterator, automaton))
+                # get total inside for metrics
+                total_inside = PyjniusHelper.getTotalLogInside(logits_python, rule_iterator, automaton)
+                self._inside_metric(total_inside)
+                print(f"log inside: {total_inside}")
+                print("indices:")
+                for index in indices:
+                    print(index.item())
+                print("rule weights:")
+                for logit in logits:
+                    print(logit.item())
+                print("automaton:")
+                for rule in to_python(rule_iterator):
+                    print(rule.toString(automaton))
+                print("outer weights:")
+                for i, weight in enumerate(outer_weights_python[-1]):
+                    if abs(weight) < 0.0001:
+                        weight = 2.0
+                        outer_weights_python[-1][i] = weight
+                    print(weight)
+                print(f"viterbi: {automaton.viterbi().toString()}")
 
-            #print(outer_weights_python)
+            print(f"time for inside outside: {time() - start_time}")
+            start_time = time()
+
+            # print(outer_weights_python)
 
             # back to pytorch tensors
             outer_weights = torch.FloatTensor(outer_weights_python) # TODO does this get the device right automatically?
-            print(f"outer_weights[0]: {outer_weights[0]}")
+            #print(f"outer_weights[0]: {outer_weights[0]}")
 
             # compute loss batched, returning a vector with a loss for each entry in the batch
+            print(outer_weights+logprobs_for_rules)
+            print(torch.logsumexp(outer_weights+logprobs_for_rules, dim=1))
             batch_loss_tensor = -torch.logsumexp(outer_weights+logprobs_for_rules, dim=1)
-            #print(batch_loss_tensor)
+            # print(batch_loss_tensor)
             # sum the loss over all entries in the batch
             loss = torch.sum(batch_loss_tensor)
             print(f"Tree inside loss: {loss}")
             loss = mix_loss(self.loss_mixing["supertagging"], loss)
 
+            print(f"time for rest of automaton loss: {time() - start_time}")
+            start_time = time()
 
             # gold_edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, head_indices)
             # edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
@@ -330,6 +367,7 @@ class AMAutomataTask(Model):
             # output_dict["supertagging_loss"] = supertagging_nll
             output_dict["lexlabel_loss"] = lexlabel_nll
             output_dict["loss"] = loss
+            self._loss_metric(loss.data.item())
 
         if self.compute_softmax_for_scores:
             # We don't use the results but we want it to be included in the time measurement
@@ -337,6 +375,8 @@ class AMAutomataTask(Model):
             F.log_softmax(output_dict["full_label_logits"], 3)
             F.log_softmax(output_dict["supertag_scores"], 2)
             torch.argsort(output_dict["supertag_scores"], descending=True, dim=2)
+
+        print(f"time after automaton loss: {time() - start_time}")
 
         return output_dict
 
@@ -598,6 +638,8 @@ class AMAutomataTask(Model):
         #     r["Constant_Acc_6_best"] = self._top_6supertagging_acc.get_metric(reset)
         if self.loss_mixing["lexlabel"] is not None:
             r["Label_Acc"] = self._lexlabel_acc.get_metric(reset)
+        r["Average_Insides"] = self._inside_metric.get_metric(reset)
+        r["Loss_Minus_Insides"] = self._loss_metric.get_metric(reset) - r["Average_Insides"]
         # las = r["LAS"]
         # if "Constant_Acc" in r:
         #     r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2

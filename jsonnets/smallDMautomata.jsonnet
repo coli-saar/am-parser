@@ -7,13 +7,13 @@
 # Evaluate on the right test corpora?
 
 local lr = 0.002;
-local num_epochs = 300;
-local patience = 1000;
+local num_epochs = 400;
+local patience = 10000;
 local pos_dim = 8;
 local lemma_dim = 8;
-local word_dim = 32;
+local word_dim = 64;
 local ner_dim = 8;
-local hidden_dim = 64;
+local hidden_dim = 128;
 
 local eval_commands = import '../configs/eval_commands.libsonnet';
 
@@ -27,8 +27,10 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 #============TASKS==============
 local my_task = "DM";
-local corpus_path = "example/smallDMautomata/automataData2S.zip";
+local corpus_path = "example/smallDMautomata/2S/train.zip";
 local sdp_corpus_path = "example/smallDM.sdp";
+local dev_corpus_path = "example/smallDMautomata/2S/dev.zip";
+local dev_sdp_corpus_path = "example/minimalDM.sdp";
 #===============================
 
 local dataset_reader =  {
@@ -90,7 +92,6 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
         #LOSS:
         "loss_mixing" : {
             "edge_existence" : 1.0,
-            "edge_label": 1.0,
             "supertagging": 1.0,
             "lexlabel": 1.0
         },
@@ -105,8 +106,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
         "validation_evaluator": {
 			"type": "standard_evaluator",
 			"formalism" : my_task,
-			"system_input" : corpus_path,
-			"gold_file": sdp_corpus_path,
+			"system_input" : dev_corpus_path,
+			"gold_file": dev_sdp_corpus_path,
 			"use_from_epoch" : 200,
 			"predictor" : {
                 "type" : "amconll_automata_predictor",
@@ -176,7 +177,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
     },
     "train_data_path": [ [my_task, corpus_path]],
-    "validation_data_path": [ [my_task, corpus_path]],
+    "validation_data_path": [ [my_task, dev_corpus_path]],
 
 
     #=========================EVALUATE ON TEST=================================

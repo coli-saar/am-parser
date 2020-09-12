@@ -42,5 +42,5 @@ class RuleMaskField(Field):
     def as_tensor(self, padding_lengths: Dict[str, int]) -> DataArray:
         padded_rule_count = padding_lengths["rule_count"]
         mask = pad_sequence_to_length([1 for _ in range(self.rule_count)], padded_rule_count)
-        return torch.LongTensor(mask)
+        return torch.BoolTensor(mask)
 

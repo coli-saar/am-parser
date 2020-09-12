@@ -22,14 +22,17 @@ class RuleIndexField(Field):
         self.rule_iterator = []
         self.supertag_map = dict()
         self.edge_map = dict()
+        print("rule info")
         for rule in to_python(rule_iterator):
             self.rule_iterator.append(rule)
             if supertag_map.keySet().contains(rule):
                 pair = supertag_map.get(rule)
                 self.supertag_map[rule] = (pair.left, pair.right)
+                print(f"st {pair.left}")
             elif edge_map.keySet().contains(rule):
                 pair = edge_map.get(rule)
                 self.edge_map[rule] = (pair.left.left, pair.left.right, pair.right)
+                print(f"el {pair.left.right}")
             else:
                 raise Exception(f"Rule not found in either supertag or edge map: {rule}")
 
@@ -40,7 +43,8 @@ class RuleIndexField(Field):
         self.edge_namespace = edge_namespace
         self.sentence_length = sentence_length
         self.index_list = None
-        self.supertag_vocab_size = None
+        self.vocab = None  # will need to store vocab later for correct shifting of indices during padding
+        self.supertag_index_max = None
 
     @overrides
     def count_vocab_items(self, counter: Dict[str, Dict[str, int]]):
@@ -65,8 +69,13 @@ class RuleIndexField(Field):
         # print(vocab.get_index_to_token_vocabulary(namespace=self.edge_namespace))
 
         self.index_list = []
-        self.supertag_vocab_size = vocab.get_vocab_size(namespace=self.supertag_namespace)
+        self.vocab = vocab  # store vocab for correct shifting of indices during padding later
+        supertag_vocab_size = vocab.get_vocab_size(namespace=self.supertag_namespace)
+        self.supertag_index_max = self.sentence_length * supertag_vocab_size  # note that supertag_vocab_size is
+        # not globally correct, but we can use it locally (updated to global correct value in as_tensor)
         edge_vocab_size = vocab.get_vocab_size(namespace=self.edge_namespace)
+        print(f"edge vocab: {vocab.get_index_to_token_vocabulary(namespace=self.edge_namespace)}")
+        print(f"st vocab: {vocab.get_index_to_token_vocabulary(namespace=self.supertag_namespace)}")
         covered_word_positions = set()
         word_positions_with_incoming_edge = set()
         for rule in self.rule_iterator:
@@ -75,13 +84,13 @@ class RuleIndexField(Field):
                 word_position = pair[0]#+1 # +1 to account for artificial root
                 covered_word_positions.add(word_position)
                 supertag_id = vocab.get_token_index(pair[1], namespace=self.supertag_namespace)
-                index = word_position*self.supertag_vocab_size+supertag_id
+                index = word_position*supertag_vocab_size+supertag_id
             elif rule in self.edge_map:
                 triple = self.edge_map[rule]
                 child_position = triple[1]# + 1 # +1 to account for artificial root
                 word_positions_with_incoming_edge.add(child_position)
                 edge_label_id = vocab.get_token_index(triple[2], namespace=self.edge_namespace)
-                index = self.sentence_length * self.supertag_vocab_size + child_position * edge_vocab_size + edge_label_id
+                index = self.sentence_length * supertag_vocab_size + child_position * edge_vocab_size + edge_label_id
             else:
                 print(self.edge_map)
                 print(self.supertag_map)
@@ -94,11 +103,13 @@ class RuleIndexField(Field):
         root_id = vocab.get_token_index("ROOT", namespace=self.edge_namespace)
         for pos in range(1, self.sentence_length):  # start at 1 to skip artificial root
             if pos not in covered_word_positions:
-                self.index_list.append(pos*self.supertag_vocab_size + bottom_id)
-                self.index_list.append(self.sentence_length * self.supertag_vocab_size + pos * edge_vocab_size + ignore_id)
+                self.index_list.append(pos*supertag_vocab_size + bottom_id)
+                self.index_list.append(self.sentence_length * supertag_vocab_size + pos * edge_vocab_size + ignore_id)
         for pos in covered_word_positions.difference(word_positions_with_incoming_edge):
-            self.index_list.append(self.sentence_length * self.supertag_vocab_size + pos * edge_vocab_size + root_id)
-        print(self.index_list)
+            self.index_list.append(self.sentence_length * supertag_vocab_size + pos * edge_vocab_size + root_id)
+        # print("index list")
+        # for index in self.index_list:
+        #     print(index)
 
 
 
@@ -111,20 +122,27 @@ class RuleIndexField(Field):
 
     @overrides
     def as_tensor(self, padding_lengths: Dict[str, int]) -> DataArray:
-        sentence_length_diff = padding_lengths["sentence_length"] - self.sentence_length
+        padded_sentence_length = padding_lengths["sentence_length"]
         padded_rule_count = padding_lengths["rule_count"]
+        supertag_vocab_size = self.vocab.get_vocab_size(namespace=self.supertag_namespace)  # now globally correct
         new_index_list = []
-        if sentence_length_diff > 0:
-            # print(self.index_list)
-            for index in self.index_list:
-                # print(f"index: {index}")
-                # print(f"sent length: {self.sentence_length}")
-                # print(f"st vocab size: {self.supertag_vocab_size}")
-                if index >= self.sentence_length*self.supertag_vocab_size:
-                    new_index_list.append(index+sentence_length_diff*self.supertag_vocab_size)
-                else:
-                    new_index_list.append(index)
-        padded_indices = pad_sequence_to_length(self.index_list, padded_rule_count) # TODO will need to mask somewhere
+        print(f"self.supertag_index_max: {self.supertag_index_max}")
+        print(f"padded_sentence_length: {padded_sentence_length}")
+        print(f"supertag_vocab_size: {supertag_vocab_size}")
+        print("indices before:")
+        for index in self.index_list:
+            print(index)
+            # print(f"index: {index}")
+            # print(f"sent length: {self.sentence_length}")
+            # print(f"st vocab size: {supertag_vocab_size}")
+            if index >= self.supertag_index_max:
+                new_index_list.append(index + (padded_sentence_length - self.sentence_length) * supertag_vocab_size)
+            else:
+                new_index_list.append(index)
+        padded_indices = pad_sequence_to_length(new_index_list, padded_rule_count)
+        print("indices after:")
+        for index in padded_indices:
+            print(index)
         return torch.LongTensor(padded_indices)
 
     def __str__(self) -> str:
