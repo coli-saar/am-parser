@@ -15,7 +15,7 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 - AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
-- The spacy core web md model: `python -m spacy download en_core_web_sm`
+- The spacy core web md model: `python -m spacy download en_core_web_md`
 - a build of [am-tools](https://github.com/coli-saar/am-tools); will be downloaded automatically.
 
 (We recommend to set up a conda environment.)
