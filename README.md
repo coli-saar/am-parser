@@ -16,6 +16,7 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 - Cython
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
 - The spacy core web md model: `python -m spacy download en_core_web_md`
+- You may require to set your version of sklearn (an AllenNLP requirement, usually automatically installed) manually to version 0.22 or lower, e.g. with `pip install scikit-learn==0.22.2`
 - a build of [am-tools](https://github.com/coli-saar/am-tools); will be downloaded automatically.
 
 (We recommend to set up a conda environment.)
