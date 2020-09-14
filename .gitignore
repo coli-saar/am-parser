@@ -211,3 +211,4 @@ test_output/dm/test.ood/en.ood.dm.sdp
 test_output/dm/train/train-supertags.txt
 scripts/setupLSWJonasLocal.txt
 example/smallDM.sdp
+example/minimalDM.sdp

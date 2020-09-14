@@ -1,7 +1,0 @@
-# selection from SDP 2015 DM dev set
-#22002001
-1	SHEARSON	_generic_proper_ne_	NNP	-	+	named:x-c	_	_	_
-2	LEHMAN	_generic_proper_ne_	NNP	-	+	named:x-c	compound	_	_
-3	HUTTON	_generic_proper_ne_	NNP	+	-	named:x-c	_	compound	compound
-4	Inc	Inc	NNP	-	+	n:x	_	_	_
-5	.	_	.	-	-	_	_	_	_

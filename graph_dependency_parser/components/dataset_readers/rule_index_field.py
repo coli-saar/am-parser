@@ -11,6 +11,10 @@ from overrides import overrides
 from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
 from graph_dependency_parser.inside_maximization.scyjava import to_python
 
+from jnius import autoclass
+Rule = autoclass("de.up.ling.irtg.automata.Rule")
+Rule.__hash__ = Rule.hashCode
+
 class RuleIndexField(Field):
 
     def __init__(self, supertag_map, edge_map, rule_iterator, sentence_length, supertag_namespace: str, edge_namespace):
