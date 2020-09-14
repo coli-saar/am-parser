@@ -173,7 +173,7 @@ class AMAutomataTask(Model):
 
         edge_existence_scores = self.edge_model.edge_existence(encoded_text_parsing,
                                                                mask)  # shape (batch_size, seq_len, seq_len)
-        print(f"edge_existence_scores: {edge_existence_scores}")
+        # print(f"edge_existence_scores: {edge_existence_scores}")
 
         # shape (batch_size, seq_len, num_supertags)
         if encoded_text_tagging is not None and self.supertagger is not None and self.lexlabeltagger is not None\
@@ -239,8 +239,9 @@ class AMAutomataTask(Model):
             # To be precise, the indices stored in rule_index[i] correspond to indices of all_logits[i] (i = entry in batch)
             st_size = supertagger_logits.size()
             el_size = edge_label_logits.size()
-            print(f"st_size: {st_size}")
-            print(f"el_size: {el_size}")
+            if self.training:
+                print(f"st_size: {st_size}")
+                print(f"el_size: {el_size}")
             supertagger_logprobs = torch.nn.functional.log_softmax(supertagger_logits, dim=2)
             edge_label_logprobs = torch.nn.functional.log_softmax(edge_label_logits, dim=2)
             all_logits = torch.cat([supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
@@ -257,15 +258,16 @@ class AMAutomataTask(Model):
             #     print(logit_index)
             #     print(all_logits[0][logit_index])
 
-            print(f"time before automaton loss: {time() - start_time}")
+            # print(f"time before automaton loss: {time() - start_time}")
             start_time = time()
             # automaton loss
-            logprobs_for_rules = torch.gather(all_logits, 1, rule_index)
-            logprobs_for_rules = logprobs_for_rules * rule_mask
-            print(f"rule_mask: {rule_mask}")
+            logprobs_for_rules_premask = torch.gather(all_logits, 1, rule_index)
+            logprobs_for_rules = logprobs_for_rules_premask * rule_mask
+            if self.training:
+                print(f"rule_mask: {rule_mask}")
             #print(f"logprobs_for_rules[0]: {logprobs_for_rules[0]}")
 
-            print(f"time for gathering and masking: {time() - start_time}")
+            # print(f"time for gathering and masking: {time() - start_time}")
             start_time = time()
             outer_weights_python = []
             # iterate over each entry in batch:
@@ -277,25 +279,27 @@ class AMAutomataTask(Model):
                 # get total inside for metrics
                 total_inside = PyjniusHelper.getTotalLogInside(logits_python, rule_iterator, automaton)
                 self._inside_metric(total_inside)
-                print(f"log inside: {total_inside}")
-                print("indices:")
-                for index in indices:
-                    print(index.item())
-                print("rule weights:")
-                for logit in logits:
-                    print(logit.item())
-                print("automaton:")
-                for rule in to_python(rule_iterator):
-                    print(rule.toString(automaton))
-                print("outer weights:")
-                for i, weight in enumerate(outer_weights_python[-1]):
-                    if abs(weight) < 0.0001:
-                        weight = 2.0
-                        outer_weights_python[-1][i] = weight
-                    print(weight)
-                print(f"viterbi: {automaton.viterbi().toString()}")
+                if self.training:
+                    print(f"log inside: {total_inside}")
+                    print("indices:")
+                    for index in indices:
+                        print(index.item())
+                    print("rule weights:")
+                    for logit in logits:
+                        print(logit.item())
+                    print("automaton:")
+                    for rule in to_python(rule_iterator):
+                        print(rule.toString(automaton))
+                    print(f"viterbi: {automaton.viterbi().toString()}")
+                    print("outer weights:")
+                for i, (outer_weight, rule_weight) in enumerate(zip(outer_weights_python[-1], logits_python)):
+                    if abs(outer_weight) < 0.000001:  # TODO slight hack to get the non-automaton outer weights
+                        outer_weight = -rule_weight  # compensate for the rich-get-richer of logsumexp TODO fix/understand math
+                        outer_weights_python[-1][i] = outer_weight
+                    if self.training:
+                        print(outer_weight)
 
-            print(f"time for inside outside: {time() - start_time}")
+            # print(f"time for inside outside: {time() - start_time}")
             start_time = time()
 
             # print(outer_weights_python)
@@ -305,22 +309,35 @@ class AMAutomataTask(Model):
             #print(f"outer_weights[0]: {outer_weights[0]}")
 
             # compute loss batched, returning a vector with a loss for each entry in the batch
-            print(outer_weights+logprobs_for_rules)
-            print(torch.logsumexp(outer_weights+logprobs_for_rules, dim=1))
-            batch_loss_tensor = -torch.logsumexp(outer_weights+logprobs_for_rules, dim=1)
+            # print(outer_weights+logprobs_for_rules)
+            # print(torch.logsumexp(outer_weights+logprobs_for_rules, dim=1))
+            inner_sum_vector = outer_weights+logprobs_for_rules
+            # batch_loss_tensor = -torch.sum(inner_sum_vector, dim=1)
+            batch_loss_tensor = -torch.logsumexp(inner_sum_vector, dim=1)  # this is too much rich get richer
             # print(batch_loss_tensor)
             # sum the loss over all entries in the batch
             loss = torch.sum(batch_loss_tensor)
-            print(f"Tree inside loss: {loss}")
+
+            if self.training:
+                batch_loss_tensor.register_hook(lambda grad: print(f"batch_loss_tensor grad: {grad}"))
+                inner_sum_vector.register_hook(lambda grad: print(f"inner_sum_vector grad: {grad}"))
+                logprobs_for_rules.register_hook(lambda grad: print(f"logprobs_for_rules grad: {grad}"))
+                logprobs_for_rules_premask.register_hook(lambda grad: print(f"logprobs_for_rules_premask grad: {grad}"))
+                edge_label_logits.register_hook(lambda grad: print(f"edge_label_logits grad: {grad}"))
+
+
+
+                print(f"Tree inside loss: {loss}")
             loss = mix_loss(self.loss_mixing["supertagging"], loss)
 
-            print(f"time for rest of automaton loss: {time() - start_time}")
+            # print(f"time for rest of automaton loss: {time() - start_time}")
             start_time = time()
 
             # gold_edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, head_indices)
             # edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
             edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
-            print(f"edge_existence loss: {edge_existence_loss}")
+            if self.training:
+                print(f"edge_existence loss: {edge_existence_loss}")
 
             # compute loss, remove loss for artificial root
             # if encoded_text_tagging is not None and self.loss_mixing["supertagging"] is not None:
@@ -341,7 +358,8 @@ class AMAutomataTask(Model):
             #     loss += mix_loss(self.loss_mixing["supertagging"], supertagging_nll)
             if lexlabel_nll is not None:
                 lexlabel_loss = mix_loss(self.loss_mixing["lexlabel"], lexlabel_nll)
-                print(f"lexlabel loss: {lexlabel_loss}")
+                if self.training:
+                    print(f"lexlabel loss: {lexlabel_loss}")
                 loss += lexlabel_loss
 
             # Compute LAS/UAS/Supertagging acc/Lex label acc:
@@ -376,7 +394,7 @@ class AMAutomataTask(Model):
             F.log_softmax(output_dict["supertag_scores"], 2)
             torch.argsort(output_dict["supertag_scores"], descending=True, dim=2)
 
-        print(f"time after automaton loss: {time() - start_time}")
+        # print(f"time after automaton loss: {time() - start_time}")
 
         return output_dict
 
