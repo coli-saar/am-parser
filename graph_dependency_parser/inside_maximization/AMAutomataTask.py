@@ -267,7 +267,7 @@ class AMAutomataTask(Model):
             start_time = time()
             # automaton loss
             logprobs_for_rules_premask = torch.gather(all_logits, 1, rule_index)
-            logprobs_for_rules = logprobs_for_rules_premask * rule_mask
+            logprobs_for_rules = logprobs_for_rules_premask * rule_mask.int().float()
             if print_diagnostics:
                 print(f"rule_mask: {rule_mask}")
                 # print(f"logprobs_for_rules[0]: {logprobs_for_rules[0]}")
