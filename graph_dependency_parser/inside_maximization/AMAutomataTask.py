@@ -300,7 +300,7 @@ class AMAutomataTask(Model):
                     print("outer weights:")
                 for i, (outer_weight, rule_weight) in enumerate(zip(outer_weights_python[-1], logits_python)):
                     if abs(outer_weight) < 0.000001:  # TODO slight hack to get the non-automaton outer weights
-                        outer_weight = -rule_weight  # compensate for the rich-get-richer of logsumexp TODO fix/understand math
+                        outer_weight = -rule_weight  # if seeing this as rule of auto that is obligatory, corresponds to outer/inside
                         outer_weights_python[-1][i] = outer_weight
                     if print_diagnostics:
                         print(outer_weight)
@@ -312,7 +312,7 @@ class AMAutomataTask(Model):
             # print(outer_weights_python)
 
             # back to pytorch tensors
-            outer_weights = torch.FloatTensor(outer_weights_python) # TODO does this get the device right automatically?
+            outer_weights = logprobs_for_rules.new(outer_weights_python) 
             #print(f"outer_weights[0]: {outer_weights[0]}")
 
             # compute loss batched, returning a vector with a loss for each entry in the batch
