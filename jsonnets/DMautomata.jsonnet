@@ -12,7 +12,8 @@ local patience = 10000;
 local pos_dim = 32;
 local lemma_dim = 64;
 local ner_dim = 16;
-local hidden_dim = 258;
+local hidden_dim = 256;
+local hidden_dim_mlp = 1024;
 
 local bert_model = "bert-large-uncased";
 
@@ -82,8 +83,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "mlp" : {
                 "input_dim" : final_encoder_output_dim,
                 "num_layers" : 1,
-                "hidden_dims" : [hidden_dim],
-                "dropout" : [0],
+                "hidden_dims" : [hidden_dim_mlp],
+                "dropout" : [0.4],
                 "activations" : "tanh"
             },
             "label_namespace": name+"_supertag_labels"
@@ -93,8 +94,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "mlp" : {
                 "input_dim" : final_encoder_output_dim,
                 "num_layers" : 1,
-                "hidden_dims" : [hidden_dim],
-                "dropout" : [0],
+                "hidden_dims" : [hidden_dim_mlp],
+                "dropout" : [0.4],
                 "activations" : "tanh"
             },
             "label_namespace":name+"_lex_labels"
