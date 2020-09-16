@@ -141,7 +141,7 @@ class AMAutomataTask(Model):
     def forward(self,  # type: ignore
                 encoded_text_parsing: torch.Tensor,
                 encoded_text_tagging: torch.Tensor,
-                mask : torch.Tensor,
+                mask: torch.Tensor,
                 pos_tags: torch.LongTensor,
                 metadata: List[Dict[str, Any]],
                 rule_index: torch.LongTensor = None,

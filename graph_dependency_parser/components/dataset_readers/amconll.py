@@ -124,3 +124,45 @@ class AMConllDatasetReader(DatasetReader):
         :return:
         """
         return sorted(instances, key=lambda d: d["position_in_corpus"])
+
+
+@DatasetReader.register("amconll_unannotated")
+class AMConllUnannotatedDatasetReader(AMConllDatasetReader):
+    """
+    Reads only the input side of an amconll file, which means it  reads the words, POS tags etc
+    but not edges, supertags etc.
+    """
+    @overrides
+    def text_to_instance(self,  # type: ignore
+                         formalism: str,
+                         position_in_corpus: int,
+                         am_sentence: AMSentence) -> Instance:
+        # pylint: disable=arguments-differ
+        """
+        Parameters
+        ----------
+        formalism : str.
+            The formalism of this instance (e.g. DM, PSD, ...)
+        position_in_corpus : ``int``, required.
+            The index of this sentence in the corpus.
+        am_sentence : ``AMSentence``, required.
+            The words in the sentence to be encoded.
+
+        Returns
+        -------
+        An instance containing words, pos tags, dependency edge labels, head
+        indices, supertags and lexical labels as fields.
+        """
+        fields: Dict[str, Field] = {}
+
+        tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
+        fields["words"] = tokens
+        fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
+        fields["ner_tags"] = SequenceLabelField(am_sentence.get_ner(), tokens, label_namespace="ner_labels")
+        fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
+
+        fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
+                                            "formalism": formalism, "position_in_corpus": position_in_corpus,
+                                            "token_ranges": am_sentence.get_ranges(),
+                                            "is_annotated": False})
+        return Instance(fields)
