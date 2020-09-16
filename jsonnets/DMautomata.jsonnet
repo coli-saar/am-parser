@@ -65,7 +65,7 @@ local data_iterator = {
 # copied from configs/task_models.libsonnet and adapted
 local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_model, edge_loss, label_loss) = {
     "name" : name,
-    "dropout": 0.0,
+    "dropout": 0.3,
 
     "output_null_lex_label" : true,
 
