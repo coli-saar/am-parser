@@ -1,0 +1,1 @@
+python -u train.py jsonnets/smallDMautomata.jsonnet -s example/smallDMautomata/out/ -f --file-friendly-logging -o ' {"trainer" : {"cuda_device" :  1 } }' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --project test &> example/smallDMautomata.log
