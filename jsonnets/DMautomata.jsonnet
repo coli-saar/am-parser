@@ -46,7 +46,7 @@ local dataset_reader =  {
     };
 
 local amconll_dataset_reader = {
-        "type": "amconll",
+        "type": "amconll_unannotated",
         "token_indexers": {
             "bert": {
               "type": "bert-pretrained",
