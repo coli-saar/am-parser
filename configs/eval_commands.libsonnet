@@ -6,7 +6,7 @@ local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
 
 
 local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
-local base_directory = "/local/mlinde/am-parser";
+local base_directory = "/home/AK/ykyao/projects/am-parser";
 
 local tool_dir = base_directory + "/external_eval_tools/";
 

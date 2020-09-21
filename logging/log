@@ -1,0 +1,1061 @@
+2020-08-18 17:22:16,204 - INFO - pytorch_pretrained_bert.modeling - Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex .
+Either spacy pytorch transformers or cupy not available, so you cannot use spacy-tok2vec! This is only an issue, if you intend to use roberta or xlnet.
+2020-08-18 17:22:30,965 - INFO - allennlp.common.params - random_seed = 804704972
+2020-08-18 17:22:30,966 - INFO - allennlp.common.params - numpy_seed = 522494743
+2020-08-18 17:22:30,966 - INFO - allennlp.common.params - pytorch_seed = 847358744
+2020-08-18 17:22:30,982 - INFO - allennlp.common.checks - Pytorch version: 1.1.0
+2020-08-18 17:22:30,984 - INFO - allennlp.common.params - evaluate_on_test = True
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators = [[['DM_id', {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.id/en.id.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.id/test.id.amconll', 'type': 'standard_evaluator'}], ['DM_ood', {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.ood/en.ood.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.ood/test.ood.amconll', 'type': 'standard_evaluator'}]]]
+2020-08-18 17:22:30,985 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Evaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.id/en.id.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.id/test.id.amconll', 'type': 'standard_evaluator'} and extras set()
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators.0.0.1.type = standard_evaluator
+2020-08-18 17:22:30,985 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.StandardEvaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.id/en.id.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.id/test.id.amconll'} and extras set()
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators.0.0.1.formalism = DM
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators.0.0.1.system_input = data/SemEval/2015/DM/test.id/test.id.amconll
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators.0.0.1.gold_file = data/SemEval/2015/DM/test.id/en.id.dm.sdp
+2020-08-18 17:22:30,985 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Predictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'} and extras set()
+2020-08-18 17:22:30,985 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.type = amconll_predictor
+2020-08-18 17:22:30,985 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.AMconllPredictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6} and extras set()
+2020-08-18 17:22:30,986 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.dataset_readers.dataset_reader.DatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'} and extras set()
+2020-08-18 17:22:30,986 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.type = amconll
+2020-08-18 17:22:30,986 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.amconll.AMConllDatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}} and extras set()
+2020-08-18 17:22:30,986 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,986 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.type = single_id
+2020-08-18 17:22:30,986 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,986 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.namespace = tokens
+2020-08-18 17:22:30,986 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.lowercase_tokens = True
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.start_tokens = None
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.end_tokens = None
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.glove.token_min_padding_length = 0
+2020-08-18 17:22:30,987 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.type = single_id
+2020-08-18 17:22:30,987 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.namespace = tokens
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.lowercase_tokens = True
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.start_tokens = None
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.end_tokens = None
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.token_indexers.tokens.token_min_padding_length = 0
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.lazy = False
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.fraction = 1.0
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.dataset_reader.only_read_fraction_if_train_in_filename = False
+2020-08-18 17:22:30,987 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.k = 6
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.give_up = 1800
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.threads = 6
+2020-08-18 17:22:30,988 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.iterators.data_iterator.DataIterator'> from params {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'} and extras set()
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.type = same_formalism
+2020-08-18 17:22:30,988 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.same_formalism_iterator.SameFormalismIterator'> from params {'batch_size': 48, 'formalisms': ['DM']} and extras set()
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.formalisms = ['DM']
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.batch_size = 48
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.batch_sizes = None
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.cache_instances = False
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.track_epoch = False
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.padding_noise = 0.1
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.instances_per_epoch = None
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.max_instances_in_memory = None
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.maximum_samples_per_batch = None
+2020-08-18 17:22:30,988 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.data_iterator.biggest_batch_first = False
+2020-08-18 17:22:30,989 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BaseEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'} and extras set()
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.evaluation_command.type = bash_evaluation_command
+2020-08-18 17:22:30,989 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BashEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}} and extras set()
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.evaluation_command.command = java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.evaluation_command.show_output = True
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.batch_size = 64
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.predictor.give_up_k_1 = None
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.0.1.use_from_epoch = 1
+2020-08-18 17:22:30,989 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Evaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.ood/en.ood.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.ood/test.ood.amconll', 'type': 'standard_evaluator'} and extras set()
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.1.1.type = standard_evaluator
+2020-08-18 17:22:30,989 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.StandardEvaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/test.ood/en.ood.dm.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/test.ood/test.ood.amconll'} and extras set()
+2020-08-18 17:22:30,989 - INFO - allennlp.common.params - test_evaluators.0.1.1.formalism = DM
+2020-08-18 17:22:30,990 - INFO - allennlp.common.params - test_evaluators.0.1.1.system_input = data/SemEval/2015/DM/test.ood/test.ood.amconll
+2020-08-18 17:22:30,990 - INFO - allennlp.common.params - test_evaluators.0.1.1.gold_file = data/SemEval/2015/DM/test.ood/en.ood.dm.sdp
+2020-08-18 17:22:30,990 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Predictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6, 'type': 'amconll_predictor'} and extras set()
+2020-08-18 17:22:30,990 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.type = amconll_predictor
+2020-08-18 17:22:30,990 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.AMconllPredictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 1800, 'k': 6, 'threads': 6} and extras set()
+2020-08-18 17:22:30,990 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.dataset_readers.dataset_reader.DatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'} and extras set()
+2020-08-18 17:22:30,990 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.type = amconll
+2020-08-18 17:22:30,990 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.amconll.AMConllDatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}} and extras set()
+2020-08-18 17:22:30,990 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,990 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.type = single_id
+2020-08-18 17:22:30,991 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.namespace = tokens
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.lowercase_tokens = True
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.start_tokens = None
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.end_tokens = None
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.glove.token_min_padding_length = 0
+2020-08-18 17:22:30,991 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.type = single_id
+2020-08-18 17:22:30,991 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.namespace = tokens
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.lowercase_tokens = True
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.start_tokens = None
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.end_tokens = None
+2020-08-18 17:22:30,991 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.token_indexers.tokens.token_min_padding_length = 0
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.lazy = False
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.fraction = 1.0
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.dataset_reader.only_read_fraction_if_train_in_filename = False
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.k = 6
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.give_up = 1800
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.threads = 6
+2020-08-18 17:22:30,992 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.iterators.data_iterator.DataIterator'> from params {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'} and extras set()
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.type = same_formalism
+2020-08-18 17:22:30,992 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.same_formalism_iterator.SameFormalismIterator'> from params {'batch_size': 48, 'formalisms': ['DM']} and extras set()
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.formalisms = ['DM']
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.batch_size = 48
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.batch_sizes = None
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.cache_instances = False
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.track_epoch = False
+2020-08-18 17:22:30,992 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.padding_noise = 0.1
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.instances_per_epoch = None
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.max_instances_in_memory = None
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.maximum_samples_per_batch = None
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.data_iterator.biggest_batch_first = False
+2020-08-18 17:22:30,993 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BaseEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'} and extras set()
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.evaluation_command.type = bash_evaluation_command
+2020-08-18 17:22:30,993 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BashEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}} and extras set()
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.evaluation_command.command = java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.evaluation_command.show_output = True
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.batch_size = 64
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.predictor.give_up_k_1 = None
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - test_evaluators.0.1.1.use_from_epoch = 1
+2020-08-18 17:22:30,993 - INFO - allennlp.common.params - validation_dataset_reader = None
+2020-08-18 17:22:30,994 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.dataset_readers.dataset_reader.DatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'} and extras set()
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.type = amconll
+2020-08-18 17:22:30,994 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.amconll.AMConllDatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}} and extras set()
+2020-08-18 17:22:30,994 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.type = single_id
+2020-08-18 17:22:30,994 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.namespace = tokens
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.lowercase_tokens = True
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.start_tokens = None
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.end_tokens = None
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.glove.token_min_padding_length = 0
+2020-08-18 17:22:30,994 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras set()
+2020-08-18 17:22:30,994 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.type = single_id
+2020-08-18 17:22:30,995 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras set()
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.namespace = tokens
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.lowercase_tokens = True
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.start_tokens = None
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.end_tokens = None
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.token_indexers.tokens.token_min_padding_length = 0
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.lazy = False
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.fraction = 1.0
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - dataset_reader.only_read_fraction_if_train_in_filename = False
+2020-08-18 17:22:30,995 - INFO - allennlp.common.params - train_data_path = [['DM', 'data/DM/output/train/train.amconll']]
+2020-08-18 17:22:30,995 - INFO - allennlp.training.util - Reading training data from [['DM', 'data/DM/output/train/train.amconll']]
+0it [00:00, ?it/s]
+2020-08-18 17:22:30,996 - INFO - graph_dependency_parser.components.dataset_readers.amconll - Reading AM dependency trees from amconll dataset at: data/DM/output/train/train.amconll
+2020-08-18 17:22:30,996 - WARNING - allennlp.data.fields.sequence_label_field - Your label namespace was 'pos'. We recommend you use a namespace ending with 'labels' or 'tags', so we don't add UNK and PAD tokens by default to your vocabulary.  See documentation for `non_padded_namespaces` parameter in Vocabulary.
+2020-08-18 17:22:30,996 - WARNING - allennlp.data.fields.sequence_label_field - Your label namespace was 'lemmas'. We recommend you use a namespace ending with 'labels' or 'tags', so we don't add UNK and PAD tokens by default to your vocabulary.  See documentation for `non_padded_namespaces` parameter in Vocabulary.
+22000it [00:06, 3159.27it/s]
+
+2020-08-18 17:22:37,959 - INFO - allennlp.common.params - validation_data_path = [['DM', 'data/DM/output/gold-dev/gold-dev.amconll']]
+2020-08-18 17:22:37,959 - INFO - allennlp.training.util - Reading validation data from [['DM', 'data/DM/output/gold-dev/gold-dev.amconll']]
+0it [00:00, ?it/s]
+2020-08-18 17:22:37,960 - INFO - graph_dependency_parser.components.dataset_readers.amconll - Reading AM dependency trees from amconll dataset at: data/DM/output/gold-dev/gold-dev.amconll
+1577it [00:00, 4642.90it/s]
+
+2020-08-18 17:22:38,299 - INFO - allennlp.common.params - test_data_path = None
+2020-08-18 17:22:38,322 - INFO - graph_dependency_parser.train.amtrainer - From dataset instances, validation, train will be considered for vocabulary creation.
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.type = None
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.extend = False
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.directory_path = None
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.max_vocab_size = None
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.non_padded_namespaces = ('*tags', '*labels')
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.min_pretrained_embeddings = None
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.only_include_pretrained_words = False
+2020-08-18 17:22:38,323 - INFO - allennlp.common.params - vocabulary.tokens_to_add = None
+2020-08-18 17:22:38,323 - INFO - allennlp.data.vocabulary - Fitting token dictionary from dataset.
+0it [00:00, ?it/s]
+23577it [00:01, 16152.21it/s]
+
+2020-08-18 17:22:39,850 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.models.model.Model'> from params {'encoder': {'encoder': {'hidden_size': 256, 'input_size': 412, 'layer_dropout_probability': 0.3, 'num_layers': 2, 'recurrent_dropout_probability': 0.4, 'type': 'stacked_bidirectional_lstm', 'use_highway': False}, 'formalisms': ['DM'], 'formalisms_without_tagging': ['EWT', 'GUM', 'LinES', 'ParTUT'], 'task_dropout': 0, 'type': 'shared_split_encoder'}, 'input_dropout': 0.3, 'lemma_embedding': {'embedding_dim': 64, 'vocab_namespace': 'lemmas'}, 'ne_embedding': {'embedding_dim': 16, 'vocab_namespace': 'ner_labels'}, 'pos_tag_embedding': {'embedding_dim': 32, 'vocab_namespace': 'pos'}, 'tasks': [{'dropout': 0.3, 'edge_model': {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256, 'type': 'kg_edges'}, 'lexlabel_loss': {'normalize_wrt_seq_len': False}, 'lexlabeltagger': {'label_namespace': 'DM_lex_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'loss_function': {'existence_loss': {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'}, 'label_loss': {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'}}, 'loss_mixing': {'edge_existence': 1, 'edge_label': 1, 'lexlabel': 1, 'supertagging': 1}, 'name': 'DM', 'output_null_lex_label': True, 'supertagger': {'label_namespace': 'DM_supertag_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'supertagger_loss': {'normalize_wrt_seq_len': False}, 'validation_evaluator': {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'type': 'standard_evaluator', 'use_from_epoch': 10}}], 'text_field_embedder': {'glove': {'embedding_dim': 200, 'pretrained_file': '/local/mlinde/glove/glove.6B.200d.txt', 'type': 'embedding'}, 'tokens': {'embedding_dim': 100, 'type': 'embedding'}}, 'type': 'graph_dependency_parser'} and extras {'vocab'}
+2020-08-18 17:22:39,850 - INFO - allennlp.common.params - model.type = graph_dependency_parser
+2020-08-18 17:22:39,850 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.graph_dependency_parser.GraphDependencyParser'> from params {'encoder': {'encoder': {'hidden_size': 256, 'input_size': 412, 'layer_dropout_probability': 0.3, 'num_layers': 2, 'recurrent_dropout_probability': 0.4, 'type': 'stacked_bidirectional_lstm', 'use_highway': False}, 'formalisms': ['DM'], 'formalisms_without_tagging': ['EWT', 'GUM', 'LinES', 'ParTUT'], 'task_dropout': 0, 'type': 'shared_split_encoder'}, 'input_dropout': 0.3, 'lemma_embedding': {'embedding_dim': 64, 'vocab_namespace': 'lemmas'}, 'ne_embedding': {'embedding_dim': 16, 'vocab_namespace': 'ner_labels'}, 'pos_tag_embedding': {'embedding_dim': 32, 'vocab_namespace': 'pos'}, 'tasks': [{'dropout': 0.3, 'edge_model': {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256, 'type': 'kg_edges'}, 'lexlabel_loss': {'normalize_wrt_seq_len': False}, 'lexlabeltagger': {'label_namespace': 'DM_lex_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'loss_function': {'existence_loss': {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'}, 'label_loss': {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'}}, 'loss_mixing': {'edge_existence': 1, 'edge_label': 1, 'lexlabel': 1, 'supertagging': 1}, 'name': 'DM', 'output_null_lex_label': True, 'supertagger': {'label_namespace': 'DM_supertag_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'supertagger_loss': {'normalize_wrt_seq_len': False}, 'validation_evaluator': {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'type': 'standard_evaluator', 'use_from_epoch': 10}}], 'text_field_embedder': {'glove': {'embedding_dim': 200, 'pretrained_file': '/local/mlinde/glove/glove.6B.200d.txt', 'type': 'embedding'}, 'tokens': {'embedding_dim': 100, 'type': 'embedding'}}} and extras {'vocab'}
+2020-08-18 17:22:39,851 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.text_field_embedders.text_field_embedder.TextFieldEmbedder'> from params {'glove': {'embedding_dim': 200, 'pretrained_file': '/local/mlinde/glove/glove.6B.200d.txt', 'type': 'embedding'}, 'tokens': {'embedding_dim': 100, 'type': 'embedding'}} and extras {'vocab'}
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.type = basic
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.embedder_to_indexer_map = None
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.allow_unmatched_keys = False
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.token_embedders = None
+2020-08-18 17:22:39,851 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.token_embedders.token_embedder.TokenEmbedder'> from params {'embedding_dim': 200, 'pretrained_file': '/local/mlinde/glove/glove.6B.200d.txt', 'type': 'embedding'} and extras {'vocab'}
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.glove.type = embedding
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.glove.num_embeddings = None
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.glove.vocab_namespace = tokens
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.glove.embedding_dim = 200
+2020-08-18 17:22:39,851 - INFO - allennlp.common.params - model.text_field_embedder.glove.pretrained_file = /local/mlinde/glove/glove.6B.200d.txt
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.projection_dim = None
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.trainable = True
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.padding_index = None
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.max_norm = None
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.norm_type = 2.0
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.scale_grad_by_freq = False
+2020-08-18 17:22:39,852 - INFO - allennlp.common.params - model.text_field_embedder.glove.sparse = False
+2020-08-18 17:22:39,854 - INFO - allennlp.modules.token_embedders.embedding - Reading pretrained embeddings from file
+0it [00:00, ?it/s]
+400000it [00:02, 171225.63it/s]
+
+2020-08-18 17:22:42,285 - INFO - allennlp.modules.token_embedders.embedding - Initializing pre-trained embedding layer
+2020-08-18 17:22:42,628 - INFO - allennlp.modules.token_embedders.embedding - Pretrained embeddings were found for 25248 out of 28568 tokens
+2020-08-18 17:22:42,634 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.token_embedders.token_embedder.TokenEmbedder'> from params {'embedding_dim': 100, 'type': 'embedding'} and extras {'vocab'}
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.type = embedding
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.num_embeddings = None
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.vocab_namespace = tokens
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.embedding_dim = 100
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.pretrained_file = None
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.projection_dim = None
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.trainable = True
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.padding_index = None
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.max_norm = None
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.norm_type = 2.0
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.scale_grad_by_freq = False
+2020-08-18 17:22:42,634 - INFO - allennlp.common.params - model.text_field_embedder.tokens.sparse = False
+2020-08-18 17:22:42,653 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.weight_sharer.MTLWeightSharer'> from params {'encoder': {'hidden_size': 256, 'input_size': 412, 'layer_dropout_probability': 0.3, 'num_layers': 2, 'recurrent_dropout_probability': 0.4, 'type': 'stacked_bidirectional_lstm', 'use_highway': False}, 'formalisms': ['DM'], 'formalisms_without_tagging': ['EWT', 'GUM', 'LinES', 'ParTUT'], 'task_dropout': 0, 'type': 'shared_split_encoder'} and extras {'vocab'}
+2020-08-18 17:22:42,653 - INFO - allennlp.common.params - model.encoder.type = shared_split_encoder
+2020-08-18 17:22:42,653 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.weight_sharer.SharedDifferentEncoder'> from params {'encoder': {'hidden_size': 256, 'input_size': 412, 'layer_dropout_probability': 0.3, 'num_layers': 2, 'recurrent_dropout_probability': 0.4, 'type': 'stacked_bidirectional_lstm', 'use_highway': False}, 'formalisms': ['DM'], 'formalisms_without_tagging': ['EWT', 'GUM', 'LinES', 'ParTUT'], 'task_dropout': 0} and extras {'vocab'}
+2020-08-18 17:22:42,653 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.seq2seq_encoders.seq2seq_encoder.Seq2SeqEncoder'> from params {'hidden_size': 256, 'input_size': 412, 'layer_dropout_probability': 0.3, 'num_layers': 2, 'recurrent_dropout_probability': 0.4, 'type': 'stacked_bidirectional_lstm', 'use_highway': False} and extras {'vocab'}
+2020-08-18 17:22:42,653 - INFO - allennlp.common.params - model.encoder.encoder.type = stacked_bidirectional_lstm
+2020-08-18 17:22:42,653 - INFO - allennlp.common.params - model.encoder.encoder.batch_first = True
+2020-08-18 17:22:42,653 - INFO - allennlp.common.params - model.encoder.encoder.stateful = False
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - Converting Params object to dict; logging of default values will not occur when dictionary parameters are used subsequently.
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - CURRENTLY DEFINED PARAMETERS: 
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.hidden_size = 256
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.input_size = 412
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.layer_dropout_probability = 0.3
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.num_layers = 2
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.recurrent_dropout_probability = 0.4
+2020-08-18 17:22:42,654 - INFO - allennlp.common.params - model.encoder.encoder.use_highway = False
+2020-08-18 17:22:42,787 - INFO - allennlp.common.params - model.encoder.formalisms = ['DM']
+2020-08-18 17:22:42,787 - INFO - allennlp.common.params - model.encoder.formalisms_without_tagging = ['EWT', 'GUM', 'LinES', 'ParTUT']
+2020-08-18 17:22:42,787 - INFO - allennlp.common.params - model.encoder.task_dropout = 0
+2020-08-18 17:22:42,790 - INFO - allennlp.common.params - model.tasks = [{'dropout': 0.3, 'edge_model': {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256, 'type': 'kg_edges'}, 'lexlabel_loss': {'normalize_wrt_seq_len': False}, 'lexlabeltagger': {'label_namespace': 'DM_lex_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'loss_function': {'existence_loss': {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'}, 'label_loss': {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'}}, 'loss_mixing': {'edge_existence': 1, 'edge_label': 1, 'lexlabel': 1, 'supertagging': 1}, 'name': 'DM', 'output_null_lex_label': True, 'supertagger': {'label_namespace': 'DM_supertag_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'supertagger_loss': {'normalize_wrt_seq_len': False}, 'validation_evaluator': {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'type': 'standard_evaluator', 'use_from_epoch': 10}}]
+2020-08-18 17:22:42,790 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.AMTask.AMTask'> from params {'dropout': 0.3, 'edge_model': {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256, 'type': 'kg_edges'}, 'lexlabel_loss': {'normalize_wrt_seq_len': False}, 'lexlabeltagger': {'label_namespace': 'DM_lex_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'loss_function': {'existence_loss': {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'}, 'label_loss': {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'}}, 'loss_mixing': {'edge_existence': 1, 'edge_label': 1, 'lexlabel': 1, 'supertagging': 1}, 'name': 'DM', 'output_null_lex_label': True, 'supertagger': {'label_namespace': 'DM_supertag_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}}, 'supertagger_loss': {'normalize_wrt_seq_len': False}, 'validation_evaluator': {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'type': 'standard_evaluator', 'use_from_epoch': 10}} and extras {'vocab'}
+2020-08-18 17:22:42,790 - INFO - allennlp.common.params - model.tasks.0.name = DM
+2020-08-18 17:22:42,790 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.edge_models.base.EdgeModel'> from params {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256, 'type': 'kg_edges'} and extras {'vocab'}
+2020-08-18 17:22:42,790 - INFO - allennlp.common.params - model.tasks.0.edge_model.type = kg_edges
+2020-08-18 17:22:42,790 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.edge_models.KG.KGEdges'> from params {'edge_dim': 256, 'edge_label_namespace': 'DM_head_tags', 'encoder_dim': 512, 'label_dim': 256} and extras {'vocab'}
+2020-08-18 17:22:42,790 - INFO - allennlp.common.params - model.tasks.0.edge_model.encoder_dim = 512
+2020-08-18 17:22:42,790 - INFO - allennlp.common.params - model.tasks.0.edge_model.label_dim = 256
+2020-08-18 17:22:42,791 - INFO - allennlp.common.params - model.tasks.0.edge_model.edge_dim = 256
+2020-08-18 17:22:42,791 - INFO - allennlp.common.params - model.tasks.0.edge_model.edge_label_namespace = DM_head_tags
+2020-08-18 17:22:42,791 - INFO - allennlp.common.params - model.tasks.0.edge_model.dropout = 0.0
+2020-08-18 17:22:42,795 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.base.EdgeLoss'> from params {'existence_loss': {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'}, 'label_loss': {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'}} and extras {'vocab'}
+2020-08-18 17:22:42,795 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.base.EdgeExistenceLoss'> from params {'normalize_wrt_seq_len': False, 'type': 'kg_edge_loss'} and extras {'vocab'}
+2020-08-18 17:22:42,795 - INFO - allennlp.common.params - model.tasks.0.loss_function.existence_loss.type = kg_edge_loss
+2020-08-18 17:22:42,795 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.KG.KGExistenceLoss'> from params {'normalize_wrt_seq_len': False} and extras {'vocab'}
+2020-08-18 17:22:42,796 - INFO - allennlp.common.params - model.tasks.0.loss_function.existence_loss.normalize_wrt_seq_len = False
+2020-08-18 17:22:42,796 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.base.EdgeLabelLoss'> from params {'normalize_wrt_seq_len': False, 'type': 'dm_label_loss'} and extras {'vocab'}
+2020-08-18 17:22:42,796 - INFO - allennlp.common.params - model.tasks.0.loss_function.label_loss.type = dm_label_loss
+2020-08-18 17:22:42,796 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.DM.DMLabelLoss'> from params {'normalize_wrt_seq_len': False} and extras {'vocab'}
+2020-08-18 17:22:42,796 - INFO - allennlp.common.params - model.tasks.0.loss_function.label_loss.normalize_wrt_seq_len = False
+2020-08-18 17:22:42,796 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.supertagger.Supertagger'> from params {'label_namespace': 'DM_supertag_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}} and extras {'vocab'}
+2020-08-18 17:22:42,796 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.feedforward.FeedForward'> from params {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1} and extras {'vocab'}
+2020-08-18 17:22:42,796 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.input_dim = 512
+2020-08-18 17:22:42,796 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.num_layers = 1
+2020-08-18 17:22:42,797 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.hidden_dims = [1024]
+2020-08-18 17:22:42,797 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.hidden_dims = [1024]
+2020-08-18 17:22:42,797 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.activations = tanh
+2020-08-18 17:22:42,797 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.dropout = [0.4]
+2020-08-18 17:22:42,797 - INFO - allennlp.common.params - model.tasks.0.supertagger.mlp.dropout = [0.4]
+2020-08-18 17:22:42,801 - INFO - allennlp.common.params - model.tasks.0.supertagger.label_namespace = DM_supertag_labels
+2020-08-18 17:22:42,804 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.supertagger.Supertagger'> from params {'label_namespace': 'DM_lex_labels', 'mlp': {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1}} and extras {'vocab'}
+2020-08-18 17:22:42,804 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.modules.feedforward.FeedForward'> from params {'activations': 'tanh', 'dropout': [0.4], 'hidden_dims': [1024], 'input_dim': 512, 'num_layers': 1} and extras {'vocab'}
+2020-08-18 17:22:42,804 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.input_dim = 512
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.num_layers = 1
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.hidden_dims = [1024]
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.hidden_dims = [1024]
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.activations = tanh
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.dropout = [0.4]
+2020-08-18 17:22:42,805 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.mlp.dropout = [0.4]
+2020-08-18 17:22:42,809 - INFO - allennlp.common.params - model.tasks.0.lexlabeltagger.label_namespace = DM_lex_labels
+2020-08-18 17:22:42,813 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.supertagging.SupertaggingLoss'> from params {'normalize_wrt_seq_len': False} and extras {'vocab'}
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.supertagger_loss.normalize_wrt_seq_len = False
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.supertagger_loss.label_smoothing = None
+2020-08-18 17:22:42,813 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.losses.supertagging.SupertaggingLoss'> from params {'normalize_wrt_seq_len': False} and extras {'vocab'}
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.lexlabel_loss.normalize_wrt_seq_len = False
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.lexlabel_loss.label_smoothing = None
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.output_null_lex_label = True
+2020-08-18 17:22:42,813 - INFO - allennlp.common.params - model.tasks.0.dropout = 0.3
+2020-08-18 17:22:42,813 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Evaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'type': 'standard_evaluator', 'use_from_epoch': 10} and extras {'vocab'}
+2020-08-18 17:22:42,814 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.type = standard_evaluator
+2020-08-18 17:22:42,814 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.StandardEvaluator'> from params {'formalism': 'DM', 'gold_file': 'data/SemEval/2015/DM/dev/dev.sdp', 'predictor': {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'}, 'system_input': 'data/SemEval/2015/DM/dev/dev.amconll', 'use_from_epoch': 10} and extras {'vocab'}
+2020-08-18 17:22:42,814 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.formalism = DM
+2020-08-18 17:22:42,814 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.system_input = data/SemEval/2015/DM/dev/dev.amconll
+2020-08-18 17:22:42,814 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.gold_file = data/SemEval/2015/DM/dev/dev.sdp
+2020-08-18 17:22:42,814 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.Predictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2, 'type': 'amconll_predictor'} and extras {'vocab'}
+2020-08-18 17:22:42,814 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.type = amconll_predictor
+2020-08-18 17:22:42,814 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.predictors.AMconllPredictor'> from params {'data_iterator': {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'}, 'dataset_reader': {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'}, 'evaluation_command': {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'}, 'give_up': 15, 'k': 6, 'threads': 2} and extras {'vocab'}
+2020-08-18 17:22:42,814 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.dataset_readers.dataset_reader.DatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}, 'type': 'amconll'} and extras {'vocab'}
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.type = amconll
+2020-08-18 17:22:42,815 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.amconll.AMConllDatasetReader'> from params {'token_indexers': {'glove': {'lowercase_tokens': True, 'type': 'single_id'}, 'tokens': {'lowercase_tokens': True, 'type': 'single_id'}}} and extras {'vocab'}
+2020-08-18 17:22:42,815 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras {'vocab'}
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.type = single_id
+2020-08-18 17:22:42,815 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras {'vocab'}
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.namespace = tokens
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.lowercase_tokens = True
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.start_tokens = None
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.end_tokens = None
+2020-08-18 17:22:42,815 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.glove.token_min_padding_length = 0
+2020-08-18 17:22:42,816 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.token_indexer.TokenIndexer'> from params {'lowercase_tokens': True, 'type': 'single_id'} and extras {'vocab'}
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.type = single_id
+2020-08-18 17:22:42,816 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.token_indexers.single_id_token_indexer.SingleIdTokenIndexer'> from params {'lowercase_tokens': True} and extras {'vocab'}
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.namespace = tokens
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.lowercase_tokens = True
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.start_tokens = None
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.end_tokens = None
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.token_indexers.tokens.token_min_padding_length = 0
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.lazy = False
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.fraction = 1.0
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.dataset_reader.only_read_fraction_if_train_in_filename = False
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.k = 6
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.give_up = 15
+2020-08-18 17:22:42,816 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.threads = 2
+2020-08-18 17:22:42,817 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.iterators.data_iterator.DataIterator'> from params {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'} and extras {'vocab'}
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.type = same_formalism
+2020-08-18 17:22:42,817 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.same_formalism_iterator.SameFormalismIterator'> from params {'batch_size': 48, 'formalisms': ['DM']} and extras {'vocab'}
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.formalisms = ['DM']
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.batch_size = 48
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.batch_sizes = None
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.cache_instances = False
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.track_epoch = False
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.padding_noise = 0.1
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.instances_per_epoch = None
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.max_instances_in_memory = None
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.maximum_samples_per_batch = None
+2020-08-18 17:22:42,817 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.data_iterator.biggest_batch_first = False
+2020-08-18 17:22:42,818 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BaseEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}, 'type': 'bash_evaluation_command'} and extras {'vocab'}
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.evaluation_command.type = bash_evaluation_command
+2020-08-18 17:22:42,818 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.evaluation.commands.BashEvaluationCommand'> from params {'command': 'java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA', 'result_regexes': {'F': [3, 'F (?P<value>.+)'], 'P': [1, 'Precision (?P<value>.+)'], 'R': [2, 'Recall (?P<value>.+)']}} and extras {'vocab'}
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.evaluation_command.command = java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.evaluation_command.show_output = True
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.batch_size = 64
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.predictor.give_up_k_1 = None
+2020-08-18 17:22:42,818 - INFO - allennlp.common.params - model.tasks.0.validation_evaluator.use_from_epoch = 10
+2020-08-18 17:22:42,818 - INFO - graph_dependency_parser.components.AMTask - Found POS tags corresponding to the following punctuation : {',': 8, '.': 10, '``': 25, "''": 26, ':': 27, 'SYM': 46}. Ignoring words with these POS tags for evaluation.
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.num_embeddings = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.vocab_namespace = pos
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.embedding_dim = 32
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.pretrained_file = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.projection_dim = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.trainable = True
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.padding_index = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.max_norm = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.norm_type = 2.0
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.scale_grad_by_freq = False
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.pos_tag_embedding.sparse = False
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.lemma_embedding.num_embeddings = None
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.lemma_embedding.vocab_namespace = lemmas
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.lemma_embedding.embedding_dim = 64
+2020-08-18 17:22:42,819 - INFO - allennlp.common.params - model.lemma_embedding.pretrained_file = None
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.projection_dim = None
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.trainable = True
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.padding_index = None
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.max_norm = None
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.norm_type = 2.0
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.scale_grad_by_freq = False
+2020-08-18 17:22:42,820 - INFO - allennlp.common.params - model.lemma_embedding.sparse = False
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.num_embeddings = None
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.vocab_namespace = ner_labels
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.embedding_dim = 16
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.pretrained_file = None
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.projection_dim = None
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.trainable = True
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.padding_index = None
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.max_norm = None
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.norm_type = 2.0
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.scale_grad_by_freq = False
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.ne_embedding.sparse = False
+2020-08-18 17:22:42,822 - INFO - allennlp.common.params - model.input_dropout = 0.3
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers - Initializing parameters
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers - Done initializing parameters; the following parameters are using their default initialization from their code
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.arc_out_layer.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.child_arc_feedforward.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.child_label_feedforward.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.head_arc_feedforward.bias
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.head_arc_feedforward.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.head_label_feedforward.bias
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.head_label_feedforward.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.label_out_layer.bias
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.edge_model.label_out_layer.weight
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.lexlabeltagger.mlp._linear_layers.0.bias
+2020-08-18 17:22:42,823 - INFO - allennlp.nn.initializers -    DM.lexlabeltagger.mlp._linear_layers.0.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.lexlabeltagger.output_layer.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.lexlabeltagger.output_layer.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.supertagger.mlp._linear_layers.0.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.supertagger.mlp._linear_layers.0.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.supertagger.output_layer.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    DM.supertagger.output_layer.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    _head_sentinel
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    _lemma_embedding.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    _ne_embedding.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    _pos_tag_embedding.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.backward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_parsing._module.forward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,824 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.backward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    encoder.encoder_tagging._module.forward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    text_field_embedder.token_embedder_glove.weight
+2020-08-18 17:22:42,825 - INFO - allennlp.nn.initializers -    text_field_embedder.token_embedder_tokens.weight
+2020-08-18 17:22:42,895 - INFO - allennlp.common.from_params - instantiating class <class 'allennlp.data.iterators.data_iterator.DataIterator'> from params {'batch_size': 48, 'formalisms': ['DM'], 'type': 'same_formalism'} and extras set()
+2020-08-18 17:22:42,895 - INFO - allennlp.common.params - iterator.type = same_formalism
+2020-08-18 17:22:42,896 - INFO - allennlp.common.from_params - instantiating class <class 'graph_dependency_parser.components.dataset_readers.same_formalism_iterator.SameFormalismIterator'> from params {'batch_size': 48, 'formalisms': ['DM']} and extras set()
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.formalisms = ['DM']
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.batch_size = 48
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.batch_sizes = None
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.cache_instances = False
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.track_epoch = False
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.padding_noise = 0.1
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.instances_per_epoch = None
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.max_instances_in_memory = None
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.maximum_samples_per_batch = None
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - iterator.biggest_batch_first = False
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - validation_iterator = None
+2020-08-18 17:22:42,896 - INFO - allennlp.common.params - trainer.no_grad = ()
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - Following parameters are Frozen  (without gradient):
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - Following parameters are Tunable (with gradient):
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - _head_sentinel
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - text_field_embedder.token_embedder_glove.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - text_field_embedder.token_embedder_tokens.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.forward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_parsing._module.backward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,897 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_0.input_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_0.state_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_0.state_linearity.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.forward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_1.input_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_1.state_linearity.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - encoder.encoder_tagging._module.backward_layer_1.state_linearity.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - _pos_tag_embedding.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - _lemma_embedding.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - _ne_embedding.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.head_arc_feedforward.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.head_arc_feedforward.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.child_arc_feedforward.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.arc_out_layer.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.head_label_feedforward.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.head_label_feedforward.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.child_label_feedforward.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.label_out_layer.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.edge_model.label_out_layer.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.supertagger.mlp._linear_layers.0.weight
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.supertagger.mlp._linear_layers.0.bias
+2020-08-18 17:22:42,898 - INFO - graph_dependency_parser.train.amtrainer - DM.supertagger.output_layer.weight
+2020-08-18 17:22:42,899 - INFO - graph_dependency_parser.train.amtrainer - DM.supertagger.output_layer.bias
+2020-08-18 17:22:42,899 - INFO - graph_dependency_parser.train.amtrainer - DM.lexlabeltagger.mlp._linear_layers.0.weight
+2020-08-18 17:22:42,899 - INFO - graph_dependency_parser.train.amtrainer - DM.lexlabeltagger.mlp._linear_layers.0.bias
+2020-08-18 17:22:42,899 - INFO - graph_dependency_parser.train.amtrainer - DM.lexlabeltagger.output_layer.weight
+2020-08-18 17:22:42,899 - INFO - graph_dependency_parser.train.amtrainer - DM.lexlabeltagger.output_layer.bias
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.patience = 10
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.validation_metric = +DM_F
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.shuffle = True
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.num_epochs = 40
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.cuda_device = 1
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.grad_norm = None
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.grad_clipping = None
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.learning_rate_scheduler = None
+2020-08-18 17:22:42,899 - INFO - allennlp.common.params - trainer.momentum_scheduler = None
+2020-08-18 17:22:49,496 - INFO - allennlp.common.params - trainer.optimizer.type = adam
+2020-08-18 17:22:49,497 - INFO - allennlp.common.params - trainer.optimizer.parameter_groups = None
+2020-08-18 17:22:49,497 - INFO - allennlp.training.optimizers - Number of trainable parameters: 17188490
+2020-08-18 17:22:49,497 - INFO - allennlp.common.params - trainer.optimizer.infer_type_and_cast = True
+2020-08-18 17:22:49,497 - INFO - allennlp.common.params - Converting Params object to dict; logging of default values will not occur when dictionary parameters are used subsequently.
+2020-08-18 17:22:49,497 - INFO - allennlp.common.params - CURRENTLY DEFINED PARAMETERS: 
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.num_serialized_models_to_keep = 1
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.keep_serialized_model_every_num_seconds = None
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.model_save_interval = None
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.summary_interval = 100
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.histogram_interval = None
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.should_log_parameter_statistics = True
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.should_log_learning_rate = False
+2020-08-18 17:22:49,498 - INFO - allennlp.common.params - trainer.log_batch_size_period = None
+2020-08-18 17:22:50,078 - INFO - graph_dependency_parser.train.amtrainer - Beginning training.
+2020-08-18 17:22:50,078 - INFO - graph_dependency_parser.train.amtrainer - Epoch 0/39
+2020-08-18 17:22:50,078 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3322.524
+2020-08-18 17:22:50,202 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2727
+2020-08-18 17:22:50,202 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 613
+2020-08-18 17:22:50,202 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:22:50,202 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:22:50,283 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.0982, DM_LAS: 0.0502, DM_UEM: 0.0000, DM_LEM: 0.0000, DM_Constant_Acc: 0.1844, DM_Constant_Acc_6_best: 0.7759, DM_Label_Acc: 0.1459, DM_mean_constant_acc_las: 0.1173, loss: 3702.0684 ||:   3%|2         | 13/459 [00:10<05:44,  1.29it/s]
+DM_UAS: 0.1148, DM_LAS: 0.0695, DM_UEM: 0.0000, DM_LEM: 0.0000, DM_Constant_Acc: 0.2223, DM_Constant_Acc_6_best: 0.8342, DM_Label_Acc: 0.1996, DM_mean_constant_acc_las: 0.1459, loss: 3290.4919 ||:   7%|7         | 33/459 [00:20<04:55,  1.44it/s]
+DM_UAS: 0.1268, DM_LAS: 0.0832, DM_UEM: 0.0000, DM_LEM: 0.0000, DM_Constant_Acc: 0.2682, DM_Constant_Acc_6_best: 0.8539, DM_Label_Acc: 0.2464, DM_mean_constant_acc_las: 0.1757, loss: 2977.9629 ||:  12%|#1        | 54/459 [00:30<04:15,  1.59it/s]
+DM_UAS: 0.1301, DM_LAS: 0.0904, DM_UEM: 0.0006, DM_LEM: 0.0006, DM_Constant_Acc: 0.3494, DM_Constant_Acc_6_best: 0.8673, DM_Label_Acc: 0.3135, DM_mean_constant_acc_las: 0.2199, loss: 2920.7882 ||:  16%|#6        | 75/459 [00:42<03:53,  1.64it/s]
+DM_UAS: 0.1378, DM_LAS: 0.1027, DM_UEM: 0.0004, DM_LEM: 0.0004, DM_Constant_Acc: 0.4170, DM_Constant_Acc_6_best: 0.8805, DM_Label_Acc: 0.3697, DM_mean_constant_acc_las: 0.2599, loss: 2847.2801 ||:  20%|##        | 93/459 [00:53<03:42,  1.64it/s]
+DM_UAS: 0.1570, DM_LAS: 0.1251, DM_UEM: 0.0005, DM_LEM: 0.0005, DM_Constant_Acc: 0.4684, DM_Constant_Acc_6_best: 0.8914, DM_Label_Acc: 0.4142, DM_mean_constant_acc_las: 0.2967, loss: 2603.9162 ||:  25%|##5       | 115/459 [01:03<03:14,  1.77it/s]
+DM_UAS: 0.1746, DM_LAS: 0.1448, DM_UEM: 0.0020, DM_LEM: 0.0018, DM_Constant_Acc: 0.5125, DM_Constant_Acc_6_best: 0.9009, DM_Label_Acc: 0.4537, DM_mean_constant_acc_las: 0.3287, loss: 2428.0082 ||:  30%|##9       | 137/459 [01:14<02:57,  1.82it/s]
+DM_UAS: 0.1907, DM_LAS: 0.1626, DM_UEM: 0.0019, DM_LEM: 0.0017, DM_Constant_Acc: 0.5486, DM_Constant_Acc_6_best: 0.9082, DM_Label_Acc: 0.4886, DM_mean_constant_acc_las: 0.3556, loss: 2332.4819 ||:  34%|###4      | 157/459 [01:25<02:47,  1.80it/s]
+DM_UAS: 0.2063, DM_LAS: 0.1794, DM_UEM: 0.0017, DM_LEM: 0.0015, DM_Constant_Acc: 0.5760, DM_Constant_Acc_6_best: 0.9144, DM_Label_Acc: 0.5160, DM_mean_constant_acc_las: 0.3777, loss: 2254.7350 ||:  38%|###8      | 175/459 [01:36<02:39,  1.79it/s]
+DM_UAS: 0.2216, DM_LAS: 0.1956, DM_UEM: 0.0016, DM_LEM: 0.0015, DM_Constant_Acc: 0.5988, DM_Constant_Acc_6_best: 0.9198, DM_Label_Acc: 0.5393, DM_mean_constant_acc_las: 0.3972, loss: 2175.9262 ||:  42%|####2     | 194/459 [01:46<02:26,  1.81it/s]
+DM_UAS: 0.2357, DM_LAS: 0.2103, DM_UEM: 0.0024, DM_LEM: 0.0022, DM_Constant_Acc: 0.6171, DM_Constant_Acc_6_best: 0.9240, DM_Label_Acc: 0.5587, DM_mean_constant_acc_las: 0.4137, loss: 2108.1667 ||:  46%|####6     | 213/459 [01:56<02:15,  1.81it/s]
+DM_UAS: 0.2493, DM_LAS: 0.2246, DM_UEM: 0.0030, DM_LEM: 0.0024, DM_Constant_Acc: 0.6321, DM_Constant_Acc_6_best: 0.9279, DM_Label_Acc: 0.5747, DM_mean_constant_acc_las: 0.4284, loss: 2047.1040 ||:  51%|#####     | 232/459 [02:06<02:03,  1.83it/s]
+DM_UAS: 0.2625, DM_LAS: 0.2384, DM_UEM: 0.0037, DM_LEM: 0.0029, DM_Constant_Acc: 0.6474, DM_Constant_Acc_6_best: 0.9315, DM_Label_Acc: 0.5906, DM_mean_constant_acc_las: 0.4429, loss: 1997.9389 ||:  55%|#####4    | 251/459 [02:18<01:55,  1.79it/s]
+DM_UAS: 0.2754, DM_LAS: 0.2518, DM_UEM: 0.0042, DM_LEM: 0.0032, DM_Constant_Acc: 0.6604, DM_Constant_Acc_6_best: 0.9346, DM_Label_Acc: 0.6042, DM_mean_constant_acc_las: 0.4561, loss: 1936.5669 ||:  59%|#####9    | 272/459 [02:28<01:40,  1.87it/s]
+DM_UAS: 0.2892, DM_LAS: 0.2662, DM_UEM: 0.0040, DM_LEM: 0.0031, DM_Constant_Acc: 0.6731, DM_Constant_Acc_6_best: 0.9377, DM_Label_Acc: 0.6179, DM_mean_constant_acc_las: 0.4697, loss: 1888.6349 ||:  64%|######3   | 293/459 [02:40<01:31,  1.82it/s]
+DM_UAS: 0.3010, DM_LAS: 0.2783, DM_UEM: 0.0052, DM_LEM: 0.0042, DM_Constant_Acc: 0.6835, DM_Constant_Acc_6_best: 0.9402, DM_Label_Acc: 0.6294, DM_mean_constant_acc_las: 0.4809, loss: 1860.0623 ||:  68%|######7   | 311/459 [02:51<01:23,  1.77it/s]
+DM_UAS: 0.3138, DM_LAS: 0.2911, DM_UEM: 0.0056, DM_LEM: 0.0045, DM_Constant_Acc: 0.6923, DM_Constant_Acc_6_best: 0.9424, DM_Label_Acc: 0.6389, DM_mean_constant_acc_las: 0.4917, loss: 1802.0150 ||:  73%|#######2  | 333/459 [03:01<01:07,  1.88it/s]
+DM_UAS: 0.3285, DM_LAS: 0.3061, DM_UEM: 0.0054, DM_LEM: 0.0042, DM_Constant_Acc: 0.7031, DM_Constant_Acc_6_best: 0.9450, DM_Label_Acc: 0.6507, DM_mean_constant_acc_las: 0.5046, loss: 1772.4620 ||:  77%|#######7  | 355/459 [03:14<00:57,  1.82it/s]
+DM_UAS: 0.3406, DM_LAS: 0.3183, DM_UEM: 0.0058, DM_LEM: 0.0046, DM_Constant_Acc: 0.7109, DM_Constant_Acc_6_best: 0.9469, DM_Label_Acc: 0.6598, DM_mean_constant_acc_las: 0.5146, loss: 1738.5694 ||:  82%|########1 | 375/459 [03:24<00:45,  1.86it/s]
+DM_UAS: 0.3534, DM_LAS: 0.3311, DM_UEM: 0.0060, DM_LEM: 0.0048, DM_Constant_Acc: 0.7187, DM_Constant_Acc_6_best: 0.9487, DM_Label_Acc: 0.6689, DM_mean_constant_acc_las: 0.5249, loss: 1710.9933 ||:  86%|########6 | 395/459 [03:35<00:34,  1.84it/s]
+DM_UAS: 0.3646, DM_LAS: 0.3425, DM_UEM: 0.0065, DM_LEM: 0.0049, DM_Constant_Acc: 0.7254, DM_Constant_Acc_6_best: 0.9503, DM_Label_Acc: 0.6766, DM_mean_constant_acc_las: 0.5339, loss: 1685.5376 ||:  90%|######### | 414/459 [03:45<00:24,  1.84it/s]
+DM_UAS: 0.3765, DM_LAS: 0.3544, DM_UEM: 0.0068, DM_LEM: 0.0052, DM_Constant_Acc: 0.7316, DM_Constant_Acc_6_best: 0.9518, DM_Label_Acc: 0.6838, DM_mean_constant_acc_las: 0.5430, loss: 1658.7866 ||:  95%|#########4| 434/459 [03:56<00:13,  1.87it/s]
+DM_UAS: 0.3878, DM_LAS: 0.3658, DM_UEM: 0.0089, DM_LEM: 0.0072, DM_Constant_Acc: 0.7370, DM_Constant_Acc_6_best: 0.9531, DM_Label_Acc: 0.6904, DM_mean_constant_acc_las: 0.5514, loss: 1625.9858 ||:  99%|#########9| 455/459 [04:06<00:02,  1.92it/s]
+DM_UAS: 0.3897, DM_LAS: 0.3676, DM_UEM: 0.0097, DM_LEM: 0.0079, DM_Constant_Acc: 0.7378, DM_Constant_Acc_6_best: 0.9533, DM_Label_Acc: 0.6914, DM_mean_constant_acc_las: 0.5527, loss: 1617.2651 ||: 100%|##########| 459/459 [04:07<00:00,  1.85it/s]
+
+2020-08-18 17:26:58,093 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.6887, DM_LAS: 0.6684, DM_UEM: 0.0501, DM_LEM: 0.0412, DM_Constant_Acc: 0.8877, DM_Constant_Acc_6_best: 0.9869, DM_Label_Acc: 0.8773, DM_mean_constant_acc_las: 0.7780, loss: 948.8615 ||: 100%|##########| 33/33 [00:05<00:00,  5.98it/s]
+
+2020-08-18 17:27:03,619 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:27:03,619 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:27:03,619 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |   613.000  |       N/A
+2020-08-18 17:27:03,620 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.008  |     0.041
+2020-08-18 17:27:03,620 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.691  |     0.877
+2020-08-18 17:27:03,621 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:27:03,621 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.953  |     0.987
+2020-08-18 17:27:03,621 - INFO - allennlp.training.tensorboard_writer - loss                     |  1617.265  |   948.862
+2020-08-18 17:27:03,621 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.738  |     0.888
+2020-08-18 17:27:03,622 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:27:03,622 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2727.000  |       N/A
+2020-08-18 17:27:03,622 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.553  |     0.778
+2020-08-18 17:27:03,622 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.010  |     0.050
+2020-08-18 17:27:03,623 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.368  |     0.668
+2020-08-18 17:27:03,623 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.390  |     0.689
+2020-08-18 17:27:03,623 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3322.524  |       N/A
+2020-08-18 17:27:03,787 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:27:03,845 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:13
+2020-08-18 17:27:03,845 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:44:56
+2020-08-18 17:27:03,845 - INFO - graph_dependency_parser.train.amtrainer - Epoch 1/39
+2020-08-18 17:27:03,845 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3422.748
+2020-08-18 17:27:03,961 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:27:03,962 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 4828
+2020-08-18 17:27:03,962 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:27:03,962 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:27:04,034 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.6628, DM_LAS: 0.6429, DM_UEM: 0.0247, DM_LEM: 0.0195, DM_Constant_Acc: 0.8751, DM_Constant_Acc_6_best: 0.9845, DM_Label_Acc: 0.8611, DM_mean_constant_acc_las: 0.7590, loss: 1050.3074 ||:   3%|3         | 16/459 [00:10<04:39,  1.58it/s]
+DM_UAS: 0.6721, DM_LAS: 0.6522, DM_UEM: 0.0383, DM_LEM: 0.0338, DM_Constant_Acc: 0.8691, DM_Constant_Acc_6_best: 0.9822, DM_Label_Acc: 0.8568, DM_mean_constant_acc_las: 0.7607, loss: 963.1502 ||:   8%|8         | 37/459 [00:20<04:07,  1.70it/s] 
+DM_UAS: 0.6908, DM_LAS: 0.6705, DM_UEM: 0.0538, DM_LEM: 0.0467, DM_Constant_Acc: 0.8733, DM_Constant_Acc_6_best: 0.9842, DM_Label_Acc: 0.8589, DM_mean_constant_acc_las: 0.7719, loss: 842.9979 ||:  14%|#3        | 62/459 [00:30<03:32,  1.87it/s]
+DM_UAS: 0.7016, DM_LAS: 0.6807, DM_UEM: 0.0627, DM_LEM: 0.0541, DM_Constant_Acc: 0.8741, DM_Constant_Acc_6_best: 0.9847, DM_Label_Acc: 0.8618, DM_mean_constant_acc_las: 0.7774, loss: 842.7608 ||:  19%|#8        | 87/459 [00:44<03:22,  1.83it/s]
+DM_UAS: 0.7115, DM_LAS: 0.6904, DM_UEM: 0.0637, DM_LEM: 0.0548, DM_Constant_Acc: 0.8765, DM_Constant_Acc_6_best: 0.9852, DM_Label_Acc: 0.8638, DM_mean_constant_acc_las: 0.7834, loss: 830.1492 ||:  23%|##3       | 106/459 [00:54<03:10,  1.85it/s]
+DM_UAS: 0.7213, DM_LAS: 0.6999, DM_UEM: 0.0627, DM_LEM: 0.0537, DM_Constant_Acc: 0.8777, DM_Constant_Acc_6_best: 0.9855, DM_Label_Acc: 0.8647, DM_mean_constant_acc_las: 0.7888, loss: 827.2288 ||:  27%|##7       | 125/459 [01:06<03:08,  1.77it/s]
+DM_UAS: 0.7297, DM_LAS: 0.7082, DM_UEM: 0.0697, DM_LEM: 0.0599, DM_Constant_Acc: 0.8793, DM_Constant_Acc_6_best: 0.9860, DM_Label_Acc: 0.8664, DM_mean_constant_acc_las: 0.7938, loss: 802.0782 ||:  32%|###2      | 147/459 [01:17<02:47,  1.86it/s]
+DM_UAS: 0.7377, DM_LAS: 0.7159, DM_UEM: 0.0675, DM_LEM: 0.0574, DM_Constant_Acc: 0.8801, DM_Constant_Acc_6_best: 0.9861, DM_Label_Acc: 0.8674, DM_mean_constant_acc_las: 0.7980, loss: 807.3273 ||:  37%|###6      | 168/459 [01:29<02:42,  1.79it/s]
+DM_UAS: 0.7446, DM_LAS: 0.7225, DM_UEM: 0.0707, DM_LEM: 0.0602, DM_Constant_Acc: 0.8812, DM_Constant_Acc_6_best: 0.9863, DM_Label_Acc: 0.8686, DM_mean_constant_acc_las: 0.8018, loss: 787.9312 ||:  41%|####      | 188/459 [01:39<02:26,  1.85it/s]
+DM_UAS: 0.7516, DM_LAS: 0.7296, DM_UEM: 0.0693, DM_LEM: 0.0583, DM_Constant_Acc: 0.8822, DM_Constant_Acc_6_best: 0.9866, DM_Label_Acc: 0.8707, DM_mean_constant_acc_las: 0.8059, loss: 778.5818 ||:  45%|####5     | 208/459 [01:51<02:17,  1.83it/s]
+DM_UAS: 0.7570, DM_LAS: 0.7348, DM_UEM: 0.0736, DM_LEM: 0.0614, DM_Constant_Acc: 0.8833, DM_Constant_Acc_6_best: 0.9868, DM_Label_Acc: 0.8715, DM_mean_constant_acc_las: 0.8090, loss: 760.0027 ||:  50%|####9     | 229/459 [02:01<02:00,  1.90it/s]
+DM_UAS: 0.7620, DM_LAS: 0.7398, DM_UEM: 0.0848, DM_LEM: 0.0716, DM_Constant_Acc: 0.8844, DM_Constant_Acc_6_best: 0.9869, DM_Label_Acc: 0.8726, DM_mean_constant_acc_las: 0.8121, loss: 744.0080 ||:  54%|#####4    | 250/459 [02:12<01:50,  1.89it/s]
+DM_UAS: 0.7662, DM_LAS: 0.7439, DM_UEM: 0.0875, DM_LEM: 0.0741, DM_Constant_Acc: 0.8853, DM_Constant_Acc_6_best: 0.9871, DM_Label_Acc: 0.8739, DM_mean_constant_acc_las: 0.8146, loss: 731.0893 ||:  59%|#####9    | 271/459 [02:22<01:38,  1.92it/s]
+DM_UAS: 0.7706, DM_LAS: 0.7484, DM_UEM: 0.0951, DM_LEM: 0.0812, DM_Constant_Acc: 0.8856, DM_Constant_Acc_6_best: 0.9872, DM_Label_Acc: 0.8747, DM_mean_constant_acc_las: 0.8170, loss: 714.5952 ||:  64%|######3   | 293/459 [02:33<01:23,  1.98it/s]
+DM_UAS: 0.7750, DM_LAS: 0.7527, DM_UEM: 0.0984, DM_LEM: 0.0837, DM_Constant_Acc: 0.8865, DM_Constant_Acc_6_best: 0.9874, DM_Label_Acc: 0.8759, DM_mean_constant_acc_las: 0.8196, loss: 706.3652 ||:  69%|######8   | 315/459 [02:45<01:14,  1.93it/s]
+DM_UAS: 0.7779, DM_LAS: 0.7555, DM_UEM: 0.0998, DM_LEM: 0.0853, DM_Constant_Acc: 0.8872, DM_Constant_Acc_6_best: 0.9874, DM_Label_Acc: 0.8770, DM_mean_constant_acc_las: 0.8214, loss: 701.8163 ||:  73%|#######2  | 334/459 [02:56<01:06,  1.87it/s]
+DM_UAS: 0.7811, DM_LAS: 0.7589, DM_UEM: 0.1019, DM_LEM: 0.0874, DM_Constant_Acc: 0.8878, DM_Constant_Acc_6_best: 0.9875, DM_Label_Acc: 0.8777, DM_mean_constant_acc_las: 0.8233, loss: 694.5096 ||:  77%|#######7  | 354/459 [03:06<00:55,  1.88it/s]
+DM_UAS: 0.7838, DM_LAS: 0.7615, DM_UEM: 0.1022, DM_LEM: 0.0871, DM_Constant_Acc: 0.8883, DM_Constant_Acc_6_best: 0.9876, DM_Label_Acc: 0.8785, DM_mean_constant_acc_las: 0.8249, loss: 693.6417 ||:  81%|########1 | 373/459 [03:19<00:48,  1.76it/s]
+DM_UAS: 0.7861, DM_LAS: 0.7637, DM_UEM: 0.1022, DM_LEM: 0.0872, DM_Constant_Acc: 0.8886, DM_Constant_Acc_6_best: 0.9876, DM_Label_Acc: 0.8792, DM_mean_constant_acc_las: 0.8262, loss: 690.8715 ||:  85%|########4 | 390/459 [03:29<00:39,  1.73it/s]
+DM_UAS: 0.7887, DM_LAS: 0.7663, DM_UEM: 0.1047, DM_LEM: 0.0891, DM_Constant_Acc: 0.8893, DM_Constant_Acc_6_best: 0.9877, DM_Label_Acc: 0.8799, DM_mean_constant_acc_las: 0.8278, loss: 684.2062 ||:  89%|########9 | 410/459 [03:39<00:27,  1.80it/s]
+DM_UAS: 0.7912, DM_LAS: 0.7689, DM_UEM: 0.1031, DM_LEM: 0.0875, DM_Constant_Acc: 0.8897, DM_Constant_Acc_6_best: 0.9879, DM_Label_Acc: 0.8807, DM_mean_constant_acc_las: 0.8293, loss: 680.9702 ||:  94%|#########3| 430/459 [03:50<00:16,  1.80it/s]
+DM_UAS: 0.7940, DM_LAS: 0.7717, DM_UEM: 0.1031, DM_LEM: 0.0875, DM_Constant_Acc: 0.8903, DM_Constant_Acc_6_best: 0.9880, DM_Label_Acc: 0.8817, DM_mean_constant_acc_las: 0.8310, loss: 679.9701 ||:  98%|#########7| 449/459 [04:02<00:05,  1.71it/s]
+DM_UAS: 0.7951, DM_LAS: 0.7728, DM_UEM: 0.1061, DM_LEM: 0.0904, DM_Constant_Acc: 0.8906, DM_Constant_Acc_6_best: 0.9881, DM_Label_Acc: 0.8820, DM_mean_constant_acc_las: 0.8317, loss: 673.8748 ||: 100%|##########| 459/459 [04:07<00:00,  1.86it/s]
+
+2020-08-18 17:31:11,332 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.8744, DM_LAS: 0.8567, DM_UEM: 0.2625, DM_LEM: 0.2257, DM_Constant_Acc: 0.9181, DM_Constant_Acc_6_best: 0.9925, DM_Label_Acc: 0.9179, DM_mean_constant_acc_las: 0.8874, loss: 439.0383 ||: 100%|##########| 33/33 [00:05<00:00,  5.70it/s]
+
+2020-08-18 17:31:17,126 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:31:17,127 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:31:17,127 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  4828.000  |       N/A
+2020-08-18 17:31:17,128 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.090  |     0.226
+2020-08-18 17:31:17,128 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.882  |     0.918
+2020-08-18 17:31:17,129 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:31:17,129 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.988  |     0.993
+2020-08-18 17:31:17,129 - INFO - allennlp.training.tensorboard_writer - loss                     |   673.875  |   439.038
+2020-08-18 17:31:17,130 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.891  |     0.918
+2020-08-18 17:31:17,130 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:31:17,130 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:31:17,130 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.832  |     0.887
+2020-08-18 17:31:17,131 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.106  |     0.263
+2020-08-18 17:31:17,131 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.773  |     0.857
+2020-08-18 17:31:17,131 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.795  |     0.874
+2020-08-18 17:31:17,132 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3422.748  |       N/A
+2020-08-18 17:31:17,294 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:31:17,387 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:13
+2020-08-18 17:31:17,387 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:40:38
+2020-08-18 17:31:17,387 - INFO - graph_dependency_parser.train.amtrainer - Epoch 2/39
+2020-08-18 17:31:17,387 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3424.976
+2020-08-18 17:31:17,525 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:31:17,525 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 4828
+2020-08-18 17:31:17,525 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:31:17,525 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:31:17,618 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.8476, DM_LAS: 0.8288, DM_UEM: 0.1432, DM_LEM: 0.1198, DM_Constant_Acc: 0.9057, DM_Constant_Acc_6_best: 0.9908, DM_Label_Acc: 0.9020, DM_mean_constant_acc_las: 0.8672, loss: 571.4025 ||:   3%|3         | 16/459 [00:10<04:57,  1.49it/s]
+DM_UAS: 0.8542, DM_LAS: 0.8359, DM_UEM: 0.1262, DM_LEM: 0.1072, DM_Constant_Acc: 0.9077, DM_Constant_Acc_6_best: 0.9913, DM_Label_Acc: 0.9055, DM_mean_constant_acc_las: 0.8718, loss: 561.1305 ||:   7%|7         | 34/459 [00:21<04:34,  1.55it/s]
+DM_UAS: 0.8574, DM_LAS: 0.8390, DM_UEM: 0.1340, DM_LEM: 0.1128, DM_Constant_Acc: 0.9087, DM_Constant_Acc_6_best: 0.9909, DM_Label_Acc: 0.9065, DM_mean_constant_acc_las: 0.8739, loss: 528.5724 ||:  12%|#1        | 53/459 [00:31<04:09,  1.62it/s]
+DM_UAS: 0.8589, DM_LAS: 0.8405, DM_UEM: 0.1415, DM_LEM: 0.1183, DM_Constant_Acc: 0.9087, DM_Constant_Acc_6_best: 0.9911, DM_Label_Acc: 0.9070, DM_mean_constant_acc_las: 0.8746, loss: 528.1749 ||:  16%|#5        | 72/459 [00:43<03:58,  1.62it/s]
+DM_UAS: 0.8597, DM_LAS: 0.8410, DM_UEM: 0.1591, DM_LEM: 0.1340, DM_Constant_Acc: 0.9084, DM_Constant_Acc_6_best: 0.9914, DM_Label_Acc: 0.9063, DM_mean_constant_acc_las: 0.8747, loss: 508.0207 ||:  20%|##        | 93/459 [00:53<03:32,  1.72it/s]
+DM_UAS: 0.8603, DM_LAS: 0.8415, DM_UEM: 0.1661, DM_LEM: 0.1413, DM_Constant_Acc: 0.9084, DM_Constant_Acc_6_best: 0.9913, DM_Label_Acc: 0.9060, DM_mean_constant_acc_las: 0.8749, loss: 497.8153 ||:  25%|##4       | 114/459 [01:04<03:11,  1.80it/s]
+DM_UAS: 0.8611, DM_LAS: 0.8424, DM_UEM: 0.1651, DM_LEM: 0.1400, DM_Constant_Acc: 0.9086, DM_Constant_Acc_6_best: 0.9914, DM_Label_Acc: 0.9062, DM_mean_constant_acc_las: 0.8755, loss: 492.5325 ||:  29%|##9       | 135/459 [01:15<02:56,  1.84it/s]
+DM_UAS: 0.8619, DM_LAS: 0.8432, DM_UEM: 0.1818, DM_LEM: 0.1555, DM_Constant_Acc: 0.9092, DM_Constant_Acc_6_best: 0.9915, DM_Label_Acc: 0.9066, DM_mean_constant_acc_las: 0.8762, loss: 479.6420 ||:  34%|###4      | 157/459 [01:25<02:36,  1.93it/s]
+DM_UAS: 0.8631, DM_LAS: 0.8445, DM_UEM: 0.1860, DM_LEM: 0.1588, DM_Constant_Acc: 0.9092, DM_Constant_Acc_6_best: 0.9915, DM_Label_Acc: 0.9071, DM_mean_constant_acc_las: 0.8769, loss: 470.8111 ||:  39%|###8      | 179/459 [01:35<02:21,  1.97it/s]
+DM_UAS: 0.8638, DM_LAS: 0.8452, DM_UEM: 0.1874, DM_LEM: 0.1601, DM_Constant_Acc: 0.9099, DM_Constant_Acc_6_best: 0.9917, DM_Label_Acc: 0.9073, DM_mean_constant_acc_las: 0.8775, loss: 466.6713 ||:  44%|####3     | 200/459 [01:46<02:11,  1.97it/s]
+DM_UAS: 0.8649, DM_LAS: 0.8463, DM_UEM: 0.1922, DM_LEM: 0.1650, DM_Constant_Acc: 0.9107, DM_Constant_Acc_6_best: 0.9918, DM_Label_Acc: 0.9079, DM_mean_constant_acc_las: 0.8785, loss: 459.3634 ||:  48%|####8     | 222/459 [01:56<01:57,  2.01it/s]
+DM_UAS: 0.8651, DM_LAS: 0.8465, DM_UEM: 0.1921, DM_LEM: 0.1655, DM_Constant_Acc: 0.9107, DM_Constant_Acc_6_best: 0.9918, DM_Label_Acc: 0.9079, DM_mean_constant_acc_las: 0.8786, loss: 460.5947 ||:  53%|#####3    | 244/459 [02:08<01:47,  2.00it/s]
+DM_UAS: 0.8658, DM_LAS: 0.8471, DM_UEM: 0.1898, DM_LEM: 0.1634, DM_Constant_Acc: 0.9111, DM_Constant_Acc_6_best: 0.9918, DM_Label_Acc: 0.9082, DM_mean_constant_acc_las: 0.8791, loss: 461.1480 ||:  58%|#####7    | 264/459 [02:18<01:39,  1.97it/s]
+DM_UAS: 0.8659, DM_LAS: 0.8473, DM_UEM: 0.1946, DM_LEM: 0.1682, DM_Constant_Acc: 0.9111, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9086, DM_mean_constant_acc_las: 0.8792, loss: 457.3223 ||:  62%|######2   | 285/459 [02:28<01:27,  2.00it/s]
+DM_UAS: 0.8666, DM_LAS: 0.8481, DM_UEM: 0.1936, DM_LEM: 0.1673, DM_Constant_Acc: 0.9113, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9089, DM_mean_constant_acc_las: 0.8797, loss: 458.2540 ||:  67%|######6   | 306/459 [02:39<01:18,  1.96it/s]
+DM_UAS: 0.8669, DM_LAS: 0.8484, DM_UEM: 0.1974, DM_LEM: 0.1709, DM_Constant_Acc: 0.9114, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9091, DM_mean_constant_acc_las: 0.8799, loss: 456.2210 ||:  71%|#######1  | 327/459 [02:50<01:06,  1.99it/s]
+DM_UAS: 0.8671, DM_LAS: 0.8485, DM_UEM: 0.1988, DM_LEM: 0.1722, DM_Constant_Acc: 0.9114, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9094, DM_mean_constant_acc_las: 0.8800, loss: 456.8948 ||:  76%|#######5  | 348/459 [03:00<00:55,  1.99it/s]
+DM_UAS: 0.8669, DM_LAS: 0.8484, DM_UEM: 0.2042, DM_LEM: 0.1774, DM_Constant_Acc: 0.9114, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9098, DM_mean_constant_acc_las: 0.8799, loss: 455.6003 ||:  80%|########  | 369/459 [03:11<00:45,  1.99it/s]
+DM_UAS: 0.8675, DM_LAS: 0.8492, DM_UEM: 0.2076, DM_LEM: 0.1808, DM_Constant_Acc: 0.9111, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9101, DM_mean_constant_acc_las: 0.8802, loss: 450.6164 ||:  85%|########5 | 392/459 [03:21<00:32,  2.07it/s]
+DM_UAS: 0.8677, DM_LAS: 0.8494, DM_UEM: 0.2053, DM_LEM: 0.1787, DM_Constant_Acc: 0.9115, DM_Constant_Acc_6_best: 0.9919, DM_Label_Acc: 0.9107, DM_mean_constant_acc_las: 0.8804, loss: 450.7730 ||:  90%|######### | 415/459 [03:35<00:22,  1.93it/s]
+DM_UAS: 0.8680, DM_LAS: 0.8497, DM_UEM: 0.2053, DM_LEM: 0.1789, DM_Constant_Acc: 0.9117, DM_Constant_Acc_6_best: 0.9920, DM_Label_Acc: 0.9113, DM_mean_constant_acc_las: 0.8807, loss: 449.3280 ||:  95%|#########4| 435/459 [03:45<00:12,  1.95it/s]
+DM_UAS: 0.8683, DM_LAS: 0.8501, DM_UEM: 0.2039, DM_LEM: 0.1776, DM_Constant_Acc: 0.9118, DM_Constant_Acc_6_best: 0.9920, DM_Label_Acc: 0.9116, DM_mean_constant_acc_las: 0.8809, loss: 448.4339 ||:  99%|#########9| 455/459 [03:56<00:02,  1.90it/s]
+DM_UAS: 0.8683, DM_LAS: 0.8500, DM_UEM: 0.2030, DM_LEM: 0.1767, DM_Constant_Acc: 0.9118, DM_Constant_Acc_6_best: 0.9920, DM_Label_Acc: 0.9116, DM_mean_constant_acc_las: 0.8809, loss: 449.4262 ||: 100%|##########| 459/459 [03:59<00:00,  1.92it/s]
+
+2020-08-18 17:35:16,641 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.8952, DM_LAS: 0.8800, DM_UEM: 0.3158, DM_LEM: 0.2771, DM_Constant_Acc: 0.9283, DM_Constant_Acc_6_best: 0.9933, DM_Label_Acc: 0.9358, DM_mean_constant_acc_las: 0.9042, loss: 364.1848 ||: 100%|##########| 33/33 [00:06<00:00,  4.84it/s]
+
+2020-08-18 17:35:23,461 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:35:23,462 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:35:23,462 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  4828.000  |       N/A
+2020-08-18 17:35:23,462 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.177  |     0.277
+2020-08-18 17:35:23,463 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.912  |     0.936
+2020-08-18 17:35:23,463 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:35:23,464 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.992  |     0.993
+2020-08-18 17:35:23,464 - INFO - allennlp.training.tensorboard_writer - loss                     |   449.426  |   364.185
+2020-08-18 17:35:23,465 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.912  |     0.928
+2020-08-18 17:35:23,465 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:35:23,466 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:35:23,466 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.881  |     0.904
+2020-08-18 17:35:23,466 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.203  |     0.316
+2020-08-18 17:35:23,467 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.850  |     0.880
+2020-08-18 17:35:23,467 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.868  |     0.895
+2020-08-18 17:35:23,468 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3424.976  |       N/A
+2020-08-18 17:35:23,660 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:35:23,751 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:06
+2020-08-18 17:35:23,752 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:34:55
+2020-08-18 17:35:23,752 - INFO - graph_dependency_parser.train.amtrainer - Epoch 3/39
+2020-08-18 17:35:23,752 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3424.988
+2020-08-18 17:35:23,907 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:35:23,908 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 4828
+2020-08-18 17:35:23,908 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:35:23,908 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:35:24,001 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.8860, DM_LAS: 0.8716, DM_UEM: 0.2390, DM_LEM: 0.2096, DM_Constant_Acc: 0.9237, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9247, DM_mean_constant_acc_las: 0.8976, loss: 369.3064 ||:   4%|3         | 17/459 [00:10<04:25,  1.66it/s]
+DM_UAS: 0.8872, DM_LAS: 0.8725, DM_UEM: 0.2164, DM_LEM: 0.1875, DM_Constant_Acc: 0.9225, DM_Constant_Acc_6_best: 0.9934, DM_Label_Acc: 0.9256, DM_mean_constant_acc_las: 0.8975, loss: 393.0172 ||:   8%|7         | 36/459 [00:21<04:11,  1.68it/s]
+DM_UAS: 0.8856, DM_LAS: 0.8707, DM_UEM: 0.2022, DM_LEM: 0.1755, DM_Constant_Acc: 0.9217, DM_Constant_Acc_6_best: 0.9932, DM_Label_Acc: 0.9245, DM_mean_constant_acc_las: 0.8962, loss: 410.5834 ||:  12%|#1        | 54/459 [00:32<04:04,  1.66it/s]
+DM_UAS: 0.8858, DM_LAS: 0.8710, DM_UEM: 0.2250, DM_LEM: 0.1978, DM_Constant_Acc: 0.9185, DM_Constant_Acc_6_best: 0.9930, DM_Label_Acc: 0.9213, DM_mean_constant_acc_las: 0.8948, loss: 400.5677 ||:  16%|#6        | 75/459 [00:42<03:38,  1.76it/s]
+DM_UAS: 0.8860, DM_LAS: 0.8712, DM_UEM: 0.2394, DM_LEM: 0.2127, DM_Constant_Acc: 0.9193, DM_Constant_Acc_6_best: 0.9933, DM_Label_Acc: 0.9213, DM_mean_constant_acc_las: 0.8953, loss: 390.6574 ||:  21%|##        | 96/459 [00:53<03:20,  1.81it/s]
+DM_UAS: 0.8867, DM_LAS: 0.8716, DM_UEM: 0.2437, DM_LEM: 0.2150, DM_Constant_Acc: 0.9201, DM_Constant_Acc_6_best: 0.9934, DM_Label_Acc: 0.9219, DM_mean_constant_acc_las: 0.8959, loss: 382.5148 ||:  25%|##5       | 116/459 [01:03<03:05,  1.85it/s]
+DM_UAS: 0.8876, DM_LAS: 0.8727, DM_UEM: 0.2425, DM_LEM: 0.2140, DM_Constant_Acc: 0.9205, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9226, DM_mean_constant_acc_las: 0.8966, loss: 381.6555 ||:  30%|##9       | 136/459 [01:14<02:53,  1.86it/s]
+DM_UAS: 0.8875, DM_LAS: 0.8727, DM_UEM: 0.2447, DM_LEM: 0.2171, DM_Constant_Acc: 0.9204, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9230, DM_mean_constant_acc_las: 0.8966, loss: 384.1453 ||:  34%|###3      | 156/459 [01:24<02:41,  1.88it/s]
+DM_UAS: 0.8876, DM_LAS: 0.8726, DM_UEM: 0.2427, DM_LEM: 0.2156, DM_Constant_Acc: 0.9201, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9230, DM_mean_constant_acc_las: 0.8964, loss: 383.3275 ||:  38%|###8      | 176/459 [01:34<02:28,  1.91it/s]
+DM_UAS: 0.8886, DM_LAS: 0.8736, DM_UEM: 0.2525, DM_LEM: 0.2246, DM_Constant_Acc: 0.9208, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9236, DM_mean_constant_acc_las: 0.8972, loss: 373.6460 ||:  43%|####3     | 198/459 [01:45<02:13,  1.95it/s]
+DM_UAS: 0.8879, DM_LAS: 0.8728, DM_UEM: 0.2471, DM_LEM: 0.2194, DM_Constant_Acc: 0.9207, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9236, DM_mean_constant_acc_las: 0.8967, loss: 379.0642 ||:  48%|####7     | 219/459 [01:58<02:10,  1.84it/s]
+DM_UAS: 0.8879, DM_LAS: 0.8728, DM_UEM: 0.2459, DM_LEM: 0.2184, DM_Constant_Acc: 0.9210, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9240, DM_mean_constant_acc_las: 0.8969, loss: 378.6227 ||:  52%|#####1    | 237/459 [02:08<02:01,  1.82it/s]
+DM_UAS: 0.8880, DM_LAS: 0.8729, DM_UEM: 0.2531, DM_LEM: 0.2253, DM_Constant_Acc: 0.9212, DM_Constant_Acc_6_best: 0.9935, DM_Label_Acc: 0.9244, DM_mean_constant_acc_las: 0.8971, loss: 375.4258 ||:  56%|#####6    | 259/459 [02:18<01:44,  1.92it/s]
+DM_UAS: 0.8882, DM_LAS: 0.8731, DM_UEM: 0.2564, DM_LEM: 0.2290, DM_Constant_Acc: 0.9215, DM_Constant_Acc_6_best: 0.9936, DM_Label_Acc: 0.9246, DM_mean_constant_acc_las: 0.8973, loss: 371.7023 ||:  61%|######1   | 282/459 [02:29<01:28,  2.00it/s]
+DM_UAS: 0.8882, DM_LAS: 0.8731, DM_UEM: 0.2580, DM_LEM: 0.2304, DM_Constant_Acc: 0.9213, DM_Constant_Acc_6_best: 0.9936, DM_Label_Acc: 0.9247, DM_mean_constant_acc_las: 0.8972, loss: 370.9532 ||:  66%|######6   | 305/459 [02:39<01:15,  2.03it/s]
+DM_UAS: 0.8884, DM_LAS: 0.8734, DM_UEM: 0.2582, DM_LEM: 0.2301, DM_Constant_Acc: 0.9216, DM_Constant_Acc_6_best: 0.9936, DM_Label_Acc: 0.9249, DM_mean_constant_acc_las: 0.8975, loss: 368.4912 ||:  71%|#######1  | 328/459 [02:50<01:03,  2.08it/s]
+DM_UAS: 0.8886, DM_LAS: 0.8737, DM_UEM: 0.2565, DM_LEM: 0.2286, DM_Constant_Acc: 0.9221, DM_Constant_Acc_6_best: 0.9937, DM_Label_Acc: 0.9254, DM_mean_constant_acc_las: 0.8979, loss: 367.6181 ||:  76%|#######6  | 351/459 [03:02<00:52,  2.04it/s]
+DM_UAS: 0.8884, DM_LAS: 0.8734, DM_UEM: 0.2522, DM_LEM: 0.2241, DM_Constant_Acc: 0.9219, DM_Constant_Acc_6_best: 0.9937, DM_Label_Acc: 0.9257, DM_mean_constant_acc_las: 0.8977, loss: 370.7247 ||:  81%|########  | 371/459 [03:13<00:44,  1.96it/s]
+DM_UAS: 0.8889, DM_LAS: 0.8739, DM_UEM: 0.2533, DM_LEM: 0.2249, DM_Constant_Acc: 0.9222, DM_Constant_Acc_6_best: 0.9937, DM_Label_Acc: 0.9260, DM_mean_constant_acc_las: 0.8981, loss: 367.5202 ||:  85%|########5 | 392/459 [03:23<00:33,  1.99it/s]
+DM_UAS: 0.8889, DM_LAS: 0.8739, DM_UEM: 0.2548, DM_LEM: 0.2266, DM_Constant_Acc: 0.9224, DM_Constant_Acc_6_best: 0.9937, DM_Label_Acc: 0.9264, DM_mean_constant_acc_las: 0.8981, loss: 368.2228 ||:  90%|########9 | 413/459 [03:34<00:23,  1.95it/s]
+DM_UAS: 0.8891, DM_LAS: 0.8742, DM_UEM: 0.2521, DM_LEM: 0.2238, DM_Constant_Acc: 0.9227, DM_Constant_Acc_6_best: 0.9938, DM_Label_Acc: 0.9267, DM_mean_constant_acc_las: 0.8984, loss: 368.6600 ||:  94%|#########4| 432/459 [03:46<00:14,  1.84it/s]
+DM_UAS: 0.8892, DM_LAS: 0.8743, DM_UEM: 0.2515, DM_LEM: 0.2231, DM_Constant_Acc: 0.9227, DM_Constant_Acc_6_best: 0.9938, DM_Label_Acc: 0.9268, DM_mean_constant_acc_las: 0.8985, loss: 370.7805 ||:  98%|#########7| 449/459 [03:56<00:05,  1.79it/s]
+DM_UAS: 0.8893, DM_LAS: 0.8744, DM_UEM: 0.2536, DM_LEM: 0.2253, DM_Constant_Acc: 0.9228, DM_Constant_Acc_6_best: 0.9938, DM_Label_Acc: 0.9270, DM_mean_constant_acc_las: 0.8986, loss: 368.3313 ||: 100%|##########| 459/459 [04:00<00:00,  1.90it/s]
+
+2020-08-18 17:39:24,979 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9057, DM_LAS: 0.8921, DM_UEM: 0.3475, DM_LEM: 0.3069, DM_Constant_Acc: 0.9354, DM_Constant_Acc_6_best: 0.9952, DM_Label_Acc: 0.9463, DM_mean_constant_acc_las: 0.9137, loss: 325.0627 ||: 100%|##########| 33/33 [00:05<00:00,  6.41it/s]
+
+2020-08-18 17:39:30,130 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:39:30,130 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:39:30,131 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  4828.000  |       N/A
+2020-08-18 17:39:30,131 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.225  |     0.307
+2020-08-18 17:39:30,131 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.927  |     0.946
+2020-08-18 17:39:30,132 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:39:30,132 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.994  |     0.995
+2020-08-18 17:39:30,132 - INFO - allennlp.training.tensorboard_writer - loss                     |   368.331  |   325.063
+2020-08-18 17:39:30,133 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.923  |     0.935
+2020-08-18 17:39:30,133 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:39:30,133 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:39:30,133 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.899  |     0.914
+2020-08-18 17:39:30,134 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.254  |     0.347
+2020-08-18 17:39:30,134 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.874  |     0.892
+2020-08-18 17:39:30,135 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.889  |     0.906
+2020-08-18 17:39:30,135 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3424.988  |       N/A
+2020-08-18 17:39:30,293 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:39:30,382 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:06
+2020-08-18 17:39:30,383 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:30:02
+2020-08-18 17:39:30,383 - INFO - graph_dependency_parser.train.amtrainer - Epoch 4/39
+2020-08-18 17:39:30,383 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.564
+2020-08-18 17:39:30,508 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:39:30,508 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6048
+2020-08-18 17:39:30,508 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:39:30,508 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:39:30,578 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9068, DM_LAS: 0.8946, DM_UEM: 0.3361, DM_LEM: 0.3089, DM_Constant_Acc: 0.9306, DM_Constant_Acc_6_best: 0.9948, DM_Label_Acc: 0.9340, DM_mean_constant_acc_las: 0.9126, loss: 254.6865 ||:   5%|5         | 23/459 [00:10<03:20,  2.17it/s]
+DM_UAS: 0.9023, DM_LAS: 0.8894, DM_UEM: 0.3384, DM_LEM: 0.3074, DM_Constant_Acc: 0.9302, DM_Constant_Acc_6_best: 0.9952, DM_Label_Acc: 0.9363, DM_mean_constant_acc_las: 0.9098, loss: 294.3166 ||:  10%|9         | 45/459 [00:21<03:15,  2.12it/s]
+DM_UAS: 0.9004, DM_LAS: 0.8874, DM_UEM: 0.3125, DM_LEM: 0.2835, DM_Constant_Acc: 0.9293, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9363, DM_mean_constant_acc_las: 0.9083, loss: 318.0736 ||:  14%|#4        | 66/459 [00:33<03:17,  1.99it/s]
+DM_UAS: 0.9005, DM_LAS: 0.8873, DM_UEM: 0.3051, DM_LEM: 0.2739, DM_Constant_Acc: 0.9294, DM_Constant_Acc_6_best: 0.9949, DM_Label_Acc: 0.9357, DM_mean_constant_acc_las: 0.9083, loss: 320.3408 ||:  19%|#8        | 87/459 [00:43<03:05,  2.00it/s]
+DM_UAS: 0.9020, DM_LAS: 0.8889, DM_UEM: 0.2976, DM_LEM: 0.2677, DM_Constant_Acc: 0.9296, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9357, DM_mean_constant_acc_las: 0.9093, loss: 319.9618 ||:  24%|##3       | 108/459 [00:55<03:01,  1.93it/s]
+DM_UAS: 0.9028, DM_LAS: 0.8896, DM_UEM: 0.3041, DM_LEM: 0.2739, DM_Constant_Acc: 0.9306, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9355, DM_mean_constant_acc_las: 0.9101, loss: 314.2706 ||:  28%|##8       | 129/459 [01:06<02:49,  1.95it/s]
+DM_UAS: 0.9035, DM_LAS: 0.8903, DM_UEM: 0.3023, DM_LEM: 0.2718, DM_Constant_Acc: 0.9311, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9361, DM_mean_constant_acc_las: 0.9107, loss: 313.2009 ||:  32%|###2      | 149/459 [01:16<02:38,  1.96it/s]
+DM_UAS: 0.9033, DM_LAS: 0.8900, DM_UEM: 0.3010, DM_LEM: 0.2713, DM_Constant_Acc: 0.9315, DM_Constant_Acc_6_best: 0.9951, DM_Label_Acc: 0.9363, DM_mean_constant_acc_las: 0.9108, loss: 313.0868 ||:  37%|###7      | 170/459 [01:26<02:25,  1.98it/s]
+DM_UAS: 0.9023, DM_LAS: 0.8889, DM_UEM: 0.2950, DM_LEM: 0.2655, DM_Constant_Acc: 0.9309, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9361, DM_mean_constant_acc_las: 0.9099, loss: 319.1672 ||:  42%|####1     | 191/459 [01:38<02:19,  1.93it/s]
+DM_UAS: 0.9020, DM_LAS: 0.8885, DM_UEM: 0.3006, DM_LEM: 0.2705, DM_Constant_Acc: 0.9307, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9359, DM_mean_constant_acc_las: 0.9096, loss: 317.0735 ||:  47%|####6     | 214/459 [01:48<02:01,  2.02it/s]
+DM_UAS: 0.9019, DM_LAS: 0.8885, DM_UEM: 0.2908, DM_LEM: 0.2615, DM_Constant_Acc: 0.9307, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9364, DM_mean_constant_acc_las: 0.9096, loss: 322.8606 ||:  52%|#####1    | 237/459 [02:02<01:57,  1.89it/s]
+DM_UAS: 0.9017, DM_LAS: 0.8884, DM_UEM: 0.2944, DM_LEM: 0.2642, DM_Constant_Acc: 0.9308, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9365, DM_mean_constant_acc_las: 0.9096, loss: 318.3387 ||:  57%|#####6    | 260/459 [02:12<01:40,  1.98it/s]
+DM_UAS: 0.9017, DM_LAS: 0.8886, DM_UEM: 0.2942, DM_LEM: 0.2644, DM_Constant_Acc: 0.9307, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9367, DM_mean_constant_acc_las: 0.9096, loss: 317.7586 ||:  62%|######1   | 283/459 [02:25<01:30,  1.94it/s]
+DM_UAS: 0.9013, DM_LAS: 0.8881, DM_UEM: 0.2915, DM_LEM: 0.2618, DM_Constant_Acc: 0.9308, DM_Constant_Acc_6_best: 0.9949, DM_Label_Acc: 0.9369, DM_mean_constant_acc_las: 0.9094, loss: 321.1883 ||:  66%|######5   | 302/459 [02:36<01:25,  1.83it/s]
+DM_UAS: 0.9010, DM_LAS: 0.8879, DM_UEM: 0.2901, DM_LEM: 0.2608, DM_Constant_Acc: 0.9307, DM_Constant_Acc_6_best: 0.9949, DM_Label_Acc: 0.9370, DM_mean_constant_acc_las: 0.9093, loss: 321.4255 ||:  70%|######9   | 320/459 [02:47<01:16,  1.81it/s]
+DM_UAS: 0.9010, DM_LAS: 0.8878, DM_UEM: 0.2941, DM_LEM: 0.2651, DM_Constant_Acc: 0.9307, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9369, DM_mean_constant_acc_las: 0.9093, loss: 319.3388 ||:  75%|#######4  | 342/459 [02:57<01:01,  1.91it/s]
+DM_UAS: 0.9013, DM_LAS: 0.8882, DM_UEM: 0.2946, DM_LEM: 0.2653, DM_Constant_Acc: 0.9309, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9370, DM_mean_constant_acc_las: 0.9095, loss: 317.3938 ||:  79%|#######9  | 364/459 [03:07<00:48,  1.97it/s]
+DM_UAS: 0.9014, DM_LAS: 0.8883, DM_UEM: 0.2913, DM_LEM: 0.2620, DM_Constant_Acc: 0.9310, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9373, DM_mean_constant_acc_las: 0.9096, loss: 318.3792 ||:  84%|########4 | 386/459 [03:19<00:37,  1.93it/s]
+DM_UAS: 0.9015, DM_LAS: 0.8884, DM_UEM: 0.2894, DM_LEM: 0.2600, DM_Constant_Acc: 0.9310, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9375, DM_mean_constant_acc_las: 0.9097, loss: 319.9347 ||:  88%|########8 | 405/459 [03:30<00:28,  1.88it/s]
+DM_UAS: 0.9015, DM_LAS: 0.8885, DM_UEM: 0.2909, DM_LEM: 0.2614, DM_Constant_Acc: 0.9311, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9376, DM_mean_constant_acc_las: 0.9098, loss: 319.0516 ||:  93%|#########2| 426/459 [03:40<00:17,  1.93it/s]
+DM_UAS: 0.9018, DM_LAS: 0.8887, DM_UEM: 0.2916, DM_LEM: 0.2619, DM_Constant_Acc: 0.9313, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9377, DM_mean_constant_acc_las: 0.9100, loss: 318.8263 ||:  97%|#########7| 447/459 [03:50<00:06,  1.96it/s]
+DM_UAS: 0.9017, DM_LAS: 0.8887, DM_UEM: 0.2898, DM_LEM: 0.2595, DM_Constant_Acc: 0.9313, DM_Constant_Acc_6_best: 0.9950, DM_Label_Acc: 0.9377, DM_mean_constant_acc_las: 0.9100, loss: 319.7528 ||: 100%|##########| 459/459 [03:57<00:00,  1.94it/s]
+
+2020-08-18 17:43:27,646 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9120, DM_LAS: 0.8996, DM_UEM: 0.3849, DM_LEM: 0.3424, DM_Constant_Acc: 0.9412, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9534, DM_mean_constant_acc_las: 0.9204, loss: 303.5414 ||: 100%|##########| 33/33 [00:05<00:00,  5.79it/s]
+
+2020-08-18 17:43:33,355 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:43:33,355 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:43:33,356 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  6048.000  |       N/A
+2020-08-18 17:43:33,357 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.260  |     0.342
+2020-08-18 17:43:33,357 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.938  |     0.953
+2020-08-18 17:43:33,358 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:43:33,358 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.995  |     0.996
+2020-08-18 17:43:33,359 - INFO - allennlp.training.tensorboard_writer - loss                     |   319.753  |   303.541
+2020-08-18 17:43:33,359 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.931  |     0.941
+2020-08-18 17:43:33,360 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:43:33,360 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:43:33,361 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.910  |     0.920
+2020-08-18 17:43:33,361 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.290  |     0.385
+2020-08-18 17:43:33,362 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.889  |     0.900
+2020-08-18 17:43:33,362 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.902  |     0.912
+2020-08-18 17:43:33,363 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3425.564  |       N/A
+2020-08-18 17:43:33,611 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:43:33,719 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:03
+2020-08-18 17:43:33,719 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:25:05
+2020-08-18 17:43:33,719 - INFO - graph_dependency_parser.train.amtrainer - Epoch 5/39
+2020-08-18 17:43:33,719 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.564
+2020-08-18 17:43:33,851 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:43:33,852 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6050
+2020-08-18 17:43:33,852 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:43:33,852 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:43:33,956 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9105, DM_LAS: 0.8989, DM_UEM: 0.2173, DM_LEM: 0.1875, DM_Constant_Acc: 0.9365, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9463, DM_mean_constant_acc_las: 0.9177, loss: 340.9486 ||:   3%|3         | 14/459 [00:10<05:22,  1.38it/s]
+DM_UAS: 0.9115, DM_LAS: 0.9004, DM_UEM: 0.2947, DM_LEM: 0.2659, DM_Constant_Acc: 0.9387, DM_Constant_Acc_6_best: 0.9965, DM_Label_Acc: 0.9463, DM_mean_constant_acc_las: 0.9196, loss: 292.3077 ||:   7%|7         | 34/459 [00:20<04:43,  1.50it/s]
+DM_UAS: 0.9119, DM_LAS: 0.9009, DM_UEM: 0.3167, DM_LEM: 0.2870, DM_Constant_Acc: 0.9383, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9454, DM_mean_constant_acc_las: 0.9196, loss: 286.5204 ||:  12%|#1        | 54/459 [00:31<04:12,  1.61it/s]
+DM_UAS: 0.9132, DM_LAS: 0.9022, DM_UEM: 0.3283, DM_LEM: 0.2953, DM_Constant_Acc: 0.9385, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9450, DM_mean_constant_acc_las: 0.9203, loss: 275.8498 ||:  16%|#6        | 75/459 [00:41<03:42,  1.72it/s]
+DM_UAS: 0.9135, DM_LAS: 0.9024, DM_UEM: 0.3443, DM_LEM: 0.3114, DM_Constant_Acc: 0.9390, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9450, DM_mean_constant_acc_las: 0.9207, loss: 266.9024 ||:  22%|##1       | 99/459 [00:51<03:11,  1.88it/s]
+DM_UAS: 0.9123, DM_LAS: 0.9013, DM_UEM: 0.3426, DM_LEM: 0.3116, DM_Constant_Acc: 0.9379, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9441, DM_mean_constant_acc_las: 0.9196, loss: 267.5108 ||:  27%|##6       | 123/459 [01:03<02:56,  1.91it/s]
+DM_UAS: 0.9127, DM_LAS: 0.9016, DM_UEM: 0.3445, DM_LEM: 0.3125, DM_Constant_Acc: 0.9381, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9438, DM_mean_constant_acc_las: 0.9198, loss: 265.9472 ||:  32%|###2      | 147/459 [01:14<02:35,  2.00it/s]
+DM_UAS: 0.9120, DM_LAS: 0.9008, DM_UEM: 0.3326, DM_LEM: 0.3009, DM_Constant_Acc: 0.9379, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9437, DM_mean_constant_acc_las: 0.9193, loss: 272.8168 ||:  37%|###7      | 170/459 [01:27<02:31,  1.90it/s]
+DM_UAS: 0.9113, DM_LAS: 0.9002, DM_UEM: 0.3200, DM_LEM: 0.2896, DM_Constant_Acc: 0.9375, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9438, DM_mean_constant_acc_las: 0.9188, loss: 281.6984 ||:  41%|####      | 188/459 [01:39<02:33,  1.76it/s]
+DM_UAS: 0.9117, DM_LAS: 0.9006, DM_UEM: 0.3252, DM_LEM: 0.2949, DM_Constant_Acc: 0.9377, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9440, DM_mean_constant_acc_las: 0.9192, loss: 277.9084 ||:  46%|####5     | 211/459 [01:50<02:13,  1.86it/s]
+DM_UAS: 0.9117, DM_LAS: 0.9006, DM_UEM: 0.3300, DM_LEM: 0.2995, DM_Constant_Acc: 0.9378, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9441, DM_mean_constant_acc_las: 0.9192, loss: 276.5544 ||:  51%|#####     | 233/459 [02:01<01:57,  1.92it/s]
+DM_UAS: 0.9114, DM_LAS: 0.9003, DM_UEM: 0.3284, DM_LEM: 0.2981, DM_Constant_Acc: 0.9379, DM_Constant_Acc_6_best: 0.9959, DM_Label_Acc: 0.9440, DM_mean_constant_acc_las: 0.9191, loss: 276.0577 ||:  55%|#####5    | 254/459 [02:11<01:45,  1.95it/s]
+DM_UAS: 0.9116, DM_LAS: 0.9005, DM_UEM: 0.3306, DM_LEM: 0.3007, DM_Constant_Acc: 0.9382, DM_Constant_Acc_6_best: 0.9959, DM_Label_Acc: 0.9442, DM_mean_constant_acc_las: 0.9194, loss: 275.4129 ||:  60%|#####9    | 275/459 [02:21<01:33,  1.98it/s]
+DM_UAS: 0.9116, DM_LAS: 0.9004, DM_UEM: 0.3283, DM_LEM: 0.2982, DM_Constant_Acc: 0.9380, DM_Constant_Acc_6_best: 0.9959, DM_Label_Acc: 0.9443, DM_mean_constant_acc_las: 0.9192, loss: 276.1380 ||:  64%|######4   | 296/459 [02:32<01:22,  1.99it/s]
+DM_UAS: 0.9115, DM_LAS: 0.9003, DM_UEM: 0.3239, DM_LEM: 0.2935, DM_Constant_Acc: 0.9381, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9444, DM_mean_constant_acc_las: 0.9192, loss: 278.0665 ||:  69%|######9   | 317/459 [02:43<01:12,  1.95it/s]
+DM_UAS: 0.9115, DM_LAS: 0.9002, DM_UEM: 0.3265, DM_LEM: 0.2962, DM_Constant_Acc: 0.9382, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9448, DM_mean_constant_acc_las: 0.9192, loss: 278.0052 ||:  74%|#######3  | 339/459 [02:54<01:00,  1.98it/s]
+DM_UAS: 0.9114, DM_LAS: 0.9001, DM_UEM: 0.3207, DM_LEM: 0.2909, DM_Constant_Acc: 0.9380, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9449, DM_mean_constant_acc_las: 0.9190, loss: 280.9823 ||:  78%|#######8  | 360/459 [03:05<00:51,  1.92it/s]
+DM_UAS: 0.9113, DM_LAS: 0.8999, DM_UEM: 0.3206, DM_LEM: 0.2909, DM_Constant_Acc: 0.9379, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9451, DM_mean_constant_acc_las: 0.9189, loss: 281.7582 ||:  83%|########2 | 380/459 [03:16<00:41,  1.91it/s]
+DM_UAS: 0.9114, DM_LAS: 0.9000, DM_UEM: 0.3215, DM_LEM: 0.2914, DM_Constant_Acc: 0.9378, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9452, DM_mean_constant_acc_las: 0.9189, loss: 282.1114 ||:  87%|########7 | 400/459 [03:26<00:30,  1.93it/s]
+DM_UAS: 0.9110, DM_LAS: 0.8996, DM_UEM: 0.3224, DM_LEM: 0.2926, DM_Constant_Acc: 0.9375, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9451, DM_mean_constant_acc_las: 0.9186, loss: 283.7412 ||:  92%|#########1| 420/459 [03:37<00:20,  1.91it/s]
+DM_UAS: 0.9110, DM_LAS: 0.8995, DM_UEM: 0.3245, DM_LEM: 0.2945, DM_Constant_Acc: 0.9376, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9451, DM_mean_constant_acc_las: 0.9185, loss: 283.1215 ||:  96%|#########6| 442/459 [03:47<00:08,  1.98it/s]
+DM_UAS: 0.9107, DM_LAS: 0.8992, DM_UEM: 0.3211, DM_LEM: 0.2909, DM_Constant_Acc: 0.9373, DM_Constant_Acc_6_best: 0.9958, DM_Label_Acc: 0.9450, DM_mean_constant_acc_las: 0.9183, loss: 285.7531 ||: 100%|##########| 459/459 [03:57<00:00,  1.93it/s]
+
+2020-08-18 17:47:31,932 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9147, DM_LAS: 0.9024, DM_UEM: 0.3951, DM_LEM: 0.3538, DM_Constant_Acc: 0.9434, DM_Constant_Acc_6_best: 0.9962, DM_Label_Acc: 0.9570, DM_mean_constant_acc_las: 0.9229, loss: 291.4067 ||: 100%|##########| 33/33 [00:06<00:00,  4.93it/s]
+
+2020-08-18 17:47:38,639 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:47:38,640 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:47:38,640 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  6050.000  |       N/A
+2020-08-18 17:47:38,641 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.291  |     0.354
+2020-08-18 17:47:38,642 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.945  |     0.957
+2020-08-18 17:47:38,642 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:47:38,642 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.996  |     0.996
+2020-08-18 17:47:38,643 - INFO - allennlp.training.tensorboard_writer - loss                     |   285.753  |   291.407
+2020-08-18 17:47:38,644 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.937  |     0.943
+2020-08-18 17:47:38,644 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:47:38,644 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:47:38,645 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.918  |     0.923
+2020-08-18 17:47:38,645 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.321  |     0.395
+2020-08-18 17:47:38,646 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.899  |     0.902
+2020-08-18 17:47:38,647 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.911  |     0.915
+2020-08-18 17:47:38,647 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3425.564  |       N/A
+2020-08-18 17:47:38,876 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:47:38,972 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:05
+2020-08-18 17:47:38,972 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:20:37
+2020-08-18 17:47:38,972 - INFO - graph_dependency_parser.train.amtrainer - Epoch 6/39
+2020-08-18 17:47:38,972 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.568
+2020-08-18 17:47:39,097 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:47:39,097 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6050
+2020-08-18 17:47:39,098 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:47:39,098 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:47:39,169 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9259, DM_LAS: 0.9156, DM_UEM: 0.4130, DM_LEM: 0.3799, DM_Constant_Acc: 0.9433, DM_Constant_Acc_6_best: 0.9966, DM_Label_Acc: 0.9542, DM_mean_constant_acc_las: 0.9294, loss: 232.4320 ||:   4%|3         | 17/459 [00:10<04:34,  1.61it/s]
+DM_UAS: 0.9198, DM_LAS: 0.9097, DM_UEM: 0.3637, DM_LEM: 0.3393, DM_Constant_Acc: 0.9420, DM_Constant_Acc_6_best: 0.9962, DM_Label_Acc: 0.9505, DM_mean_constant_acc_las: 0.9258, loss: 256.6085 ||:   8%|7         | 35/459 [00:20<04:17,  1.64it/s]
+DM_UAS: 0.9178, DM_LAS: 0.9075, DM_UEM: 0.3565, DM_LEM: 0.3306, DM_Constant_Acc: 0.9423, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9509, DM_mean_constant_acc_las: 0.9249, loss: 266.8648 ||:  12%|#1        | 54/459 [00:31<03:56,  1.71it/s]
+DM_UAS: 0.9177, DM_LAS: 0.9073, DM_UEM: 0.3447, DM_LEM: 0.3174, DM_Constant_Acc: 0.9418, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9503, DM_mean_constant_acc_las: 0.9245, loss: 270.6671 ||:  16%|#5        | 73/459 [00:41<03:40,  1.75it/s]
+DM_UAS: 0.9165, DM_LAS: 0.9058, DM_UEM: 0.3369, DM_LEM: 0.3087, DM_Constant_Acc: 0.9411, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9500, DM_mean_constant_acc_las: 0.9234, loss: 271.6270 ||:  20%|##        | 94/459 [00:51<03:19,  1.83it/s]
+DM_UAS: 0.9166, DM_LAS: 0.9056, DM_UEM: 0.3364, DM_LEM: 0.3091, DM_Constant_Acc: 0.9408, DM_Constant_Acc_6_best: 0.9960, DM_Label_Acc: 0.9502, DM_mean_constant_acc_las: 0.9232, loss: 269.3829 ||:  25%|##5       | 115/459 [01:01<03:00,  1.91it/s]
+DM_UAS: 0.9167, DM_LAS: 0.9058, DM_UEM: 0.3320, DM_LEM: 0.3025, DM_Constant_Acc: 0.9406, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9503, DM_mean_constant_acc_las: 0.9232, loss: 272.1182 ||:  30%|##9       | 136/459 [01:14<02:56,  1.83it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9064, DM_UEM: 0.3344, DM_LEM: 0.3037, DM_Constant_Acc: 0.9408, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9504, DM_mean_constant_acc_las: 0.9236, loss: 269.5715 ||:  34%|###3      | 156/459 [01:24<02:41,  1.87it/s]
+DM_UAS: 0.9168, DM_LAS: 0.9061, DM_UEM: 0.3333, DM_LEM: 0.3018, DM_Constant_Acc: 0.9410, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9503, DM_mean_constant_acc_las: 0.9235, loss: 268.9146 ||:  38%|###8      | 176/459 [01:34<02:28,  1.90it/s]
+DM_UAS: 0.9170, DM_LAS: 0.9062, DM_UEM: 0.3315, DM_LEM: 0.2999, DM_Constant_Acc: 0.9410, DM_Constant_Acc_6_best: 0.9962, DM_Label_Acc: 0.9503, DM_mean_constant_acc_las: 0.9236, loss: 267.3138 ||:  43%|####2     | 196/459 [01:45<02:20,  1.87it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9066, DM_UEM: 0.3315, DM_LEM: 0.3002, DM_Constant_Acc: 0.9412, DM_Constant_Acc_6_best: 0.9962, DM_Label_Acc: 0.9506, DM_mean_constant_acc_las: 0.9239, loss: 268.0712 ||:  47%|####7     | 216/459 [01:56<02:10,  1.87it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9066, DM_UEM: 0.3279, DM_LEM: 0.2970, DM_Constant_Acc: 0.9412, DM_Constant_Acc_6_best: 0.9963, DM_Label_Acc: 0.9506, DM_mean_constant_acc_las: 0.9239, loss: 269.2916 ||:  51%|#####1    | 235/459 [02:06<02:00,  1.85it/s]
+DM_UAS: 0.9173, DM_LAS: 0.9068, DM_UEM: 0.3331, DM_LEM: 0.3017, DM_Constant_Acc: 0.9415, DM_Constant_Acc_6_best: 0.9963, DM_Label_Acc: 0.9504, DM_mean_constant_acc_las: 0.9241, loss: 266.7171 ||:  56%|#####5    | 257/459 [02:16<01:45,  1.92it/s]
+DM_UAS: 0.9176, DM_LAS: 0.9071, DM_UEM: 0.3340, DM_LEM: 0.3023, DM_Constant_Acc: 0.9418, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9507, DM_mean_constant_acc_las: 0.9245, loss: 265.0410 ||:  61%|######    | 279/459 [02:27<01:31,  1.96it/s]
+DM_UAS: 0.9177, DM_LAS: 0.9072, DM_UEM: 0.3413, DM_LEM: 0.3097, DM_Constant_Acc: 0.9419, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9506, DM_mean_constant_acc_las: 0.9245, loss: 260.5760 ||:  66%|######6   | 304/459 [02:38<01:14,  2.08it/s]
+DM_UAS: 0.9177, DM_LAS: 0.9073, DM_UEM: 0.3439, DM_LEM: 0.3122, DM_Constant_Acc: 0.9419, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9508, DM_mean_constant_acc_las: 0.9246, loss: 258.7446 ||:  72%|#######1  | 329/459 [02:49<01:01,  2.10it/s]
+DM_UAS: 0.9174, DM_LAS: 0.9069, DM_UEM: 0.3445, DM_LEM: 0.3130, DM_Constant_Acc: 0.9418, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9507, DM_mean_constant_acc_las: 0.9243, loss: 260.0422 ||:  76%|#######6  | 351/459 [03:00<00:52,  2.06it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9067, DM_UEM: 0.3415, DM_LEM: 0.3106, DM_Constant_Acc: 0.9416, DM_Constant_Acc_6_best: 0.9963, DM_Label_Acc: 0.9506, DM_mean_constant_acc_las: 0.9242, loss: 261.3809 ||:  81%|########  | 371/459 [03:11<00:43,  2.01it/s]
+DM_UAS: 0.9171, DM_LAS: 0.9065, DM_UEM: 0.3381, DM_LEM: 0.3074, DM_Constant_Acc: 0.9416, DM_Constant_Acc_6_best: 0.9963, DM_Label_Acc: 0.9504, DM_mean_constant_acc_las: 0.9240, loss: 263.1067 ||:  85%|########4 | 390/459 [03:22<00:35,  1.93it/s]
+DM_UAS: 0.9170, DM_LAS: 0.9064, DM_UEM: 0.3429, DM_LEM: 0.3121, DM_Constant_Acc: 0.9416, DM_Constant_Acc_6_best: 0.9963, DM_Label_Acc: 0.9505, DM_mean_constant_acc_las: 0.9240, loss: 261.1720 ||:  90%|########9 | 412/459 [03:32<00:23,  1.96it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9066, DM_UEM: 0.3458, DM_LEM: 0.3146, DM_Constant_Acc: 0.9417, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9504, DM_mean_constant_acc_las: 0.9241, loss: 259.0282 ||:  95%|#########4| 435/459 [03:43<00:11,  2.04it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9066, DM_UEM: 0.3433, DM_LEM: 0.3118, DM_Constant_Acc: 0.9417, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9504, DM_mean_constant_acc_las: 0.9241, loss: 259.3847 ||: 100%|#########9| 458/459 [03:55<00:00,  2.00it/s]
+DM_UAS: 0.9173, DM_LAS: 0.9066, DM_UEM: 0.3430, DM_LEM: 0.3115, DM_Constant_Acc: 0.9417, DM_Constant_Acc_6_best: 0.9964, DM_Label_Acc: 0.9505, DM_mean_constant_acc_las: 0.9242, loss: 259.5284 ||: 100%|##########| 459/459 [03:55<00:00,  1.95it/s]
+
+2020-08-18 17:51:35,060 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9172, DM_LAS: 0.9049, DM_UEM: 0.4077, DM_LEM: 0.3722, DM_Constant_Acc: 0.9450, DM_Constant_Acc_6_best: 0.9966, DM_Label_Acc: 0.9603, DM_mean_constant_acc_las: 0.9250, loss: 283.7282 ||: 100%|##########| 33/33 [00:05<00:00,  5.76it/s]
+
+2020-08-18 17:51:40,793 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:51:40,793 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:51:40,794 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  6050.000  |       N/A
+2020-08-18 17:51:40,794 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.311  |     0.372
+2020-08-18 17:51:40,795 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.950  |     0.960
+2020-08-18 17:51:40,795 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:51:40,795 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.996  |     0.997
+2020-08-18 17:51:40,796 - INFO - allennlp.training.tensorboard_writer - loss                     |   259.528  |   283.728
+2020-08-18 17:51:40,796 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.942  |     0.945
+2020-08-18 17:51:40,796 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:51:40,796 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:51:40,797 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.924  |     0.925
+2020-08-18 17:51:40,797 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.343  |     0.408
+2020-08-18 17:51:40,797 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.907  |     0.905
+2020-08-18 17:51:40,798 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.917  |     0.917
+2020-08-18 17:51:40,798 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3425.568  |       N/A
+2020-08-18 17:51:40,962 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:51:41,055 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:02
+2020-08-18 17:51:41,055 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:16:00
+2020-08-18 17:51:41,055 - INFO - graph_dependency_parser.train.amtrainer - Epoch 7/39
+2020-08-18 17:51:41,055 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.568
+2020-08-18 17:51:41,194 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:51:41,194 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6050
+2020-08-18 17:51:41,194 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:51:41,194 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:51:41,297 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9209, DM_LAS: 0.9121, DM_UEM: 0.2991, DM_LEM: 0.2693, DM_Constant_Acc: 0.9431, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9547, DM_mean_constant_acc_las: 0.9276, loss: 264.1592 ||:   3%|3         | 14/459 [00:10<05:33,  1.34it/s]
+DM_UAS: 0.9200, DM_LAS: 0.9106, DM_UEM: 0.3255, DM_LEM: 0.2988, DM_Constant_Acc: 0.9439, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9523, DM_mean_constant_acc_las: 0.9272, loss: 247.9033 ||:   7%|6         | 32/459 [00:20<04:56,  1.44it/s]
+DM_UAS: 0.9225, DM_LAS: 0.9132, DM_UEM: 0.3456, DM_LEM: 0.3145, DM_Constant_Acc: 0.9450, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9522, DM_mean_constant_acc_las: 0.9291, loss: 238.7562 ||:  11%|#1        | 51/459 [00:30<04:23,  1.55it/s]
+DM_UAS: 0.9216, DM_LAS: 0.9122, DM_UEM: 0.3628, DM_LEM: 0.3328, DM_Constant_Acc: 0.9447, DM_Constant_Acc_6_best: 0.9970, DM_Label_Acc: 0.9530, DM_mean_constant_acc_las: 0.9285, loss: 237.0408 ||:  16%|#5        | 72/459 [00:40<03:50,  1.68it/s]
+DM_UAS: 0.9216, DM_LAS: 0.9122, DM_UEM: 0.3595, DM_LEM: 0.3297, DM_Constant_Acc: 0.9442, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9534, DM_mean_constant_acc_las: 0.9282, loss: 239.0834 ||:  20%|##        | 93/459 [00:53<03:38,  1.67it/s]
+DM_UAS: 0.9226, DM_LAS: 0.9131, DM_UEM: 0.3654, DM_LEM: 0.3361, DM_Constant_Acc: 0.9446, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9536, DM_mean_constant_acc_las: 0.9289, loss: 237.2969 ||:  25%|##4       | 113/459 [01:03<03:17,  1.75it/s]
+DM_UAS: 0.9221, DM_LAS: 0.9124, DM_UEM: 0.3698, DM_LEM: 0.3394, DM_Constant_Acc: 0.9449, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9536, DM_mean_constant_acc_las: 0.9286, loss: 236.8418 ||:  29%|##8       | 133/459 [01:13<03:00,  1.81it/s]
+DM_UAS: 0.9217, DM_LAS: 0.9123, DM_UEM: 0.3680, DM_LEM: 0.3371, DM_Constant_Acc: 0.9448, DM_Constant_Acc_6_best: 0.9970, DM_Label_Acc: 0.9537, DM_mean_constant_acc_las: 0.9285, loss: 236.1209 ||:  33%|###3      | 153/459 [01:24<02:49,  1.81it/s]
+DM_UAS: 0.9215, DM_LAS: 0.9121, DM_UEM: 0.3634, DM_LEM: 0.3323, DM_Constant_Acc: 0.9447, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9539, DM_mean_constant_acc_las: 0.9284, loss: 240.2143 ||:  37%|###7      | 172/459 [01:36<02:45,  1.74it/s]
+DM_UAS: 0.9224, DM_LAS: 0.9129, DM_UEM: 0.3700, DM_LEM: 0.3383, DM_Constant_Acc: 0.9449, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9539, DM_mean_constant_acc_las: 0.9289, loss: 235.8737 ||:  43%|####2     | 196/459 [01:47<02:20,  1.88it/s]
+DM_UAS: 0.9225, DM_LAS: 0.9130, DM_UEM: 0.3745, DM_LEM: 0.3428, DM_Constant_Acc: 0.9449, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9539, DM_mean_constant_acc_las: 0.9290, loss: 236.0218 ||:  48%|####7     | 220/459 [01:58<02:03,  1.94it/s]
+DM_UAS: 0.9225, DM_LAS: 0.9130, DM_UEM: 0.3732, DM_LEM: 0.3428, DM_Constant_Acc: 0.9450, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9539, DM_mean_constant_acc_las: 0.9290, loss: 236.5391 ||:  53%|#####2    | 241/459 [02:09<01:50,  1.96it/s]
+DM_UAS: 0.9225, DM_LAS: 0.9130, DM_UEM: 0.3690, DM_LEM: 0.3382, DM_Constant_Acc: 0.9451, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9539, DM_mean_constant_acc_las: 0.9291, loss: 237.4785 ||:  57%|#####7    | 262/459 [02:20<01:42,  1.92it/s]
+DM_UAS: 0.9230, DM_LAS: 0.9134, DM_UEM: 0.3725, DM_LEM: 0.3415, DM_Constant_Acc: 0.9454, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9543, DM_mean_constant_acc_las: 0.9294, loss: 234.8973 ||:  62%|######1   | 283/459 [02:30<01:30,  1.95it/s]
+DM_UAS: 0.9231, DM_LAS: 0.9135, DM_UEM: 0.3709, DM_LEM: 0.3399, DM_Constant_Acc: 0.9456, DM_Constant_Acc_6_best: 0.9969, DM_Label_Acc: 0.9544, DM_mean_constant_acc_las: 0.9296, loss: 233.8493 ||:  66%|######6   | 304/459 [02:41<01:19,  1.95it/s]
+DM_UAS: 0.9228, DM_LAS: 0.9131, DM_UEM: 0.3659, DM_LEM: 0.3345, DM_Constant_Acc: 0.9455, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9544, DM_mean_constant_acc_las: 0.9293, loss: 238.2716 ||:  71%|#######   | 324/459 [02:56<01:17,  1.73it/s]
+DM_UAS: 0.9225, DM_LAS: 0.9127, DM_UEM: 0.3620, DM_LEM: 0.3307, DM_Constant_Acc: 0.9452, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9543, DM_mean_constant_acc_las: 0.9290, loss: 241.2699 ||:  74%|#######4  | 340/459 [03:06<01:11,  1.66it/s]
+DM_UAS: 0.9224, DM_LAS: 0.9126, DM_UEM: 0.3594, DM_LEM: 0.3281, DM_Constant_Acc: 0.9451, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9542, DM_mean_constant_acc_las: 0.9289, loss: 242.6600 ||:  78%|#######7  | 357/459 [03:17<01:01,  1.66it/s]
+DM_UAS: 0.9224, DM_LAS: 0.9127, DM_UEM: 0.3578, DM_LEM: 0.3267, DM_Constant_Acc: 0.9452, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9542, DM_mean_constant_acc_las: 0.9289, loss: 242.9212 ||:  81%|########1 | 374/459 [03:27<00:51,  1.64it/s]
+DM_UAS: 0.9224, DM_LAS: 0.9126, DM_UEM: 0.3580, DM_LEM: 0.3268, DM_Constant_Acc: 0.9452, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9542, DM_mean_constant_acc_las: 0.9289, loss: 243.4508 ||:  85%|########5 | 392/459 [03:38<00:40,  1.66it/s]
+DM_UAS: 0.9227, DM_LAS: 0.9129, DM_UEM: 0.3628, DM_LEM: 0.3314, DM_Constant_Acc: 0.9452, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9542, DM_mean_constant_acc_las: 0.9291, loss: 241.1016 ||:  90%|######### | 414/459 [03:48<00:25,  1.78it/s]
+DM_UAS: 0.9228, DM_LAS: 0.9130, DM_UEM: 0.3662, DM_LEM: 0.3346, DM_Constant_Acc: 0.9452, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9543, DM_mean_constant_acc_las: 0.9291, loss: 239.8042 ||:  95%|#########4| 436/459 [03:59<00:12,  1.83it/s]
+DM_UAS: 0.9230, DM_LAS: 0.9133, DM_UEM: 0.3660, DM_LEM: 0.3347, DM_Constant_Acc: 0.9453, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9544, DM_mean_constant_acc_las: 0.9293, loss: 239.2827 ||: 100%|#########9| 457/459 [04:10<00:01,  1.88it/s]
+DM_UAS: 0.9230, DM_LAS: 0.9133, DM_UEM: 0.3664, DM_LEM: 0.3352, DM_Constant_Acc: 0.9453, DM_Constant_Acc_6_best: 0.9968, DM_Label_Acc: 0.9544, DM_mean_constant_acc_las: 0.9293, loss: 238.9597 ||: 100%|##########| 459/459 [04:11<00:00,  1.83it/s]
+
+2020-08-18 17:55:52,358 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9176, DM_LAS: 0.9060, DM_UEM: 0.4185, DM_LEM: 0.3748, DM_Constant_Acc: 0.9476, DM_Constant_Acc_6_best: 0.9967, DM_Label_Acc: 0.9634, DM_mean_constant_acc_las: 0.9268, loss: 280.6927 ||: 100%|##########| 33/33 [00:05<00:00,  6.15it/s]
+
+2020-08-18 17:55:57,737 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:55:57,737 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:55:57,737 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  6050.000  |       N/A
+2020-08-18 17:55:57,738 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.335  |     0.375
+2020-08-18 17:55:57,738 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.954  |     0.963
+2020-08-18 17:55:57,738 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:55:57,739 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.997  |     0.997
+2020-08-18 17:55:57,739 - INFO - allennlp.training.tensorboard_writer - loss                     |   238.960  |   280.693
+2020-08-18 17:55:57,739 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.945  |     0.948
+2020-08-18 17:55:57,740 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:55:57,740 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:55:57,740 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.929  |     0.927
+2020-08-18 17:55:57,741 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.366  |     0.419
+2020-08-18 17:55:57,741 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.913  |     0.906
+2020-08-18 17:55:57,741 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.923  |     0.918
+2020-08-18 17:55:57,742 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3425.568  |       N/A
+2020-08-18 17:55:57,905 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 17:55:57,996 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:16
+2020-08-18 17:55:57,996 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:12:31
+2020-08-18 17:55:57,996 - INFO - graph_dependency_parser.train.amtrainer - Epoch 8/39
+2020-08-18 17:55:57,996 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.588
+2020-08-18 17:55:58,127 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 17:55:58,128 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6050
+2020-08-18 17:55:58,128 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 17:55:58,128 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 17:55:58,219 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9276, DM_LAS: 0.9189, DM_UEM: 0.3596, DM_LEM: 0.3213, DM_Constant_Acc: 0.9479, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9580, DM_mean_constant_acc_las: 0.9334, loss: 235.1875 ||:   4%|4         | 19/459 [00:10<04:11,  1.75it/s]
+DM_UAS: 0.9305, DM_LAS: 0.9217, DM_UEM: 0.3928, DM_LEM: 0.3577, DM_Constant_Acc: 0.9505, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9573, DM_mean_constant_acc_las: 0.9361, loss: 218.7371 ||:   9%|8         | 41/459 [00:21<03:46,  1.85it/s]
+DM_UAS: 0.9307, DM_LAS: 0.9223, DM_UEM: 0.4134, DM_LEM: 0.3816, DM_Constant_Acc: 0.9497, DM_Constant_Acc_6_best: 0.9973, DM_Label_Acc: 0.9571, DM_mean_constant_acc_las: 0.9360, loss: 206.1491 ||:  14%|#3        | 63/459 [00:31<03:24,  1.93it/s]
+DM_UAS: 0.9293, DM_LAS: 0.9208, DM_UEM: 0.4037, DM_LEM: 0.3703, DM_Constant_Acc: 0.9488, DM_Constant_Acc_6_best: 0.9974, DM_Label_Acc: 0.9571, DM_mean_constant_acc_las: 0.9348, loss: 206.8568 ||:  19%|#8        | 85/459 [00:41<03:08,  1.98it/s]
+DM_UAS: 0.9286, DM_LAS: 0.9202, DM_UEM: 0.3986, DM_LEM: 0.3664, DM_Constant_Acc: 0.9481, DM_Constant_Acc_6_best: 0.9974, DM_Label_Acc: 0.9571, DM_mean_constant_acc_las: 0.9341, loss: 207.9829 ||:  23%|##3       | 107/459 [00:52<02:54,  2.02it/s]
+DM_UAS: 0.9299, DM_LAS: 0.9214, DM_UEM: 0.4092, DM_LEM: 0.3779, DM_Constant_Acc: 0.9485, DM_Constant_Acc_6_best: 0.9973, DM_Label_Acc: 0.9574, DM_mean_constant_acc_las: 0.9349, loss: 203.5566 ||:  28%|##8       | 129/459 [01:02<02:40,  2.05it/s]
+DM_UAS: 0.9287, DM_LAS: 0.9202, DM_UEM: 0.3994, DM_LEM: 0.3693, DM_Constant_Acc: 0.9485, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9574, DM_mean_constant_acc_las: 0.9343, loss: 212.3784 ||:  33%|###2      | 151/459 [01:16<02:45,  1.86it/s]
+DM_UAS: 0.9291, DM_LAS: 0.9206, DM_UEM: 0.4043, DM_LEM: 0.3744, DM_Constant_Acc: 0.9489, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9575, DM_mean_constant_acc_las: 0.9348, loss: 209.2353 ||:  38%|###7      | 173/459 [01:27<02:28,  1.93it/s]
+DM_UAS: 0.9286, DM_LAS: 0.9203, DM_UEM: 0.3935, DM_LEM: 0.3645, DM_Constant_Acc: 0.9488, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9576, DM_mean_constant_acc_las: 0.9345, loss: 213.8856 ||:  42%|####2     | 195/459 [01:40<02:22,  1.86it/s]
+DM_UAS: 0.9285, DM_LAS: 0.9200, DM_UEM: 0.3950, DM_LEM: 0.3659, DM_Constant_Acc: 0.9492, DM_Constant_Acc_6_best: 0.9973, DM_Label_Acc: 0.9580, DM_mean_constant_acc_las: 0.9346, loss: 213.3634 ||:  47%|####7     | 217/459 [01:50<02:04,  1.94it/s]
+DM_UAS: 0.9286, DM_LAS: 0.9202, DM_UEM: 0.3981, DM_LEM: 0.3689, DM_Constant_Acc: 0.9492, DM_Constant_Acc_6_best: 0.9973, DM_Label_Acc: 0.9581, DM_mean_constant_acc_las: 0.9347, loss: 210.8987 ||:  53%|#####2    | 241/459 [02:00<01:46,  2.05it/s]
+DM_UAS: 0.9284, DM_LAS: 0.9200, DM_UEM: 0.4008, DM_LEM: 0.3718, DM_Constant_Acc: 0.9492, DM_Constant_Acc_6_best: 0.9973, DM_Label_Acc: 0.9579, DM_mean_constant_acc_las: 0.9346, loss: 209.1886 ||:  58%|#####7    | 266/459 [02:10<01:29,  2.16it/s]
+DM_UAS: 0.9276, DM_LAS: 0.9191, DM_UEM: 0.3891, DM_LEM: 0.3605, DM_Constant_Acc: 0.9486, DM_Constant_Acc_6_best: 0.9972, DM_Label_Acc: 0.9576, DM_mean_constant_acc_las: 0.9339, loss: 216.8548 ||:  63%|######3   | 291/459 [02:26<01:26,  1.95it/s]
+DM_UAS: 0.9275, DM_LAS: 0.9190, DM_UEM: 0.3875, DM_LEM: 0.3590, DM_Constant_Acc: 0.9485, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9575, DM_mean_constant_acc_las: 0.9338, loss: 218.5324 ||:  68%|######7   | 310/459 [02:36<01:17,  1.93it/s]
+DM_UAS: 0.9273, DM_LAS: 0.9186, DM_UEM: 0.3843, DM_LEM: 0.3554, DM_Constant_Acc: 0.9484, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9576, DM_mean_constant_acc_las: 0.9335, loss: 221.2823 ||:  72%|#######1  | 329/459 [02:47<01:09,  1.86it/s]
+DM_UAS: 0.9272, DM_LAS: 0.9185, DM_UEM: 0.3809, DM_LEM: 0.3519, DM_Constant_Acc: 0.9483, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9578, DM_mean_constant_acc_las: 0.9334, loss: 223.2075 ||:  76%|#######5  | 348/459 [02:57<00:59,  1.86it/s]
+DM_UAS: 0.9272, DM_LAS: 0.9184, DM_UEM: 0.3836, DM_LEM: 0.3543, DM_Constant_Acc: 0.9483, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9577, DM_mean_constant_acc_las: 0.9334, loss: 222.3393 ||:  80%|#######9  | 367/459 [03:08<00:50,  1.83it/s]
+DM_UAS: 0.9275, DM_LAS: 0.9187, DM_UEM: 0.3835, DM_LEM: 0.3538, DM_Constant_Acc: 0.9484, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9579, DM_mean_constant_acc_las: 0.9335, loss: 221.5159 ||:  84%|########3 | 385/459 [03:19<00:41,  1.80it/s]
+DM_UAS: 0.9275, DM_LAS: 0.9187, DM_UEM: 0.3841, DM_LEM: 0.3545, DM_Constant_Acc: 0.9484, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9579, DM_mean_constant_acc_las: 0.9336, loss: 220.8439 ||:  88%|########8 | 406/459 [03:29<00:28,  1.86it/s]
+DM_UAS: 0.9274, DM_LAS: 0.9186, DM_UEM: 0.3845, DM_LEM: 0.3552, DM_Constant_Acc: 0.9483, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9579, DM_mean_constant_acc_las: 0.9334, loss: 221.1753 ||:  93%|#########3| 427/459 [03:40<00:16,  1.88it/s]
+DM_UAS: 0.9275, DM_LAS: 0.9187, DM_UEM: 0.3850, DM_LEM: 0.3556, DM_Constant_Acc: 0.9484, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9579, DM_mean_constant_acc_las: 0.9336, loss: 220.6202 ||:  98%|#########7| 449/459 [03:50<00:05,  1.95it/s]
+DM_UAS: 0.9275, DM_LAS: 0.9187, DM_UEM: 0.3840, DM_LEM: 0.3545, DM_Constant_Acc: 0.9485, DM_Constant_Acc_6_best: 0.9971, DM_Label_Acc: 0.9578, DM_mean_constant_acc_las: 0.9336, loss: 221.0346 ||: 100%|##########| 459/459 [03:56<00:00,  1.94it/s]
+
+2020-08-18 17:59:54,415 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9201, DM_LAS: 0.9089, DM_UEM: 0.4204, DM_LEM: 0.3798, DM_Constant_Acc: 0.9486, DM_Constant_Acc_6_best: 0.9967, DM_Label_Acc: 0.9641, DM_mean_constant_acc_las: 0.9288, loss: 278.9853 ||: 100%|##########| 33/33 [00:05<00:00,  6.14it/s]
+
+2020-08-18 17:59:59,794 - WARNING - graph_dependency_parser.train.amtrainer - Validation metric DM_F not found (yet)
+2020-08-18 17:59:59,794 - INFO - allennlp.training.tensorboard_writer -                              Training |  Validation
+2020-08-18 17:59:59,794 - INFO - allennlp.training.tensorboard_writer - gpu_1_memory_MB          |  6050.000  |       N/A
+2020-08-18 17:59:59,795 - INFO - allennlp.training.tensorboard_writer - DM_LEM                   |     0.354  |     0.380
+2020-08-18 17:59:59,795 - INFO - allennlp.training.tensorboard_writer - DM_Label_Acc             |     0.958  |     0.964
+2020-08-18 17:59:59,795 - INFO - allennlp.training.tensorboard_writer - gpu_3_memory_MB          |    13.000  |       N/A
+2020-08-18 17:59:59,796 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc_6_best   |     0.997  |     0.997
+2020-08-18 17:59:59,796 - INFO - allennlp.training.tensorboard_writer - loss                     |   221.035  |   278.985
+2020-08-18 17:59:59,796 - INFO - allennlp.training.tensorboard_writer - DM_Constant_Acc          |     0.948  |     0.949
+2020-08-18 17:59:59,797 - INFO - allennlp.training.tensorboard_writer - gpu_2_memory_MB          |    13.000  |       N/A
+2020-08-18 17:59:59,797 - INFO - allennlp.training.tensorboard_writer - gpu_0_memory_MB          |  2143.000  |       N/A
+2020-08-18 17:59:59,797 - INFO - allennlp.training.tensorboard_writer - DM_mean_constant_acc_las |     0.934  |     0.929
+2020-08-18 17:59:59,798 - INFO - allennlp.training.tensorboard_writer - DM_UEM                   |     0.384  |     0.420
+2020-08-18 17:59:59,798 - INFO - allennlp.training.tensorboard_writer - DM_LAS                   |     0.919  |     0.909
+2020-08-18 17:59:59,799 - INFO - allennlp.training.tensorboard_writer - DM_UAS                   |     0.927  |     0.920
+2020-08-18 17:59:59,799 - INFO - allennlp.training.tensorboard_writer - cpu_memory_MB            |  3425.588  |       N/A
+2020-08-18 17:59:59,998 - INFO - allennlp.training.checkpointer - Best validation performance so far. Copying weights to './model//best.th'.
+2020-08-18 18:00:00,116 - INFO - graph_dependency_parser.train.amtrainer - Epoch duration: 00:04:02
+2020-08-18 18:00:00,116 - INFO - graph_dependency_parser.train.amtrainer - Estimated training time remaining: 2:08:01
+2020-08-18 18:00:00,116 - INFO - graph_dependency_parser.train.amtrainer - Epoch 9/39
+2020-08-18 18:00:00,116 - INFO - graph_dependency_parser.train.amtrainer - Peak CPU memory usage MB: 3425.588
+2020-08-18 18:00:00,263 - INFO - graph_dependency_parser.train.amtrainer - GPU 0 memory usage MB: 2143
+2020-08-18 18:00:00,264 - INFO - graph_dependency_parser.train.amtrainer - GPU 1 memory usage MB: 6050
+2020-08-18 18:00:00,264 - INFO - graph_dependency_parser.train.amtrainer - GPU 2 memory usage MB: 13
+2020-08-18 18:00:00,264 - INFO - graph_dependency_parser.train.amtrainer - GPU 3 memory usage MB: 13
+2020-08-18 18:00:00,340 - INFO - graph_dependency_parser.train.amtrainer - Training
+  0%|          | 0/459 [00:00<?, ?it/s]
+DM_UAS: 0.9351, DM_LAS: 0.9275, DM_UEM: 0.4444, DM_LEM: 0.4132, DM_Constant_Acc: 0.9518, DM_Constant_Acc_6_best: 0.9975, DM_Label_Acc: 0.9600, DM_mean_constant_acc_las: 0.9397, loss: 201.6058 ||:   4%|3         | 18/459 [00:10<04:08,  1.77it/s]
+DM_UAS: 0.9366, DM_LAS: 0.9296, DM_UEM: 0.4411, DM_LEM: 0.4101, DM_Constant_Acc: 0.9544, DM_Constant_Acc_6_best: 0.9978, DM_Label_Acc: 0.9614, DM_mean_constant_acc_las: 0.9420, loss: 184.3800 ||:   9%|8         | 41/459 [00:20<03:43,  1.87it/s]
+DM_UAS: 0.9342, DM_LAS: 0.9270, DM_UEM: 0.4276, DM_LEM: 0.3978, DM_Constant_Acc: 0.9536, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9605, DM_mean_constant_acc_las: 0.9403, loss: 187.4179 ||:  14%|#3        | 63/459 [00:31<03:24,  1.94it/s]
+DM_UAS: 0.9344, DM_LAS: 0.9270, DM_UEM: 0.4294, DM_LEM: 0.4000, DM_Constant_Acc: 0.9532, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9604, DM_mean_constant_acc_las: 0.9401, loss: 186.1320 ||:  19%|#8        | 85/459 [00:42<03:12,  1.95it/s]
+DM_UAS: 0.9332, DM_LAS: 0.9257, DM_UEM: 0.4238, DM_LEM: 0.3937, DM_Constant_Acc: 0.9524, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9601, DM_mean_constant_acc_las: 0.9390, loss: 194.1907 ||:  23%|##2       | 105/459 [00:54<03:12,  1.84it/s]
+DM_UAS: 0.9321, DM_LAS: 0.9244, DM_UEM: 0.4139, DM_LEM: 0.3838, DM_Constant_Acc: 0.9519, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9601, DM_mean_constant_acc_las: 0.9381, loss: 200.0087 ||:  27%|##7       | 126/459 [01:05<02:57,  1.88it/s]
+DM_UAS: 0.9326, DM_LAS: 0.9249, DM_UEM: 0.4175, DM_LEM: 0.3872, DM_Constant_Acc: 0.9521, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9605, DM_mean_constant_acc_las: 0.9385, loss: 197.9249 ||:  32%|###2      | 147/459 [01:15<02:41,  1.94it/s]
+DM_UAS: 0.9326, DM_LAS: 0.9249, DM_UEM: 0.4173, DM_LEM: 0.3864, DM_Constant_Acc: 0.9523, DM_Constant_Acc_6_best: 0.9978, DM_Label_Acc: 0.9605, DM_mean_constant_acc_las: 0.9386, loss: 197.6905 ||:  37%|###6      | 168/459 [01:25<02:27,  1.97it/s]
+DM_UAS: 0.9330, DM_LAS: 0.9253, DM_UEM: 0.4240, DM_LEM: 0.3923, DM_Constant_Acc: 0.9526, DM_Constant_Acc_6_best: 0.9978, DM_Label_Acc: 0.9607, DM_mean_constant_acc_las: 0.9389, loss: 194.4169 ||:  42%|####1     | 191/459 [01:35<02:10,  2.05it/s]
+DM_UAS: 0.9330, DM_LAS: 0.9253, DM_UEM: 0.4228, DM_LEM: 0.3918, DM_Constant_Acc: 0.9525, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9609, DM_mean_constant_acc_las: 0.9389, loss: 194.8632 ||:  47%|####6     | 214/459 [01:46<01:58,  2.06it/s]
+DM_UAS: 0.9331, DM_LAS: 0.9253, DM_UEM: 0.4204, DM_LEM: 0.3888, DM_Constant_Acc: 0.9524, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9388, loss: 195.3476 ||:  51%|#####1    | 235/459 [01:57<01:50,  2.03it/s]
+DM_UAS: 0.9332, DM_LAS: 0.9252, DM_UEM: 0.4190, DM_LEM: 0.3874, DM_Constant_Acc: 0.9523, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9388, loss: 196.5980 ||:  56%|#####5    | 255/459 [02:07<01:41,  2.00it/s]
+DM_UAS: 0.9327, DM_LAS: 0.9246, DM_UEM: 0.4160, DM_LEM: 0.3848, DM_Constant_Acc: 0.9520, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9383, loss: 200.2723 ||:  60%|#####9    | 275/459 [02:20<01:38,  1.86it/s]
+DM_UAS: 0.9330, DM_LAS: 0.9248, DM_UEM: 0.4186, DM_LEM: 0.3870, DM_Constant_Acc: 0.9521, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9385, loss: 198.8508 ||:  65%|######4   | 297/459 [02:30<01:24,  1.92it/s]
+DM_UAS: 0.9331, DM_LAS: 0.9249, DM_UEM: 0.4160, DM_LEM: 0.3840, DM_Constant_Acc: 0.9523, DM_Constant_Acc_6_best: 0.9977, DM_Label_Acc: 0.9611, DM_mean_constant_acc_las: 0.9386, loss: 199.3742 ||:  69%|######9   | 318/459 [02:42<01:14,  1.88it/s]
+DM_UAS: 0.9328, DM_LAS: 0.9247, DM_UEM: 0.4107, DM_LEM: 0.3790, DM_Constant_Acc: 0.9522, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9611, DM_mean_constant_acc_las: 0.9384, loss: 202.3222 ||:  73%|#######3  | 336/459 [02:54<01:09,  1.76it/s]
+DM_UAS: 0.9326, DM_LAS: 0.9244, DM_UEM: 0.4107, DM_LEM: 0.3789, DM_Constant_Acc: 0.9522, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9383, loss: 203.1161 ||:  78%|#######7  | 357/459 [03:04<00:55,  1.84it/s]
+DM_UAS: 0.9323, DM_LAS: 0.9241, DM_UEM: 0.4104, DM_LEM: 0.3785, DM_Constant_Acc: 0.9521, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9609, DM_mean_constant_acc_las: 0.9381, loss: 203.8324 ||:  82%|########2 | 378/459 [03:14<00:42,  1.89it/s]
+DM_UAS: 0.9319, DM_LAS: 0.9236, DM_UEM: 0.4047, DM_LEM: 0.3727, DM_Constant_Acc: 0.9518, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9377, loss: 206.6515 ||:  87%|########6 | 399/459 [03:28<00:33,  1.77it/s]
+DM_UAS: 0.9319, DM_LAS: 0.9237, DM_UEM: 0.4084, DM_LEM: 0.3767, DM_Constant_Acc: 0.9519, DM_Constant_Acc_6_best: 0.9976, DM_Label_Acc: 0.9609, DM_mean_constant_acc_las: 0.9378, loss: 204.6300 ||:  92%|#########2| 423/459 [03:39<00:19,  1.89it/s]
+DM_UAS: 0.9313, DM_LAS: 0.9230, DM_UEM: 0.4033, DM_LEM: 0.3719, DM_Constant_Acc: 0.9517, DM_Constant_Acc_6_best: 0.9975, DM_Label_Acc: 0.9609, DM_mean_constant_acc_las: 0.9373, loss: 206.7734 ||:  97%|#########7| 446/459 [03:52<00:07,  1.82it/s]
+DM_UAS: 0.9313, DM_LAS: 0.9231, DM_UEM: 0.4031, DM_LEM: 0.3717, DM_Constant_Acc: 0.9517, DM_Constant_Acc_6_best: 0.9975, DM_Label_Acc: 0.9610, DM_mean_constant_acc_las: 0.9374, loss: 206.3253 ||: 100%|##########| 459/459 [03:59<00:00,  1.91it/s]
+
+2020-08-18 18:04:00,144 - INFO - graph_dependency_parser.train.amtrainer - Validating
+  0%|          | 0/33 [00:00<?, ?it/s]
+DM_UAS: 0.9215, DM_LAS: 0.9103, DM_UEM: 0.4306, DM_LEM: 0.3906, DM_Constant_Acc: 0.9485, DM_Constant_Acc_6_best: 0.9961, DM_Label_Acc: 0.9651, DM_mean_constant_acc_las: 0.9294, loss: 282.7881 ||: 100%|##########| 33/33 [00:05<00:00,  6.31it/s]
+
+0it [00:00, ?it/s]
+Traceback (most recent call last):
+  File "train.py", line 217, in <module>
+    metrics = trainer.train(experiment, model_path = serialization_dir)
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/train/amtrainer.py", line 521, in train
+    val_metrics = self.model.get_metrics(reset=True, model_path = model_path)
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/graph_dependency_parser.py", line 290, in get_metrics
+    for metric, val in task.metrics(parser_model=self, reset=reset, model_path=model_path).items():
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/AMTask.py", line 534, in metrics
+    metrics = self.validation_evaluator.eval(parser_model, self.current_epoch, model_path)
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/evaluation/predictors.py", line 195, in eval
+    return self.predictor.parse_and_eval(self.formalism, self.system_input, self.gold_file, filename=filename)
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/evaluation/predictors.py", line 93, in parse_and_eval
+    self.parse_and_save(formalism, input_file, filename)
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/evaluation/predictors.py", line 148, in parse_and_save
+    instances = self.dataset_reader.read([[formalism, input_file]]) #we need to give the formalism to amconll dataset_reader
+  File "/proj/irtg.shadow/conda/envs/allennlp/lib/python3.7/site-packages/allennlp/data/dataset_readers/dataset_reader.py", line 134, in read
+    instances = [instance for instance in Tqdm.tqdm(instances)]
+  File "/proj/irtg.shadow/conda/envs/allennlp/lib/python3.7/site-packages/allennlp/data/dataset_readers/dataset_reader.py", line 134, in <listcomp>
+    instances = [instance for instance in Tqdm.tqdm(instances)]
+  File "/proj/irtg.shadow/conda/envs/allennlp/lib/python3.7/site-packages/tqdm/_tqdm.py", line 1022, in __iter__
+    for obj in iterable:
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/dataset_readers/amconll.py", line 77, in _read
+    for instance in self._read_one_file(formalism, path):
+  File "/local/home/AK/ykyao/projects/am-parser/graph_dependency_parser/components/dataset_readers/amconll.py", line 58, in _read_one_file
+    file_path = cached_path(file_path)
+  File "/proj/irtg.shadow/conda/envs/allennlp/lib/python3.7/site-packages/allennlp/common/file_utils.py", line 104, in cached_path
+    raise FileNotFoundError("file {} not found".format(url_or_filename))
+FileNotFoundError: file data/SemEval/2015/DM/dev/dev.amconll not found
+

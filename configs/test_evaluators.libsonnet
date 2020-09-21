@@ -6,7 +6,8 @@ local data_paths = import 'data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
 local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
 local SDP_prefix = data_paths["SDP_prefix"];
-
+local my_prefix = "data/ACL2019/";
+local my_sdp_prefix = my_prefix+"SemEval/2015/";
 local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
         [name+"_id", { #prefix used for evaluation metric
             "type": "standard_evaluator",

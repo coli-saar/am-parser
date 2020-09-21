@@ -1,0 +1,314 @@
+{
+    "dataset_reader": {
+        "type": "amconll",
+        "token_indexers": {
+            "bert": {
+                "type": "bert-pretrained",
+                "pretrained_model": "bert-large-uncased"
+            }
+        }
+    },
+    "iterator": {
+        "type": "same_formalism",
+        "batch_size": 64,
+        "formalisms": [
+            "PAS"
+        ]
+    },
+    "model": {
+        "type": "graph_dependency_parser",
+        "encoder": {
+            "type": "shared_split_encoder",
+            "encoder": {
+                "type": "stacked_bidirectional_lstm",
+                "hidden_size": 256,
+                "input_size": 1136,
+                "layer_dropout_probability": 0.3,
+                "num_layers": 1,
+                "recurrent_dropout_probability": 0.4,
+                "use_highway": false
+            },
+            "formalisms": [
+                "PAS"
+            ],
+            "formalisms_without_tagging": [
+                "EWT",
+                "GUM",
+                "LinES",
+                "ParTUT"
+            ],
+            "task_dropout": 0
+        },
+        "input_dropout": 0.3,
+        "lemma_embedding": {
+            "embedding_dim": 64,
+            "vocab_namespace": "lemmas"
+        },
+        "ne_embedding": {
+            "embedding_dim": 16,
+            "vocab_namespace": "ner_labels"
+        },
+        "pos_tag_embedding": {
+            "embedding_dim": 32,
+            "vocab_namespace": "pos"
+        },
+        "tasks": [
+            {
+                "dropout": 0.3,
+                "edge_model": {
+                    "edge_dim": 256,
+                    "edge_label_namespace": "PAS_head_tags",
+                    "encoder_dim": 512,
+                    "label_dim": 256,
+                    "type": "kg_edges"
+                },
+                "lexlabel_loss": {
+                    "normalize_wrt_seq_len": false
+                },
+                "lexlabeltagger": {
+                    "label_namespace": "PAS_lex_labels",
+                    "mlp": {
+                        "activations": "tanh",
+                        "dropout": [
+                            0.4
+                        ],
+                        "hidden_dims": [
+                            1024
+                        ],
+                        "input_dim": 512,
+                        "num_layers": 1
+                    }
+                },
+                "loss_function": {
+                    "existence_loss": {
+                        "normalize_wrt_seq_len": false,
+                        "type": "kg_edge_loss"
+                    },
+                    "label_loss": {
+                        "normalize_wrt_seq_len": false,
+                        "type": "dm_label_loss"
+                    }
+                },
+                "loss_mixing": {
+                    "edge_existence": 1,
+                    "edge_label": 1,
+                    "lexlabel": 1,
+                    "supertagging": 1
+                },
+                "name": "PAS",
+                "output_null_lex_label": true,
+                "supertagger": {
+                    "label_namespace": "PAS_supertag_labels",
+                    "mlp": {
+                        "activations": "tanh",
+                        "dropout": [
+                            0.4
+                        ],
+                        "hidden_dims": [
+                            1024
+                        ],
+                        "input_dim": 512,
+                        "num_layers": 1
+                    }
+                },
+                "supertagger_loss": {
+                    "normalize_wrt_seq_len": false
+                },
+                "validation_evaluator": {
+                    "formalism": "PAS",
+                    "gold_file": "/proj/irtg/sempardata/ACL2019/SemEval/2015/DM/dev/dev.sdp",
+                    "predictor": {
+                        "data_iterator": {
+                            "batch_size": 64,
+                            "formalisms": [
+                                "PAS"
+                            ],
+                            "type": "same_formalism"
+                        },
+                        "dataset_reader": {
+                            "token_indexers": {
+                                "bert": {
+                                    "pretrained_model": "bert-large-uncased",
+                                    "type": "bert-pretrained"
+                                }
+                            },
+                            "type": "amconll"
+                        },
+                        "evaluation_command": {
+                            "command": "java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA",
+                            "result_regexes": {
+                                "F": [
+                                    3,
+                                    "F (?P<value>.+)"
+                                ],
+                                "P": [
+                                    1,
+                                    "Precision (?P<value>.+)"
+                                ],
+                                "R": [
+                                    2,
+                                    "Recall (?P<value>.+)"
+                                ]
+                            },
+                            "type": "bash_evaluation_command"
+                        },
+                        "give_up": 15,
+                        "k": 6,
+                        "threads": 4,
+                        "type": "amconll_predictor"
+                    },
+                    "system_input": "/proj/irtg/sempardata/ACL2019/SemEval/2015/DM/dev/dev.amconll",
+                    "type": "standard_evaluator",
+                    "use_from_epoch": 10
+                }
+            }
+        ],
+        "text_field_embedder": {
+            "type": "basic",
+            "allow_unmatched_keys": true,
+            "embedder_to_indexer_map": {
+                "bert": [
+                    "bert",
+                    "bert-offsets"
+                ]
+            },
+            "token_embedders": {
+                "bert": {
+                    "type": "bert-pretrained",
+                    "pretrained_model": "bert-large-uncased"
+                }
+            }
+        }
+    },
+    "train_data_path": [
+        [
+            "PAS",
+            "data/SemEval/2015/PAS/train/train.amconll"
+        ]
+    ],
+    "validation_data_path": [
+        [
+            "PAS",
+            "data/SemEval/2015/PAS/gold-dev/gold-dev.amconll"
+        ]
+    ],
+    "trainer": {
+        "type": "am-trainer",
+        "cuda_device": 0,
+        "num_epochs": 40,
+        "num_serialized_models_to_keep": 1,
+        "optimizer": {
+            "type": "adam"
+        },
+        "patience": 10,
+        "validation_metric": "+PAS_F"
+    },
+    "vocabulary": {
+        "min_count": {
+            "lemmas": 7
+        }
+    },
+    "evaluate_on_test": true,
+    "test_evaluators": [
+        [
+            [
+                "PAS_id",
+                {
+                    "formalism": "PAS",
+                    "gold_file": "data/SemEval/2015/PAS/test.id/en.id.pas.sdp",
+                    "predictor": {
+                        "data_iterator": {
+                            "batch_size": 64,
+                            "formalisms": [
+                                "PAS"
+                            ],
+                            "type": "same_formalism"
+                        },
+                        "dataset_reader": {
+                            "token_indexers": {
+                                "bert": {
+                                    "pretrained_model": "bert-large-uncased",
+                                    "type": "bert-pretrained"
+                                }
+                            },
+                            "type": "amconll"
+                        },
+                        "evaluation_command": {
+                            "command": "java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA",
+                            "result_regexes": {
+                                "F": [
+                                    3,
+                                    "F (?P<value>.+)"
+                                ],
+                                "P": [
+                                    1,
+                                    "Precision (?P<value>.+)"
+                                ],
+                                "R": [
+                                    2,
+                                    "Recall (?P<value>.+)"
+                                ]
+                            },
+                            "type": "bash_evaluation_command"
+                        },
+                        "give_up": 1800,
+                        "k": 6,
+                        "threads": 6,
+                        "type": "amconll_predictor"
+                    },
+                    "system_input": "data/SemEval/2015/PAS/test.id/test.id.amconll",
+                    "type": "standard_evaluator"
+                }
+            ],
+            [
+                "PAS_ood",
+                {
+                    "formalism": "PAS",
+                    "gold_file": "data/SemEval/2015/PAS/test.ood/en.ood.pas.sdp",
+                    "predictor": {
+                        "data_iterator": {
+                            "batch_size": 64,
+                            "formalisms": [
+                                "PAS"
+                            ],
+                            "type": "same_formalism"
+                        },
+                        "dataset_reader": {
+                            "token_indexers": {
+                                "bert": {
+                                    "pretrained_model": "bert-large-uncased",
+                                    "type": "bert-pretrained"
+                                }
+                            },
+                            "type": "amconll"
+                        },
+                        "evaluation_command": {
+                            "command": "java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA",
+                            "result_regexes": {
+                                "F": [
+                                    3,
+                                    "F (?P<value>.+)"
+                                ],
+                                "P": [
+                                    1,
+                                    "Precision (?P<value>.+)"
+                                ],
+                                "R": [
+                                    2,
+                                    "Recall (?P<value>.+)"
+                                ]
+                            },
+                            "type": "bash_evaluation_command"
+                        },
+                        "give_up": 1800,
+                        "k": 6,
+                        "threads": 6,
+                        "type": "amconll_predictor"
+                    },
+                    "system_input": "data/SemEval/2015/PAS/test.ood/test.ood.amconll",
+                    "type": "standard_evaluator"
+                }
+            ]
+        ]
+    ]
+}

@@ -54,7 +54,7 @@ if [ "$outputPath" = "" ]; then
 fi
 printf "Placing output in $outputPath\n"
 
-mem=3G
+mem=700G
 alto="am-tools.jar"
 
 
