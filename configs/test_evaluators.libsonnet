@@ -96,6 +96,23 @@ function (dataset_reader, data_iterator) {
 
   }]],
 
+      "AMR-2020" :  [ ["AMR-2020",{ #prefix used for evaluation metric
+          "type": "standard_evaluator",
+          "formalism" : "AMR-2020",
+          "system_input" : "data/AMR/2020/test/test.amconll",
+          "gold_file": "data/AMR/2020/test/goldAMR.txt",
+          "predictor" : {
+                  "type" : "amconll_predictor",
+                  "dataset_reader" : dataset_reader,
+                  "data_iterator" : data_iterator,
+                  "k" : k,
+                  "threads" : 8,
+                  "give_up": give_up,
+                  "evaluation_command" : eval_commands['commands']['AMR-2020']
+          }
+
+    }]],
+
     "DM" : SDP_evaluator(dataset_reader, data_iterator,"DM",6),
 
     "PAS" : SDP_evaluator(dataset_reader, data_iterator,"PAS",6),

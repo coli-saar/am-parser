@@ -1,0 +1,4 @@
+This directory contains configuration files used for EMNLP 20 experiments with the fixed tree parser and the A* parser.
+
+All configurations in this directory use a character CNN.
+astar contains the config files where we train with a Dozat & Manning style loss, the other directories are for the fixed tree parser.

@@ -81,6 +81,16 @@ local sdp_regexes = {
                                 "F" : [2, "F-score: (?P<value>.+)"]}
         },
 
+        "AMR-2020" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/2020/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
+        },
+
         "MRP-DM" : {
         "type" : "json_evaluation_command",
         "commands" : [["",'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {tmp}/output.mrp'],
@@ -131,6 +141,7 @@ local sdp_regexes = {
         "EDS": "+EDS_Smatch_F",
         "AMR-2015": "+AMR-2015_F",
         "AMR-2017": "+AMR-2017_F",
+        "AMR-2020": "+AMR-2020_F",
 
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",

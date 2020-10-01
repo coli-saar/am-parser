@@ -81,6 +81,24 @@ function (dataset_reader, data_iterator) {
 
   },
 
+      "AMR-2020" :  {
+          "type": "standard_evaluator",
+          "formalism" : "AMR-2020",
+          "system_input" : "data/AMR/2020/dev/dev.amconll",
+          "gold_file": "data/AMR/2020/dev/goldAMR.txt",
+          "use_from_epoch" : 10,
+          "predictor" : {
+                  "type" : "amconll_predictor",
+                  "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                  "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                  "k" : k,
+                  "threads" : 4,
+                  "give_up": give_up, #retry with smaller k
+                  "evaluation_command" : eval_commands['commands']['AMR-2020']
+          }
+
+    },
+
     "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,10),
 
     "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,10),
