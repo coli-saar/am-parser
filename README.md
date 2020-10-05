@@ -7,7 +7,7 @@ Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our par
 ## Quick Guide
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
-You can find documentation on how to train the parser in the [wiki pages](https://github.com/coli-saar/am-parser/wiki/Train-Parser) (we will update this part of the documentation later in fall 2019 to make it easier for you to train your own models).
+You can find documentation on how to train the parser in the [wiki pages](https://github.com/coli-saar/am-parser/wiki/Train-Parser).
 
 ### Requirements
 - Python 3.7 up to version 3.7.3
