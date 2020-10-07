@@ -127,7 +127,7 @@ class AMConllAutomataDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
-        rule_iterator = automaton.getRuleSet()
+        all_rules_in_bottom_up_order = automaton.getAllRulesInBottomUpOrder()
         # for rule in to_python(rule_iterator):
         #     print(rule.toString(automaton))
         #     if supertag_map.keySet().contains(rule):
@@ -144,13 +144,14 @@ class AMConllAutomataDatasetReader(DatasetReader):
         fields["rule_index"] = RuleIndexField(supertag_map, edge_map, rule_iterator, len(tokens) + 1, # +1 for artificial root
                                               supertag_namespace=formalism+"_supertag_labels",
                                               edge_namespace=formalism+"_head_tags")
-        fields["rule_mask"] = RuleMaskField(rule_iterator, supertag_map, len(tokens) + 1)
+        fields["rule_mask"] = RuleMaskField(all_rules_in_bottomup_order, supertag_map, len(tokens) + 1)
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
-                                            "token_ranges" : am_sentence.get_ranges(),
-                                            "is_annotated" : am_sentence.is_annotated(),
-                                            "automaton" : automaton,
-                                            "rule_iterator" : rule_iterator})
+                                            "token_ranges": am_sentence.get_ranges(),
+                                            "is_annotated": am_sentence.is_annotated(),
+                                            "max_state_id_plus_one": automaton.getStateInterner().getNextIndex(),
+                                            "final_states": automaton.getFinalStates(),
+                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order})
         # checking rule identity across maps and automaton
         # print("Rules in supertag_map:")
         # for rule in to_python(supertag_map.keySet()):

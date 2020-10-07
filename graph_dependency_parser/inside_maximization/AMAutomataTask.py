@@ -279,11 +279,16 @@ class AMAutomataTask(Model):
             # iterate over each entry in batch:
             for logits, meta, indices in zip(logprobs_for_rules, metadata, rule_index):
                 logits_python = logits.tolist() # need to convert to python primitive to send it to java as a float[]
-                rule_iterator = meta["rule_iterator"]
-                automaton = meta["automaton"]
-                outer_weights_python.append(PyjniusHelper.computeOuterProbabilities(logits_python, rule_iterator, automaton))
+                all_rules_in_bottom_up_order = meta["all_rules_in_bottom_up_order"]
+                max_state_id_plus_one = meta["max_state_id_plus_one"]
+                final_states = meta["final_states"]
+                outer_weights_python.append(PyjniusHelper.computeOuterProbabilities(logits_python,
+                                                                                    all_rules_in_bottom_up_order,
+                                                                                    max_state_id_plus_one,
+                                                                                    final_states))
                 # get total inside for metrics
-                total_inside = PyjniusHelper.getTotalLogInside(logits_python, rule_iterator, automaton)
+                total_inside = PyjniusHelper.getTotalLogInside(logits_python, all_rules_in_bottom_up_order,
+                                                               max_state_id_plus_one, final_states)
                 self._inside_metric(total_inside)
                 if print_diagnostics:
                     print(f"log inside: {total_inside}")
@@ -294,9 +299,11 @@ class AMAutomataTask(Model):
                     for logit in logits:
                         print(logit.item())
                     print("automaton:")
-                    for rule in to_python(rule_iterator):
-                        print(rule.toString(automaton))
-                    print(f"viterbi: {automaton.viterbi().toString()}")
+                    # the following are no longer possible since we don't carry the automaton around anymore.
+                    # If you need to print them, add automaton to meta again in amconll_automata DatasetReader
+                    # for rule in to_python(all_rules_in_bottom_up_order):
+                    #     print(rule.toString(automaton))
+                    # print(f"viterbi: {automaton.viterbi().toString()}")
                     print("outer weights:")
                 for i, (outer_weight, rule_weight) in enumerate(zip(outer_weights_python[-1], logits_python)):
                     if abs(outer_weight) < 0.000001:  # TODO slight hack to get the non-automaton outer weights
