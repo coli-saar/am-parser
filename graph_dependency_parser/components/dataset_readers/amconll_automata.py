@@ -141,10 +141,10 @@ class AMConllAutomataDatasetReader(DatasetReader):
         fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
         fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
-        fields["rule_index"] = RuleIndexField(supertag_map, edge_map, rule_iterator, len(tokens) + 1, # +1 for artificial root
+        fields["rule_index"] = RuleIndexField(supertag_map, edge_map, all_rules_in_bottom_up_order, len(tokens) + 1, # +1 for artificial root
                                               supertag_namespace=formalism+"_supertag_labels",
                                               edge_namespace=formalism+"_head_tags")
-        fields["rule_mask"] = RuleMaskField(all_rules_in_bottomup_order, supertag_map, len(tokens) + 1)
+        fields["rule_mask"] = RuleMaskField(all_rules_in_bottom_up_order, supertag_map, len(tokens) + 1)
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
                                             "token_ranges": am_sentence.get_ranges(),
