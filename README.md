@@ -38,7 +38,7 @@ bash scripts/predict.sh -i INPUT -T DM -o example/
 ``` 
 will create a file `DM.sdp` in the `example` folder with graphs for the sentences in `INPUT`, as well as print evaluation scores compared to the gold graphs in `INPUT`.
 
-With this pre-trained model you should get (labeled) F-scores close to the following on the test sets:
+With this pre-trained model (this is the MTL+BERT version, corresponding to the bottom-most line in Table 1 in the paper) you should get (labeled) F-scores close to the following on the test sets:
 
 | DM id | DM ood | PAS id| PAS ood| PSD id | PSD ood | EDS (Smatch) | EDS (EDM) | AMR 2017 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
