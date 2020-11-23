@@ -4,10 +4,10 @@ Modular implementation of the AM dependency parser used in [Compositional Semant
 ## Online Demo
 Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
 
-## Quick Guide
+## Quick Guide to the Pretrained Models
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
-You can find documentation on how to train the parser in the [wiki pages](https://github.com/coli-saar/am-parser/wiki/Train-Parser).
+**You can find documentation on how to train the parser on the [wiki pages](https://github.com/coli-saar/am-parser/wiki).**
 
 ### Requirements
 - Python 3.7 up to version 3.7.3
@@ -22,8 +22,6 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 (We recommend to set up a conda environment.)
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
-
-## Pretrained models
 
 ### Reproducing our experiment results
 
