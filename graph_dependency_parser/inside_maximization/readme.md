@@ -8,7 +8,7 @@ This is simply rerunning the L19 code to get it into comet.ml and to double chec
 
 This was run on tony-1 in /local/jonasg/unsupervised2020/am-parser
 
-Step 1: set up server as described in wiki, clone repo
+Step 1: set up server as described in wiki, clone repo (used commit 3aec3990191452b4734a4dd32ff4ab30111c3b3b in unsupervised2020 branch)
 
 Step 2: `cp -r /proj/corpora/abstract_meaning_representation_amr_2.0_LDC2017T10/abstract_meaning_representation_amr_2.0/data/amrs/split/* /local/jonasg/unsupervised2020/AMR17/corpus/`
 
