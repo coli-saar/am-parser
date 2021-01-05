@@ -13,3 +13,7 @@ Step 1: set up server as described in wiki, clone repo (used commit 3aec39901914
 Step 2: `cp -r /proj/corpora/abstract_meaning_representation_amr_2.0_LDC2017T10/abstract_meaning_representation_amr_2.0/data/amrs/split/* /local/jonasg/unsupervised2020/AMR17/corpus/`
 
 Step 3: in `/local/jonasg/unsupervised2020/am-parser/`: `bash scripts/preprocess-no-baseline.sh -m /local/jonasg/unsupervised2020/AMR17/ &>/local/jonasg/unsupervised2020/AMR17/screenLog.txt`
+
+Step 4: set all AMR-17 related datapaths in `configs/data_paths.libsonnet`, `configs/eval_commands.libsonnet`, `configs/test_evaluators.libsonnet` and `configs/validation_evaluators.libsonnet` to the ones in `/local/jonasg/unsupervised2020/AMR17/`.
+
+Step 5: run ` python -u train.py jsonnets/single/bert/AMR-2017.jsonnet -s /local/jonasg/unsupervised2020/saved_models/amr17baseline/  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  5  } }' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --project unsupervised2020-amr  &> /local/jonasg/unsupervised2020/saved_models/amr17baseline/screenLog.txt`
