@@ -154,7 +154,9 @@ class GraphDependencyParser(Model):
                 supertags: torch.LongTensor = None,
                 lexlabels: torch.LongTensor = None,
                 head_tags: torch.LongTensor = None,
-                head_indices: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
+                head_indices: torch.LongTensor = None,
+                lemma_copying: torch.LongTensor = None,
+                token_copying: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
         # pylint: disable=arguments-differ
         """
         Parameters
@@ -257,7 +259,8 @@ class GraphDependencyParser(Model):
         if head_tags is not None:
             head_tags = torch.cat([head_tags.new_zeros(batch_size, 1), head_tags], 1)
 
-        ret = self.tasks[formalism_of_batch](encoded_text_parsing, encoded_text_tagging, mask, pos_tags, metadata, supertags, lexlabels, head_tags, head_indices)
+        ret = self.tasks[formalism_of_batch](encoded_text_parsing, encoded_text_tagging, mask, pos_tags, metadata,
+                                             supertags, lexlabels, head_tags, head_indices, lemma_copying, token_copying)
         t1 = time.time()
         # Save time and batch size, but save it separately for each batch element.
         ret["batch_size"] = torch.ones(batch_size, dtype=torch.long) * batch_size

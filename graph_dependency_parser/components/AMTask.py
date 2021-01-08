@@ -33,6 +33,7 @@ from overrides import overrides
 from torch.nn import Module
 
 from graph_dependency_parser.components.cle import cle_decode, find_root
+from graph_dependency_parser.components.copier import Copier
 from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
 from graph_dependency_parser.components.edge_models import EdgeModel
 from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, Evaluator
@@ -74,6 +75,7 @@ class AMTask(Model):
                  lexlabeltagger: Supertagger,
                  supertagger_loss : SupertaggingLoss,
                  lexlabel_loss : SupertaggingLoss,
+                 lexlabelcopier: Copier = None,
                  output_null_lex_label : bool = True,
                  loss_mixing : Dict[str,float] = None,
                  dropout : float = 0.0,
@@ -88,6 +90,7 @@ class AMTask(Model):
         self.supertagger_loss = supertagger_loss
         self.lexlabel_loss = lexlabel_loss
         self.loss_function = loss_function
+        self.lexlabelcopier = lexlabelcopier
         self.loss_mixing = loss_mixing or dict()
         self.validation_evaluator = validation_evaluator
         self.output_null_lex_label = output_null_lex_label
@@ -142,7 +145,9 @@ class AMTask(Model):
                 supertags: torch.LongTensor = None,
                 lexlabels: torch.LongTensor = None,
                 head_tags: torch.LongTensor = None,
-                head_indices: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
+                head_indices: torch.LongTensor = None,
+                lemma_copying: torch.LongTensor = None,
+                token_copying: torch.LongTensor = None) -> Dict[str, torch.Tensor]:
         """
         Takes a batch of encoded sentences and returns a dictionary with loss and predictions.
 
@@ -165,6 +170,9 @@ class AMTask(Model):
 
         batch_size, seq_len, _ = encoded_text_parsing.shape
 
+        print("seq_len")
+        print(seq_len)
+
         edge_existence_scores = self.edge_model.edge_existence(encoded_text_parsing,
                                                                mask)  # shape (batch_size, seq_len, seq_len)
         # shape (batch_size, seq_len, num_supertags)
@@ -173,6 +181,8 @@ class AMTask(Model):
                 and self.loss_mixing["lexlabel"] is not None:
             supertagger_logits = self.supertagger.compute_logits(encoded_text_tagging)
             lexlabel_logits = self.lexlabeltagger.compute_logits(encoded_text_tagging) # shape (batch_size, seq_len, num label tags)
+            print("lexlabel_logits.shape")
+            print(lexlabel_logits.shape)
         else:
             supertagger_logits = None
             lexlabel_logits = None
@@ -241,7 +251,23 @@ class AMTask(Model):
 
             if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
                 lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
-                lexlabel_nll = self.lexlabel_loss.loss(lexlabel_logits, lexlabels, mask[:, 1:])
+                if self.lexlabelcopier is not None:
+                    lexlabel_logprob_matrix, p_vocab, p_lemma, p_token = self.lexlabelcopier.compute_logprobs(encoded_text_tagging[:, 1:, :].contiguous(),
+                                                                                   lemma_copying,
+                                                                                   token_copying,
+                                                                                   lexlabels,
+                                                                                   lexlabel_logits)
+                    diagonal = torch.diagonal(lexlabel_logprob_matrix, dim1=1, dim2=2)
+                    print("diagonal")
+                    print(diagonal)
+                    # diagonal.register_hook(lambda grad: print(f"diagonal grad: {grad}"))
+                    lexlabel_nll = -torch.sum(diagonal)  # negative log likelihood loss
+                    # lexlabel_nll.register_hook(lambda grad: print(f"lexlabel_nll grad: {grad}"))
+                    output_dict["p_vocab"] = p_vocab  # shape is batch_size x (seq_length-1) x 1
+                    output_dict["p_lemma"] = p_lemma
+                    output_dict["p_token"] = p_token
+                else:
+                    lexlabel_nll = self.lexlabel_loss.loss(lexlabel_logits, lexlabels, mask[:, 1:])
             else:
                 lexlabel_nll = None
 
@@ -368,6 +394,11 @@ class AMTask(Model):
         top_k_supertags = Supertagger.top_k_supertags(supertag_scores, k).cpu().detach().numpy() # shape (batch_size, seq_len, k)
         supertag_scores = supertag_scores.cpu().detach().numpy()
         lexlabels = output_dict.pop("lexlabels").cpu().detach().numpy() #shape (batch_size, seq_len)
+        if self.lexlabelcopier is not None:
+            p_vocab = output_dict.pop("p_vocab").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
+            p_lemma = output_dict.pop("p_lemma").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
+            p_token = output_dict.pop("p_token").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
+            words = output_dict["words"]
         heads = output_dict.pop("heads")
         heads_cpu = heads.cpu().detach().numpy()
         mask = output_dict.pop("mask")
@@ -422,7 +453,20 @@ class AMTask(Model):
                     supertags_for_this_word.append((supertag_scores[i,word,bot_id],fragment,typ))
                 supertags_for_this_sentence.append(supertags_for_this_word)
             all_supertags.append(supertags_for_this_sentence)
-            all_predicted_lex_labels.append([self.vocab.get_token_from_index(label,namespace=self.name+"_lex_labels") for label in lexlabels[i,1:length]])
+            if self.lexlabelcopier is not None:
+                lexlabels_decoded = []
+                for j in range(1, length):
+                    lemma = words[i][j-1].lemma
+                    token = words[i][j-1].token
+                    label_id = lexlabels[i][j]
+                    probability_triple = numpy.array([p_vocab[i][j-1, 0], p_lemma[i][j-1, 0], p_token[i][j-1, 0]])
+                    lexlabels_decoded.append(self.lexlabelcopier.get_most_likely(probability_triple, label_id, self.vocab,
+                                                                                 self.name+"_lex_labels", lemma, token))
+                print("lexlabels_decoded")
+                print(lexlabels_decoded)
+                all_predicted_lex_labels.append(lexlabels_decoded)
+            else:
+                all_predicted_lex_labels.append([self.vocab.get_token_from_index(label, namespace=self.name+"_lex_labels") for label in lexlabels[i, 1:length]])
             head_indices.append(instance_heads_cpu)
 
         t1 = time()
@@ -434,6 +478,7 @@ class AMTask(Model):
         output_dict["label_logits"] = all_edge_label_logits
         output_dict["predicted_heads"] = head_indices
         output_dict["full_label_logits"] = all_full_label_logits
+
         output_dict["edge_existence_scores"] = all_edge_existence_scores
         output_dict["supertag_scores"] = all_supertag_scores
         return output_dict

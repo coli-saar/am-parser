@@ -30,6 +30,7 @@ from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Token
 
 from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll, AMSentence
+from graph_dependency_parser.components.dataset_readers.adjecency_field import AdjacencyField
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -109,6 +110,19 @@ class AMConllDatasetReader(DatasetReader):
         fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
         fields["head_tags"] = SequenceLabelField(am_sentence.get_edge_labels(),tokens, label_namespace=formalism+"_head_tags") #edge labels
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
+
+        lemma_copying_matrix = []
+        lemma_copying_matrix.append((4, 4))
+        # lemma_copying_matrix.append((5, 5))
+        lemma_copying_field = AdjacencyField(lemma_copying_matrix, tokens, padding_value=0)
+        fields["lemma_copying"] = lemma_copying_field
+        token_copying_matrix = []
+        token_copying_matrix.append((0, 0))
+        token_copying_matrix.append((1, 1))
+        token_copying_matrix.append((3, 3))
+        token_copying_field = AdjacencyField(token_copying_matrix, tokens, padding_value=0)
+        fields["token_copying"] = token_copying_field
+        print(f"token_copying {token_copying_field}")
 
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,

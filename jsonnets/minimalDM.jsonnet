@@ -101,6 +101,17 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
         "supertagger_loss" : { "normalize_wrt_seq_len": false },
         "lexlabel_loss" : { "normalize_wrt_seq_len": false },
+		
+		"lexlabelcopier" : {
+			"type": "lemma_and_token",
+			"mlp" : {
+                "input_dim" : final_encoder_output_dim,
+                "num_layers" : 1,
+                "hidden_dims" : [hidden_dim],
+                "dropout" : [0],
+                "activations" : "tanh"
+            }
+		},
 
         "validation_evaluator": {
 			"type": "standard_evaluator",
