@@ -258,8 +258,8 @@ class AMTask(Model):
                                                                                    lexlabels,
                                                                                    lexlabel_logits)
                     diagonal = torch.diagonal(lexlabel_logprob_matrix, dim1=1, dim2=2)
-                    print("diagonal")
-                    print(diagonal)
+                    # print("diagonal")
+                    # print(diagonal)
                     # diagonal.register_hook(lambda grad: print(f"diagonal grad: {grad}"))
                     lexlabel_nll = -torch.sum(diagonal)  # negative log likelihood loss
                     # lexlabel_nll.register_hook(lambda grad: print(f"lexlabel_nll grad: {grad}"))
@@ -462,8 +462,8 @@ class AMTask(Model):
                     probability_triple = numpy.array([p_vocab[i][j-1, 0], p_lemma[i][j-1, 0], p_token[i][j-1, 0]])
                     lexlabels_decoded.append(self.lexlabelcopier.get_most_likely(probability_triple, label_id, self.vocab,
                                                                                  self.name+"_lex_labels", lemma, token))
-                print("lexlabels_decoded")
-                print(lexlabels_decoded)
+                # print("lexlabels_decoded")
+                # print(lexlabels_decoded)
                 all_predicted_lex_labels.append(lexlabels_decoded)
             else:
                 all_predicted_lex_labels.append([self.vocab.get_token_from_index(label, namespace=self.name+"_lex_labels") for label in lexlabels[i, 1:length]])
