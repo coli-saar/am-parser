@@ -39,7 +39,20 @@ __this hasn't run yet, will need to update commit and commands. In fact, this ex
 
 Run on my own computer, using WSL and the allennlp coda env. Working directory is `Work`.
 
+Generate AM trees:
+
 `java -Xmx4G -cp GitHub/am-tools/build/libs/am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c experimentData/unsupervised2020/AMR17/toyAMR.corpus -li 10 -o experimentData/unsupervised2020/AMR17/toyAMR/nn/ -t 1 -pos experimentData/unsupervised2020/stanford/english-bidirectional-distsim.tagger 2>&1 | tee experimentData/unsupervised2020/AMR17/toyAMR/dep.log`
+
+Reformat to AM conll:
 
 `java -Xmx4G -cp GitHub/am-tools/build/libs/am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c experimentData/unsupervised2020/AMR17/toyAMR/nn/ -o experimentData/unsupervised2020/AMR17/toyAMR/ --stanford-ner-model experimentData/unsupervised2020/stanford/english.conll.4class.distsim.crf.ser.gz --no-lexlabel-replacement 2>&1 | tee experimentData/unsupervised2020/AMR17/toyAMR/amconll.log`
 
+Change working directory to `am-parser` and copy toyAMR amconll and gold AMRs over.
+
+Run AMR setup: `. scripts/setup_AMR.sh`
+
+Run training: `python -u train.py jsonnets/toyAMR.jsonnet -s example/toyAMRoutput/  -f --file-friendly-logging 2>&1 | tee example/toyAMR.log`
+
+Later, eval by hand and create AMR file:
+
+`java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus example/toyAMRoutput/dev_epoch_200.amconll -o example/toyAMRoutput/amr/ --relabel --wn downloaded_models/wordnet3.0/dict/ --lookup downloaded_models/lookup/lookupdata17/ --th 0 --add-sense-to-nn-label&& python2 external_eval_tools/smatch/smatch.py -f example/toyAMRoutput/amr/parserOut.txt example/toyAMR/toyAMRgold.txt --pr --significant 4 > example/toyAMRoutput/amr/metrics.txt && cat example/toyAMRoutput/amr/metrics.txt`
