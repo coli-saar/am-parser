@@ -33,3 +33,13 @@ Step 2: Copy results of Step 4 from above baseline to falken-3: `scp -r /local/j
 
 Step 3: Create the automata: in `/local/jonasg/unsupervised2020/` run `java -Xmx800G -cp am-tools.jar de.saar.coli.amtools.decomposition.SourceAutomataCLIAMR -t AMR17/data/alto/train/namesDatesNumbers_AlsFixed_sorted.corpus -d AMR17/data/alto/dev/namesDatesNumbers_AlsFixed_sorted.corpus -o AMR17/automata/ --stanford-ner-model stanford/english.conll.4class.distsim.crf.ser.gz --stanford-pos-model stanford/english-bidirectional-distsim.tagger -s 4 -a automata &>AMR17/automata.log`
 
+__this hasn't run yet, will need to update commit and commands. In fact, this experiment may not be necessary__
+
+### creating toy dataset
+
+Run on my own computer, using WSL and the allennlp coda env. Working directory is `Work`.
+
+`java -Xmx4G -cp GitHub/am-tools/build/libs/am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c experimentData/unsupervised2020/AMR17/toyAMR.corpus -li 10 -o experimentData/unsupervised2020/AMR17/toyAMR/nn/ -t 1 -pos experimentData/unsupervised2020/stanford/english-bidirectional-distsim.tagger 2>&1 | tee experimentData/unsupervised2020/AMR17/toyAMR/dep.log`
+
+`java -Xmx4G -cp GitHub/am-tools/build/libs/am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c experimentData/unsupervised2020/AMR17/toyAMR/nn/ -o experimentData/unsupervised2020/AMR17/toyAMR/ --stanford-ner-model experimentData/unsupervised2020/stanford/english.conll.4class.distsim.crf.ser.gz --no-lexlabel-replacement 2>&1 | tee experimentData/unsupervised2020/AMR17/toyAMR/amconll.log`
+
