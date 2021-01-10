@@ -48,11 +48,13 @@ class AMConllDatasetReader(DatasetReader):
     """
     def __init__(self,
                  token_indexers: Dict[str, TokenIndexer] = None,
-                 lazy: bool = False, fraction: float = 1.0, only_read_fraction_if_train_in_filename : bool = False) -> None:
+                 lazy: bool = False, fraction: float = 1.0, only_read_fraction_if_train_in_filename : bool = False,
+                 allow_copy_despite_sense: bool = False) -> None:
         super().__init__(lazy)
         self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
         self.fraction = fraction
         self.only_read_fraction_if_train_in_filename = only_read_fraction_if_train_in_filename
+        self.allow_copy_despite_sense = allow_copy_despite_sense
 
     def _read_one_file(self, formalism:str, file_path: str):
         # if `file_path` is a URL, redirect to the cache
@@ -112,17 +114,24 @@ class AMConllDatasetReader(DatasetReader):
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
 
         lemma_copying_matrix = []
-        lemma_copying_matrix.append((4, 4))
-        # lemma_copying_matrix.append((5, 5))
+        for i, lemma in enumerate(am_sentence.get_lemmas()):
+            for j, lexlabel in enumerate(am_sentence.get_lexlabels()):
+                if lemma == lexlabel:
+                    lemma_copying_matrix.append((i, j))
+                elif self.allow_copy_despite_sense and lemma+"-01" == lexlabel:
+                    lemma_copying_matrix.append((i, j))
         lemma_copying_field = AdjacencyField(lemma_copying_matrix, tokens, padding_value=0)
         fields["lemma_copying"] = lemma_copying_field
+
         token_copying_matrix = []
-        token_copying_matrix.append((0, 0))
-        token_copying_matrix.append((1, 1))
-        token_copying_matrix.append((3, 3))
+        for i, token in enumerate(am_sentence.get_tokens(shadow_art_root=True)):
+            for j, lexlabel in enumerate(am_sentence.get_lexlabels()):
+                if token == lexlabel:
+                    token_copying_matrix.append((i, j))
+                elif self.allow_copy_despite_sense and token+"-01" == lexlabel:
+                    token_copying_matrix.append((i, j))
         token_copying_field = AdjacencyField(token_copying_matrix, tokens, padding_value=0)
         fields["token_copying"] = token_copying_field
-        print(f"token_copying {token_copying_field}")
 
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,

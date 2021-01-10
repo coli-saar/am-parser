@@ -1,0 +1,94 @@
+///###IRTG unannotated corpus file, v1.0
+///###
+///###  sorted
+///### with added alignments for unaligned stuff
+///###
+///###interpretation string: de.up.ling.irtg.algebra.StringAlgebra
+///###interpretation repstring: de.up.ling.irtg.algebra.StringAlgebra
+///###interpretation spanmap: de.up.ling.irtg.algebra.StringAlgebra
+///###interpretation repgraph: de.up.ling.irtg.algebra.graph.GraphAlgebra
+///###interpretation graph: de.up.ling.irtg.algebra.graph.GraphAlgebra
+///###interpretation repalignment: de.up.ling.irtg.algebra.StringAlgebra
+///###interpretation alignment: de.up.ling.irtg.algebra.StringAlgebra
+///###interpretation id: de.up.ling.irtg.algebra.StringAlgebra
+
+John loves Mary .
+John loves Mary .
+0-1 1-2 2-3 3-4
+(l<root> / love-01 :ARG0 (p / person  :name (n / name  :op1 (j / John))) :ARG1 (p2 / person  :name (n2 / name  :op1 (m / Mary))))
+(l<root> / love-01 :ARG0 (p / person  :name (n / name  :op1 (j / John))) :ARG1 (p2 / person  :name (n2 / name  :op1 (m / Mary))))
+p|n|j!||0-1||1.0 l!||1-2||1.0 p2|n2|m!||2-3||1.0
+p|n|j!||0-1||1.0 l!||1-2||1.0 p2|n2|m!||2-3||1.0
+1
+
+John kissed the frog .
+John kissed the frog .
+0-1 1-2 2-3 3-4 4-5
+(l<root> / kiss-01 :ARG0 (p / person  :name (n / name  :op1 (j / John))) :ARG1 (f / frog))
+(l<root> / kiss-01 :ARG0 (p / person  :name (n / name  :op1 (j / John))) :ARG1 (f / frog))
+p|n|j!||0-1||1.0 l!||1-2||1.0 f!||3-4||1.0
+p|n|j!||0-1||1.0 l!||1-2||1.0 f!||3-4||1.0
+2
+
+The cat likes the dog .
+The cat likes the dog .
+0-1 1-2 2-3 3-4 4-5 5-6
+(l<root> / like-02 :ARG0 (c / cat) :ARG1 (d / dog))
+(l<root> / like-02 :ARG0 (c / cat) :ARG1 (d / dog))
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+3
+
+The snail loves the cat .
+The snail loves the cat .
+0-1 1-2 2-3 3-4 4-5 5-6
+(l<root> / love-01 :ARG0 (c / snail) :ARG1 (d / cat))
+(l<root> / love-01 :ARG0 (c / snail) :ARG1 (d / cat))
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+4
+
+The dog loves a frog .
+The dog loves a frog .
+0-1 1-2 2-3 3-4 4-5 5-6
+(l<root> / love-01 :ARG0 (c / dog) :ARG1 (d / frog))
+(l<root> / love-01 :ARG0 (c / dog) :ARG1 (d / frog))
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+c!||1-2||1.0 l!||2-3||1.0 d!||4-5||1.0
+5
+
+The snail likes John .
+The snail likes John .
+0-1 1-2 2-3 3-4 4-5
+(l<root> / like-02 :ARG0 (c / snail) :ARG1 (p / person  :name (n / name  :op1 (j / John))))
+(l<root> / like-02 :ARG0 (c / snail) :ARG1 (p / person  :name (n / name  :op1 (j / John))))
+c!||1-2||1.0 l!||2-3||1.0 p|n|j!||3-4||1.0
+c!||1-2||1.0 l!||2-3||1.0 p|n|j!||3-4||1.0
+6
+
+A cat kisses Mary .
+A cat kisses Mary .
+0-1 1-2 2-3 3-4 4-5
+(l<root> / kiss-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 (j / Mary))))
+(l<root> / kiss-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 (j / Mary))))
+c!||1-2||1.0 l!||2-3||1.0 p|n|j!||3-4||1.0
+c!||1-2||1.0 l!||2-3||1.0 p|n|j!||3-4||1.0
+7
+
+The dog is liked by the snail .
+The dog is liked by the snail .
+0-1 1-2 2-3 3-4 4-5 5-6 6-7 7-8
+(l<root> / like-02 :ARG0 (s / snail) :ARG1 (d / dog))
+(l<root> / like-02 :ARG0 (s / snail) :ARG1 (d / dog))
+s!||6-7||1.0 l!||3-4||1.0 d!||1-2||1.0
+s!||6-7||1.0 l!||3-4||1.0 d!||1-2||1.0
+8
+
+John is loved by the cat .
+John is loved by the cat .
+0-1 1-2 2-3 3-4 4-5 5-6 6-7
+(l<root> / love-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 (j / John))))
+(l<root> / love-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 (j / John))))
+c!||5-6||1.0 l!||2-3||1.0 p|n|j!||0-1||1.0
+c!||5-6||1.0 l!||2-3||1.0 p|n|j!||0-1||1.0
+9

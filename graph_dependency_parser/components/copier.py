@@ -132,6 +132,15 @@ class LemmaAndTokenCopier(Copier):
                         lemma,
                         token):
         index = copy_probabilities.argmax()
+        # print("copy_probabilities")
+        # print(copy_probabilities)
+        # print("prediction")
+        # print(vocab.get_token_from_index(lexlabel_id, namespace=lexlabel_namespace))
+        # print("lemma")
+        # print(lemma)
+        # print("token")
+        # print(token)
+
         if index == 0:
             return vocab.get_token_from_index(lexlabel_id, namespace=lexlabel_namespace)
         elif index == 1:

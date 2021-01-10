@@ -170,9 +170,6 @@ class AMTask(Model):
 
         batch_size, seq_len, _ = encoded_text_parsing.shape
 
-        print("seq_len")
-        print(seq_len)
-
         edge_existence_scores = self.edge_model.edge_existence(encoded_text_parsing,
                                                                mask)  # shape (batch_size, seq_len, seq_len)
         # shape (batch_size, seq_len, num_supertags)
@@ -181,8 +178,6 @@ class AMTask(Model):
                 and self.loss_mixing["lexlabel"] is not None:
             supertagger_logits = self.supertagger.compute_logits(encoded_text_tagging)
             lexlabel_logits = self.lexlabeltagger.compute_logits(encoded_text_tagging) # shape (batch_size, seq_len, num label tags)
-            print("lexlabel_logits.shape")
-            print(lexlabel_logits.shape)
         else:
             supertagger_logits = None
             lexlabel_logits = None
@@ -294,7 +289,7 @@ class AMTask(Model):
                 self._top_6supertagging_acc(supertagger_logits, supertags, evaluation_mask)
                 self._supertagging_acc(supertagger_logits, supertags, evaluation_mask)  # compare against gold data
             if lexlabel_nll is not None:
-                self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)  # compare against gold data
+                self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)  # compare against gold data # TODO this is broken if copying is used
 
             output_dict["arc_loss"] = edge_existence_loss
             output_dict["edge_label_loss"] = edge_label_loss

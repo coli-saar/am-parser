@@ -159,7 +159,7 @@ class AMconllPredictor(Predictor):
             attributes["normalized_prepare_ftd_time"] = pred["normalized_prepare_ftd_time"]
             attributes["host"] = socket.gethostname()
             attributes["parser"] = "ftd"
-            am_sentence = AMSentence(pred["words"],attributes) #(form,replacement,lemma,pos,ne)
+            am_sentence = AMSentence(pred["words"],attributes)  # (form,replacement,lemma,pos,ne)
             sentence = list(zip(am_sentence.get_tokens(shadow_art_root=False),am_sentence.get_replacements(), am_sentence.get_lemmas(), am_sentence.get_pos(), am_sentence.get_ner(), am_sentence.get_ranges()))
             decoder.add_sentence(pred["root"],pred["predicted_heads"],pred["label_logits"],pred["lexlabels"],pred["supertags"], sentence, am_sentence.attributes_to_list())
         decoder.decode(self.threads,self.k,self.give_up,self.give_up_k_1)
