@@ -1,0 +1,5 @@
+python -u train.py jsonnets/PASautomata.jsonnet -s /local/jonasg/unsupervised2020/temp/PASAuto3/ -f --file-friendly-logging -o ' {"trainer" : {"cuda_device" :  0 }}' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags PAS auto3 --project unsupervised2020 &> /local/jonasg/unsupervised2020/PASAuto3.log &
+
+python -u train.py jsonnets/unsupervised2020/automata/PASautomata.jsonnet -s /local/jonasg/unsupervised2020/temp/PASAuto4/ -f --file-friendly-logging -o ' {"trainer" : {"cuda_device" :  0 }, "train_data_path": [["PAS", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto4/PAS/train.zip"]], "validation_data_path": [["PAS", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/PAS/dev.zip"]]}' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags PAS auto4 --project unsupervised2020 &> /proj/irtg/sempardata/unsupervised2020/logs/PASAuto4.log &
+
+wait
