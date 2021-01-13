@@ -17,7 +17,7 @@ local hidden_dim_mlp = 1024;
 
 local bert_model = "bert-large-uncased";
 
-local eval_commands = import '../configs/eval_commands.libsonnet';
+local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local encoder_output_dim = hidden_dim; #encoder output dim, per direction, so total will be twice as large
 
@@ -28,12 +28,11 @@ local use_freda = 0; #0 = no, 1 = yes
 local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encoder_output_dim; #freda again doubles output dimension
 
 #============TASKS==============
-local my_task = "DM";
-local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto4/DM/train.zip";
-local sdp_corpus_path = "/proj/irtg/sempardata/sdp/2015/train.dm.sdp";
-local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto4/DM/dev.zip";
-local dev_amconll_corpus_path = "/proj/irtg/sempardata/uniformify2020/original_decompositions/DM/dev/dev.amconll";
-local dev_sdp_corpus_path = "/proj/irtg/sempardata/sdp/2015/dev.dm.sdp";
+local my_task = "AMR-2017";
+local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/train.zip";
+local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/dev.zip";
+local dev_amconll_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/dev.amconll";
+local dev_sdp_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/goldAMR.txt";
 #===============================
 
 local dataset_reader =  {
