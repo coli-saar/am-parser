@@ -391,3 +391,14 @@ def parse_amconll(fil, validate:bool = True) -> Iterable[AMSentence]:
                           int(fields[9]), fields[10], bool(fields[11]),fields[12]))
 
 
+def write_conll(file_name: str, sentences: Iterable[AMSentence]):
+    """
+    Takes a file object and an iterable of
+    :param fn:
+    :param conll_gen:
+    :return:
+    """
+    with open(file_name, 'w') as f:
+        for sentence in sentences:
+            f.write(str(sentence))
+            f.write('\n\n')

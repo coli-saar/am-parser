@@ -3,6 +3,8 @@ models/*
 data/*
 example/minimalDMoutput/*
 example/toyAMRoutput/*
+example/toyAMRAlignmentsoutput/*
+example/toyAMRAutomataoutput/*
 example/toyAMR/nn/*
 example/minimalDMautomata/*
 example/smallDMoutput/*
@@ -214,3 +216,4 @@ test_output/dm/train/train-supertags.txt
 scripts/setupLSWJonasLocal.txt
 example/smallDM.sdp
 example/minimalDM.sdp
+example/toyAMR/train.zip
