@@ -1,6 +1,16 @@
 # Experiments
 
-## AMR
+## Preliminary experiments on server
+
+### Jan 13
+
+I'm using the am-parser repo in `/proj/irtg/sempardata/unsupervised2020/am-parser`. Note that the `am-tools.jar` in that repo is the default pulled one. I'm using that for evaluation, but I'm using the `am-tools.jar` in the parent `/proj/irtg/sempardata/unsupervised2020/` folder for Pyjnius (see in `graph-dependency-parser/important_imports.py`). I set the Java Memory to 40G for now.
+
+I'm running the whole thing on jones-1 in the `allennlp` conda env.
+
+I'm testing automaton learning on PAS and AMR with 3 and 4 sources using the script `scripts/unsupervised2020/pas3pas4amr3amr4.sh`
+
+## AMR figuring stuff out
 
 ### Baseline
 
