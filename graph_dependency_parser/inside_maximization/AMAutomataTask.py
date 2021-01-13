@@ -238,8 +238,9 @@ class AMAutomataTask(Model):
             output_dict["lexlabels"] = Supertagger.top_k_supertags(masked_lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
 
         is_annotated = metadata[0]["is_annotated"]
-        if any( metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
-            raise ValueError("Batch contained inconsistent information if data is annotated.")
+        if any(metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
+            print("Batch contained inconsistent information if data is annotated.")
+            print([meta["words"] for meta in metadata])
 
         lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
         if self.lexlabelcopier is not None:
