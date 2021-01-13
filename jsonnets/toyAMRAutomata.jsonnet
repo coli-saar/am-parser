@@ -31,7 +31,7 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 local my_task = "AMR-2017";
 local zip_path = "example/toyAMR/train.zip";
 local amconll_path = "example/toyAMR/corpus.amconll";
-local gold_path = "example/toyAMR/toyAMRgold.txt";
+local gold_path = "example/toyAMR/gold.txt";
 #===============================
 
 local dataset_reader =  {
@@ -42,7 +42,6 @@ local dataset_reader =  {
               "lowercase_tokens": true
             }
         },
-		"allow_copy_despite_sense": true
     };
 	
 local amconll_dataset_reader =  {
@@ -116,17 +115,6 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
         "supertagger_loss" : { "normalize_wrt_seq_len": false },
         "lexlabel_loss" : { "normalize_wrt_seq_len": false },
 		
-		"lexlabelcopier" : {
-			"type": "lemma_and_token",
-			"mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [hidden_dim],
-                "dropout" : [0],
-                "activations" : "tanh"
-            }
-		},
-
         "validation_evaluator": {
 			"type": "standard_evaluator",
 			"formalism" : my_task,
