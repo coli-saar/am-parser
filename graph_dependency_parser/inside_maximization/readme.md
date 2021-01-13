@@ -4,7 +4,7 @@
 
 ### Jan 13
 
-I'm using the am-parser repo in `/proj/irtg/sempardata/unsupervised2020/am-pasrer`. Note that the `am-tools.jar` in that repo is the default pulled one. I'm using that for evaluation, but I'm using the `am-tools.jar` in the parent `/proj/irtg/sempardata/unsupervised2020/` folder for Pyjnius. I set the Jaa Memory to 40G for now.
+I'm using the am-parser repo in `/proj/irtg/sempardata/unsupervised2020/am-parser`. Note that the `am-tools.jar` in that repo is the default pulled one. I'm using that for evaluation, but I'm using the `am-tools.jar` in the parent `/proj/irtg/sempardata/unsupervised2020/` folder for Pyjnius. I set the Jaa Memory to 40G for now.
 
 I'm running the whole thing on jones-1 in the `allennlp` conda env.
 
