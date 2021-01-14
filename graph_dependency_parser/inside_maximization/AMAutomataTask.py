@@ -245,7 +245,7 @@ class AMAutomataTask(Model):
                 print("Batch contained inconsistent information if data is annotated.")
                 for meta in metadata:
                     if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
-                        print('meta["is_inherently_annotated"]' + meta["is_inherently_annotated"])
+                        print('meta["is_inherently_annotated"]' + str(meta["is_inherently_annotated"]))
                         r = []
                         for i, w in enumerate(meta["words"]):
                             fields = list(w)
