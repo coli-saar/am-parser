@@ -8,7 +8,7 @@ local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
 local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
 local base_directory = "/local/mlinde/am-parser";
 
-local tool_dir = external_eval_tools/";
+local tool_dir = "external_eval_tools/";
 
 local data_paths = import 'data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
