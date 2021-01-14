@@ -8,7 +8,7 @@ local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
 local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
 local base_directory = "/local/mlinde/am-parser";
 
-local tool_dir = base_directory + "/external_eval_tools/";
+local tool_dir = external_eval_tools/";
 
 local data_paths = import 'data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
@@ -64,7 +64,7 @@ local sdp_regexes = {
         "AMR-2015" : {
             "type" : "bash_evaluation_command",
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                ' --lookup data/AMR/2015/lookup/ --th 10' +
+                ' --lookup downloaded_models/lookup/lookupdata15/ --th 10' +
             '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
             "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
                                 "R" : [1, "Recall: (?P<value>.+)"],
@@ -74,7 +74,7 @@ local sdp_regexes = {
         "AMR-2017" : {
             "type" : "bash_evaluation_command",
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                ' --lookup data/AMR/2017/lookup/ --th 10' +
+                ' --lookup downloaded_models/lookup/lookupdata17/ --th 10' +
             '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
             "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
                                 "R" : [1, "Recall: (?P<value>.+)"],
