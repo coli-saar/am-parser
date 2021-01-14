@@ -170,7 +170,8 @@ class AMConllAutomataDatasetReader(DatasetReader):
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
                                             "token_ranges": am_sentence.get_ranges(),
-                                            "is_annotated": am_sentence.is_annotated(),
+                                            "is_annotated": True,  # this dataset reader is only used for annotated data
+                                            "is_inherently_annotated": am_sentence.is_annotated(), # for debugging
                                             "max_state_id_plus_one": automaton.getStateInterner().getNextIndex(),
                                             "final_states": automaton.getFinalStates(),
                                             "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order})
