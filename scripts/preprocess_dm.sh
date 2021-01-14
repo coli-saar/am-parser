@@ -45,7 +45,7 @@ while getopts "d:m:o:h" opt; do
 done
 
 if [ "$maindir" = "" ]; then
-    printf "No main directory given. Please use -m option.\n"
+    printf "No main directory given. Please use -d option.\n"
     exit 1
 else
     printf "Processing files in main directory $maindir\n"
