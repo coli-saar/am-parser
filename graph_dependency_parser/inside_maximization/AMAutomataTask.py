@@ -244,14 +244,15 @@ class AMAutomataTask(Model):
             if any(metadata[i]["is_inherently_annotated"] != metadata[0]["is_inherently_annotated"] for i in range(batch_size)):
                 print("Batch contained inconsistent information if data is annotated.")
                 for meta in metadata:
-                    print(meta["is_inherently_annotated"])
-                    r = []
-                    for i, w in enumerate(meta["words"]):
-                        fields = list(w)
-                        if fields[-1] is None:
-                            fields = fields[:-1]  # when token range not present -> remove it
-                        r.append("\t".join([str(x) for x in [i] + fields]))
-                    print("\n".join(r)+"\n")
+                    if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
+                        print('meta["is_inherently_annotated"]' + meta["is_inherently_annotated"])
+                        r = []
+                        for i, w in enumerate(meta["words"]):
+                            fields = list(w)
+                            if fields[-1] is None:
+                                fields = fields[:-1]  # when token range not present -> remove it
+                            r.append("\t".join([str(x) for x in [i] + fields]))
+                        print("\n".join(r)+"\n")
 
         lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
         if self.lexlabelcopier is not None:

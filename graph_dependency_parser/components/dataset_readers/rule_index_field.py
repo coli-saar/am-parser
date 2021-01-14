@@ -85,13 +85,13 @@ class RuleIndexField(Field):
         for rule in self.rule_iterator:
             if rule in self.supertag_map:
                 pair = self.supertag_map[rule]
-                word_position = pair[0]#+1 # +1 to account for artificial root
+                word_position = pair[0]  #+1 # +1 to account for artificial root
                 covered_word_positions.add(word_position)
                 supertag_id = vocab.get_token_index(pair[1], namespace=self.supertag_namespace)
                 index = word_position*supertag_vocab_size+supertag_id
             elif rule in self.edge_map:
                 triple = self.edge_map[rule]
-                child_position = triple[1]# + 1 # +1 to account for artificial root
+                child_position = triple[1]  # + 1 # +1 to account for artificial root
                 word_positions_with_incoming_edge.add(child_position)
                 edge_label_id = vocab.get_token_index(triple[2], namespace=self.edge_namespace)
                 index = self.sentence_length * supertag_vocab_size + child_position * edge_vocab_size + edge_label_id
