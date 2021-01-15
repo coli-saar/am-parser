@@ -249,20 +249,20 @@ class AMAutomataTask(Model):
         is_annotated = metadata[0]["is_annotated"]
         if any(metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
             raise ValueError("Batch contained inconsistent information if data is annotated.")
-        if "is_inherently_annotated" in metadata[0]:
-            if any(metadata[i]["is_inherently_annotated"] != metadata[0]["is_inherently_annotated"] for i in
-                   range(batch_size)):
-                print("Batch contained inconsistent information if data is annotated.")
-                for meta in metadata:
-                    if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
-                        print('meta["is_inherently_annotated"]' + str(meta["is_inherently_annotated"]))
-                        r = []
-                        for i, w in enumerate(meta["words"]):
-                            fields = list(w)
-                            if fields[-1] is None:
-                                fields = fields[:-1]  # when token range not present -> remove it
-                            r.append("\t".join([str(x) for x in [i] + fields]))
-                        print("\n".join(r) + "\n")
+        # if "is_inherently_annotated" in metadata[0]:
+        #     if any(metadata[i]["is_inherently_annotated"] != metadata[0]["is_inherently_annotated"] for i in
+        #            range(batch_size)):
+        #         print("Batch contained inconsistent information if data is annotated.")
+        #         for meta in metadata:
+        #             if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
+        #                 print('meta["is_inherently_annotated"]' + str(meta["is_inherently_annotated"]))
+        #                 r = []
+        #                 for i, w in enumerate(meta["words"]):
+        #                     fields = list(w)
+        #                     if fields[-1] is None:
+        #                         fields = fields[:-1]  # when token range not present -> remove it
+        #                     r.append("\t".join([str(x) for x in [i] + fields]))
+        #                 print("\n".join(r) + "\n")
 
         lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
         if self.lexlabelcopier is not None:
