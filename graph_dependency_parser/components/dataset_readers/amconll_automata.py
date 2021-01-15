@@ -174,7 +174,10 @@ class AMConllAutomataDatasetReader(DatasetReader):
                                             "is_inherently_annotated": am_sentence.is_annotated(), # for debugging
                                             "max_state_id_plus_one": automaton.getStateInterner().getNextIndex(),
                                             "final_states": automaton.getFinalStates(),
-                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order})
+                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order,
+                                            "signature": automaton.getSignature(),
+                                            "supertag_map": supertag_map,
+                                            "edge_map": edge_map})
         # checking rule identity across maps and automaton
         # print("Rules in supertag_map:")
         # for rule in to_python(supertag_map.keySet()):
