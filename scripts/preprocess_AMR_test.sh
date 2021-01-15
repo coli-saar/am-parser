@@ -24,49 +24,58 @@
 usage="Preprocess the corpus.\n\n
 
 Arguments: \n
-\n\t     -i  directory which contains all the test corpus files (e.g. data/amrs/split/test in the official AMR corpora)
-\n\t     -o  output directory
-\n\t     -j  am-tools jar file
+\n\t     -d  main directory where corpus lives
+\n\t	 -m  memory limit to be used for the task (default: 6G)
+\n\t	 -o  directory where output files will be put (default: new 'output'folder in main directory)
+\n\t	 -t  number of threads (default: 1)
 "
 
-while getopts "i:o:j:h" opt; do
+while getopts "d:m:o:t:h" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
 	   ;;
-	i) input="$OPTARG"
+	d) maindir="$OPTARG"
+	   ;;
+	m) memLimit="$OPTARG"
 	   ;;
 	o) outputPath="$OPTARG"
 	   ;;
-	j) jar="$OPTARG"
+	t) threads="$OPTARG"
 	   ;;
-    \?) echo "Invalid option -$OPTARG" >&2
-	   ;;
+       	\?) echo "Invalid option -$OPTARG" >&2
+	    ;;
     esac
 done
 
-if [ "$input" = "" ]; then
-    printf "\n No input directory given. Please use -i option."
+if [ "$maindir" = "" ]; then
+    printf "\n No main directory given. Please use -d option."
     exit 1
+else
+    printf "Processing files in main directory $maindir\n"
 fi
 
 
 if [ "$outputPath" = "" ]; then
-    printf "\n No output directory given. Please use -o option."
-    exit 1
+    outputPath="$maindir/output"
+    printf "\n No output directory given. Using default: 'output' folder inside main directory.\n"
 fi
-
-if [ "$jar" = "" ]; then
-    printf "\n No jar file given. Please use -j option."
-    exit 1
-fi
-
+printf "Placing output in $outputPath\n"
 
 
 mkdir -p $outputPath
 log=$outputPath/preprocess.log
 if [ -f "$log" ]; then
     rm "$log"
+fi
+
+alto="am-tools.jar"
+
+if [ -f "$alto" ]; then
+    echo "jar file found at $jar"
+else
+    echo "jar file not found at $jar, downloading it!"
+    wget -O "$alto" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
 fi
 
 testNNdata=$outputPath/
@@ -86,8 +95,12 @@ NNdataCorpusName="namesDatesNumbers_AlsFixed_sorted.corpus"  # from which we get
 evalDataCorpusName="finalAlto.corpus"                        # from which we get the dev and test evaluation data
 trainMinuteLimit=600                                         # limit for generating NN training data
 devMinuteLimit=20                                            # limit for geneating NN dev data
-threads=1
-memLimit=6G
+if [ "$threads" = "" ]; then
+    threads=1
+fi
+if [ "$memLimit" = "" ]; then
+    memLimit=6G
+fi
 posTagger="downloaded_models/stanford/english-bidirectional-distsim.tagger"
 nerTagger="downloaded_models/stanford/english.conll.4class.distsim.crf.ser.gz"
 wordnet="downloaded_models/wordnet3.0/dict/"
