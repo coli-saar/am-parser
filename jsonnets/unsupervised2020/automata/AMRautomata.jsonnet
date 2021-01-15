@@ -57,7 +57,7 @@ local amconll_dataset_reader = {
 
 local data_iterator = {
         "type": "same_formalism",
-        "batch_size": 48,
+        "batch_size": 32,
         "formalisms" : [my_task]
     };
 
@@ -120,7 +120,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 			"formalism" : my_task,
 			"system_input" : dev_amconll_corpus_path,
 			"gold_file": dev_sdp_corpus_path,
-			"use_from_epoch" : 3,
+			"use_from_epoch" : 6,
 			"predictor" : {
                 "type" : "amconll_automata_predictor",
                 "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
