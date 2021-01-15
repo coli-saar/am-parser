@@ -4,10 +4,10 @@ Modular implementation of the AM dependency parser used in [Compositional Semant
 ## Online Demo
 Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
 
-## Quick Guide
+## Quick Guide to the Pretrained Models
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
-You can find documentation on how to train the parser in the [wiki pages](https://github.com/coli-saar/am-parser/wiki/Train-Parser) (we will update this part of the documentation later in fall 2019 to make it easier for you to train your own models).
+**You can find documentation on how to train the parser on the [wiki pages](https://github.com/coli-saar/am-parser/wiki).**
 
 ### Requirements
 - Python 3.7 up to version 3.7.3
@@ -23,8 +23,6 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 
-## Pretrained models
-
 ### Reproducing our experiment results
 
 From the main directory, run `bash scripts/predict.sh` with the following arguments (or with -h for help):
@@ -38,7 +36,7 @@ bash scripts/predict.sh -i INPUT -T DM -o example/
 ``` 
 will create a file `DM.sdp` in the `example` folder with graphs for the sentences in `INPUT`, as well as print evaluation scores compared to the gold graphs in `INPUT`.
 
-With this pre-trained model you should get (labeled) F-scores close to the following on the test sets:
+With this pre-trained model (this is the MTL+BERT version, corresponding to the bottom-most line in Table 1 in the paper) you should get (labeled) F-scores close to the following on the test sets:
 
 | DM id | DM ood | PAS id| PAS ood| PSD id | PSD ood | EDS (Smatch) | EDS (EDM) | AMR 2017 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
