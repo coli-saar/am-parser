@@ -18,14 +18,14 @@
 ## limitations under the License.
 ##
 
-usage="Preprocess an DM 2015 Shared task corpus, in ACL 2019 style.\n\n
+usage="Preprocess an EDS corpus, in penman notation.\n\n
 Arguments: \n
 
 \n\t     -d  main directory where corpus lives
 \n\t     -o  directory where output files will be put (default: 'output' within main directory)
 "
 
-while getopts "d:m:o:h" opt; do
+while getopts "d:o:h" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
