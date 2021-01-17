@@ -124,8 +124,8 @@ class AMConllDatasetReader(DatasetReader):
                     am_sentence.words[i] = am_sentence.words[i].set_edge_label("IGNORE")
                 if am_sentence.words[i].lexlabel == "NULL":
                     am_sentence.words[i] = am_sentence.words[i].set_lexlabel("_")
-            print("am sentence fixed")
-            print(am_sentence)
+            # print("am sentence fixed")
+            # print(am_sentence)
 
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens
