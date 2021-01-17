@@ -104,15 +104,19 @@ class AMConllDatasetReader(DatasetReader):
         fields: Dict[str, Field] = {}
 
 
-        # sometimes, when there is only one word in the sentence, it does not have the correct incoming edge
+        # sometimes, the ROOT edge label is missing in the sentence
         # we fix this here, although it may a bit hacky # TODO maybe this can be fixed in the files instead
-        # In particular, this shows up in the "retrain" method of the unsupervised2020 project
-        word_ids_with_supertag = []
+        # In particular, this shows up in the "retrain" method of the unsupervised2020 project and the AMR baselines
+        word_ids_with_supertag_and_no_edge_label = []
+        has_root = False
         for i, word in enumerate(am_sentence.words):
             if not word.fragment == "_":
-                word_ids_with_supertag.append(i)
-        if len(word_ids_with_supertag) == 1:
-            i = word_ids_with_supertag[0]
+                if word.label == "_" or word.label == "IGNORE":
+                    word_ids_with_supertag_and_no_edge_label.append(i)
+            if word.label == "ROOT":
+                has_root = True
+        if len(word_ids_with_supertag_and_no_edge_label) == 1 and not has_root:
+            i = word_ids_with_supertag_and_no_edge_label[0]
             am_sentence.words[i] = am_sentence.words[i].set_edge_label("ROOT")
 
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
