@@ -118,6 +118,8 @@ class AMConllDatasetReader(DatasetReader):
         if len(word_ids_with_supertag_and_no_edge_label) == 1 and not has_root:
             i = word_ids_with_supertag_and_no_edge_label[0]
             am_sentence.words[i] = am_sentence.words[i].set_edge_label("ROOT")
+            print("root fixed in am sentence")
+            print(am_sentence)
 
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens
