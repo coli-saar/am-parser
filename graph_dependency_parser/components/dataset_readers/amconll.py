@@ -62,14 +62,14 @@ class AMConllDatasetReader(DatasetReader):
         if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
             with open(file_path, 'r') as amconll_file:
                 logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
-                sents = list(parse_amconll(amconll_file))
+                sents = list(parse_amconll(amconll_file, validate=False))
                 for i,am_sentence in  enumerate(sents):
                     if i <= len(sents) * self.fraction:
                         yield self.text_to_instance(formalism,i,am_sentence)
         else:
             with open(file_path, 'r') as amconll_file:
                 logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-                for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
+                for i,am_sentence in  enumerate(parse_amconll(amconll_file, validate=False)):
                     yield self.text_to_instance(formalism,i,am_sentence)
 
     @overrides
