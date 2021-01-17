@@ -103,6 +103,18 @@ class AMConllDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
+
+        # sometimes, when there is only one word in the sentence, it does not have the correct incoming edge
+        # we fix this here, although it may a bit hacky # TODO maybe this can be fixed in the files instead
+        # In particular, this shows up in the "retrain" method of the unsupervised2020 project
+        word_ids_with_supertag = []
+        for i, word in enumerate(am_sentence.words):
+            if not word.fragment == "_":
+                word_ids_with_supertag.append(i)
+        if len(word_ids_with_supertag) == 1:
+            i = word_ids_with_supertag[0]
+            am_sentence.words[i] = am_sentence.words[i].set_edge_label("ROOT")
+
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens
         fields["pos_tags"] = SequenceLabelField(am_sentence.get_pos(), tokens, label_namespace="pos")
