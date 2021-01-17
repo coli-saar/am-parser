@@ -118,15 +118,14 @@ class AMConllDatasetReader(DatasetReader):
         if len(word_ids_with_supertag_and_no_edge_label) == 1 and not has_root:
             i = word_ids_with_supertag_and_no_edge_label[0]
             am_sentence.words[i] = am_sentence.words[i].set_edge_label("ROOT")
+        if am_sentence.is_annotated():
             for i in range(len(am_sentence.words)):
                 if am_sentence.words[i].label == "_":
                     am_sentence.words[i] = am_sentence.words[i].set_edge_label("IGNORE")
-            print("root fixed in am sentence")
+                if am_sentence.words[i].lexlabel == "NULL":
+                    am_sentence.words[i] = am_sentence.words[i].set_lexlabel("_")
+            print("am sentence fixed")
             print(am_sentence)
-        else:
-            print("root not fixed")
-            print(word_ids_with_supertag_and_no_edge_label)
-            print(has_root)
 
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens

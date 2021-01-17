@@ -54,6 +54,10 @@ class Entry:
         return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, self.lexlabel,
                      self.typ, self.head, edge_label, self.aligned, self.range)
 
+    def set_lexlabel(self, lexlabel: str) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, lexlabel,
+                     self.typ, self.head, self.label, self.aligned, self.range)
+
     def set_fragment(self, fragment: str) -> "Entry":
         return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, fragment, self.lexlabel,
                      self.typ, self.head, self.label, self.aligned, self.range)
