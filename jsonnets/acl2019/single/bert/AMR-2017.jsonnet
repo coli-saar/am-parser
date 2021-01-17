@@ -123,7 +123,7 @@ local data_iterator = {
     "trainer": {
         "type" : "am-trainer",
         "num_epochs": num_epochs,
-        "patience" : 10,
+        "patience" : 40,
         "cuda_device": device,
         "optimizer": {
             "type": "adam",

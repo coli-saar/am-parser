@@ -68,24 +68,24 @@ function (dataset_reader, data_iterator) {
         "formalism" : "AMR-2017",
         "system_input" : "data/AMR/2017/dev/dev.amconll",
         "gold_file": "data/AMR/2017/dev/goldAMR.txt",
-        "use_from_epoch" : 10,
+        "use_from_epoch" : 8,
         "predictor" : {
                 "type" : "amconll_predictor",
                 "dataset_reader" : dataset_reader, #same dataset_reader as above.
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k,
-                "threads" : 4,
+                "threads" : 1,
                 "give_up": give_up, #retry with smaller k
                 "evaluation_command" : eval_commands['commands']['AMR-2017']
         }
 
   },
 
-    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",2,10),
+    "DM" : sdp_evaluator(dataset_reader, data_iterator, "DM",1,8),
 
-    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",4,10),
+    "PAS" :  sdp_evaluator(dataset_reader, data_iterator, "PAS",1,8),
 
-    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",2,10),
+    "PSD" :  sdp_evaluator(dataset_reader, data_iterator, "PSD",1,8),
 
     "EDS" :  {
         "type": "standard_evaluator",
