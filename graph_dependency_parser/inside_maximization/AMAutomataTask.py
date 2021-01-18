@@ -87,6 +87,7 @@ class AMAutomataTask(Model):
                  lexlabelcopier: Copier = None,
                  output_null_lex_label: bool = True,
                  loss_mixing: Dict[str, float] = None,
+                 all_automaton_loss = False,
                  dropout: float = 0.0,
                  validation_evaluator: Optional[Evaluator] = None,
                  regularizer: Optional[RegularizerApplicator] = None):
@@ -101,6 +102,7 @@ class AMAutomataTask(Model):
         self.loss_function = loss_function
         self.lexlabelcopier = lexlabelcopier
         self.loss_mixing = loss_mixing or dict()
+        self.all_automaton_loss = all_automaton_loss
         self.validation_evaluator = validation_evaluator
         self.output_null_lex_label = output_null_lex_label
 
@@ -120,6 +122,10 @@ class AMAutomataTask(Model):
         if len(not_contained):
             logger.critical(f"The following loss name(s) are unknown: {not_contained}")
             raise ValueError(f"The following loss name(s) are unknown: {not_contained}")
+
+        if self.all_automaton_loss:
+            self.loss_mixing["edge_existence"] = 0.0
+            self.loss_mixing["lexlabel"] = 0.0
 
         self._lexlabel_acc = CategoricalAccuracy()
         self._attachment_scores = AttachmentScores()
@@ -264,6 +270,7 @@ class AMAutomataTask(Model):
         #                     r.append("\t".join([str(x) for x in [i] + fields]))
         #                 print("\n".join(r) + "\n")
 
+        orig_lexlabel_logits = lexlabel_logits # TODO I think this is not compatible with copying at this point
         lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
         if self.lexlabelcopier is not None:
             lexlabel_prob_matrix, p_vocab, p_lemma, p_token = self.lexlabelcopier.compute_logprobs(
@@ -284,6 +291,7 @@ class AMAutomataTask(Model):
 
         # Compute loss:
         if is_annotated and head_indices is not None and rule_index is not None:
+            #  torch.autograd.set_detect_anomaly(True)  # this allows pinpoining errors better in debugging, but costs speed
 
             # convert neural outputs into a format (view) that makes it possible to associate them with automaton rules via rule_index
             # To be precise, the indices stored in rule_index[i] correspond to indices of all_logprobs[i] (i = entry in batch)
@@ -292,11 +300,41 @@ class AMAutomataTask(Model):
             if print_diagnostics:
                 print(f"st_size: {st_size}")
                 print(f"el_size: {el_size}")
+                print(f"orig_lexlabel_logits size: {orig_lexlabel_logits.size()}")
+                print(f"lexlabels size: {lexlabels.size()}")
+                print(f"head_indices size: {head_indices.size()}")
+                print(f"edge_existence_scores size: {edge_existence_scores.size()}")
+
             supertagger_logprobs = torch.nn.functional.log_softmax(supertagger_logits, dim=2)
             edge_label_logprobs = torch.nn.functional.log_softmax(edge_label_logits, dim=2)
-            all_logprobs = torch.cat(
-                [supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
-                dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
+            if self.all_automaton_loss:
+                lexlabel_logprobs = torch.nn.functional.log_softmax(orig_lexlabel_logits, dim=2)
+                edge_existence_logprobs = torch.nn.functional.log_softmax(edge_existence_scores, dim=2)
+                lexlabel_buffer = torch.zeros(batch_size, 1, dtype=torch.long)
+                # print(lexlabel_buffer)
+                lexlabel_lookup = torch.cat([lexlabel_buffer, lexlabels], dim=1).view(batch_size, seq_len, 1)
+                # print(lexlabel_lookup)
+                # print(lexlabel_logits)
+                lexlabel_logprobs = torch.gather(lexlabel_logprobs, 2, lexlabel_lookup)
+                edge_existence_logprobs = torch.gather(edge_existence_logprobs, 2,
+                                                       head_indices.view(batch_size, seq_len, 1))
+
+                tag_logprobs = supertagger_logprobs + lexlabel_logprobs  # with broadcasting
+                edge_logprobs = edge_label_logprobs + edge_existence_logprobs  # with broadcasting
+                if print_diagnostics:
+                    print(f"supertagger_logprobs.size {supertagger_logprobs.size()}")
+                    print(f"lexlabel_logprobs.size {lexlabel_logprobs.size()}")
+                    print(f"tag_logprobs.size {tag_logprobs.size()}")
+                    print(f"edge_label_logprobs.size {edge_label_logprobs.size()}")
+                    print(f"edge_existence_logprobs.size {edge_existence_logprobs.size()}")
+                    print(f"edge_logprobs.size {edge_logprobs.size()}")
+                all_logprobs = torch.cat(
+                    [tag_logprobs.view(batch_size, -1), edge_logprobs.view(batch_size, -1)],
+                    dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
+            else:
+                all_logprobs = torch.cat(
+                    [supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
+                    dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
 
             # printing some information for testing
             # print(f"all_logprobs.size(): {all_logprobs.size()}")
@@ -313,6 +351,8 @@ class AMAutomataTask(Model):
                 print(f"time before automaton loss: {time() - start_time}")
             start_time = time()
             # automaton loss
+            if print_diagnostics:
+                print(f"rule_index {rule_index}")
             logprobs_for_rules_premask = torch.gather(all_logprobs, 1, rule_index)
             logprobs_for_rules = logprobs_for_rules_premask * rule_mask.int().float()
             if print_diagnostics:
@@ -426,7 +466,10 @@ class AMAutomataTask(Model):
 
             # gold_edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, head_indices)
             # edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
-            edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
+            if self.loss_mixing["edge_existence"] > 0:
+                edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
+            else:
+                edge_existence_loss = 0
             if print_diagnostics:
                 print(f"edge_existence loss: {edge_existence_loss}")
 
@@ -437,7 +480,7 @@ class AMAutomataTask(Model):
             # else:
             #     supertagging_nll = None
 
-            if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
+            if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None and self.loss_mixing["lexlabel"] > 0:
                 if self.lexlabelcopier is not None:
                     lexlabel_logprob_diagonal = torch.log(torch.diagonal(lexlabel_prob_matrix, dim1=1, dim2=2))
                     lexlabel_nll = -torch.sum(lexlabel_logprob_diagonal)  # negative log likelihood loss
@@ -729,6 +772,8 @@ class AMAutomataTask(Model):
         # Mask padded tokens, because we only want to consider actual words as heads.
         if mask is not None:
             minus_mask = (1 - mask).byte().unsqueeze(2)
+            # existence_scores = existence_scores.masked_fill(minus_mask, -numpy.inf)
+            # use inplace operation to save memory (note the underscore at the end of the operation)
             existence_scores.masked_fill_(minus_mask, -numpy.inf)
 
         # Compute the heads greedily.
