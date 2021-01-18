@@ -28,7 +28,7 @@ from allennlp.data import Vocabulary
 from allennlp.models import Model
 from allennlp.modules import InputVariationalDropout
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
-from allennlp.nn.util import get_lengths_from_binary_sequence_mask
+from allennlp.nn.util import get_lengths_from_binary_sequence_mask, get_device_of
 from allennlp.training.metrics import CategoricalAccuracy, AttachmentScores
 from allennlp.training.metrics.average import Average
 from overrides import overrides
@@ -310,7 +310,12 @@ class AMAutomataTask(Model):
             if self.all_automaton_loss:
                 lexlabel_logprobs = torch.nn.functional.log_softmax(orig_lexlabel_logits, dim=2)
                 edge_existence_logprobs = torch.nn.functional.log_softmax(edge_existence_scores, dim=2)
-                lexlabel_buffer = torch.zeros(batch_size, 1, dtype=torch.long)
+                cuda_check = lexlabels.is_cuda
+                if cuda_check:
+                    device = lexlabels.get_device()
+                else:
+                    device = "cpu"
+                lexlabel_buffer = torch.zeros(batch_size, 1, dtype=torch.long, device=device)
                 # print(lexlabel_buffer)
                 lexlabel_lookup = torch.cat([lexlabel_buffer, lexlabels], dim=1).view(batch_size, seq_len, 1)
                 # print(lexlabel_lookup)
