@@ -98,6 +98,9 @@ class AMSentence:
     def get_ner(self) -> List[str]:
         return [word.ner_tag for word in self.words]
 
+    def get_types(self) -> List[str]:
+        return [word.typ for word in self.words]
+
     def get_supertags(self) -> List[str]:
         return [word.fragment+"--TYPE--"+word.typ for word in self.words]
 
