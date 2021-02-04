@@ -49,3 +49,30 @@ There are three Java scripts that categorise corpus entries, count the entries i
    > (i_4<root> / --LEX--  :ARG1 (i_5<S0>)),(S0(S1())): 1
     
    * For each supertag, prints an amconll file of all sentences containing a word that is assigned that supertag. Because supertags are full of weird symbols, files are instead numbered. `<i>_<j>.amconll` where `<i>` is the number printed before the graph constant, e.g. `3` above, and `<j>` is the index of the supertag in the list of supertags under that graph, starting at 0. In the example above, to find the 120 sentences that contain the graph constant `[i_4<root>/--LEX-- -ARG1-> i_5]` with supertag `(i_4<root> / --LEX--  :ARG1 (i_5<S0>)),(S0(S2()))`, look in file `3_2.amconll`.
+   
+   
+### Counting and printing more stuff
+
+You can write new Java scripts to count and print examples of other phenomena. The methods for printing live in `CountSources`. Use the existing scripts as a model.
+
+Note also there is a bug where for each large category we print the number of subcategories instead of the total number of sentences in that large category.
+
+### Get all counts with a script
+
+There is a script in `am-tools/scripts` which will run the three existing counters on all four graphbanks. it's simple and you can edit it if you want it to behave differently. To run it:
+
+```bash
+bash 
+
+```
+   
+   
+ ## Visualising examples
+ 
+ I used a script from `am-parser` designed to compare two different analyses, so it will show the AM dep-tree twice. I used the "own GUI approach" explained here: https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
+ 
+You can visualise a random sample of AM dep-trees from the specialsed amconll files you generated with the Java scripts. To make your life easier, you can use the script `analyzers/visualise_unsupervised.sh` which takes as argument the path to the amconll file you want to visualise samples from. It will filter out sentences shorter than 5 and longer than 15 words, randomise the order, and display the AM dependency trees. 
+
+Note it won't show the final graphs; try https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#4-get-pdf-with-graph-for-one-sentence if you want to see the graph for a sentence. 
+
+There is a random seed, so you will get the same sample as we did. If you want to change the filtering or seed, see https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
