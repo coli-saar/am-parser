@@ -3,6 +3,24 @@ To be added to the wiki when we publish the paper
 
 ## Counting and printing examples of phenomena
 
+### Get all counts and examples with a script
+
+There are three Java scripts that categorise corpus entries, count the entries in each category, and print new amconll files for each category. They count the following, explained in detail below:
+
+ * Supertags: counts supertags by unlabelled graph constant
+ * Sources: counts sources by graph edge label
+ * Edges: counts AM dep-tree edge labels (AM operations)
+
+There is a script in `am-tools/scripts` which will run the three existing counters on all four graphbanks. It's simple and you can edit it if you want it to behave differently. Currently it assumes the corpora are `<path/to/amconll_files/DM.amconll>` etc, and that you have DM, PAS, PSD, and AMR.  To run it:
+
+```bash
+bash all_counts.sh <path/to/amconll_files> <path/to/output_folder>
+
+```
+   
+   
+It will put the output files in `<output_path>/sources/DM/`, `<output_path>/supertags/DM/` etc.
+
 There are three Java scripts that categorise corpus entries, count the entries in each category, and print new amconll files for each category. These are:
   1. `CountEdges`: creates a map from AM operation (= dep tree edge labels) to sentences that use that operation. 
    * Creates a directory called `edges` and a daughter `edges/examples`
@@ -57,17 +75,7 @@ You can write new Java scripts to count and print examples of other phenomena. T
 
 Note also there is a bug where for each large category we print the number of subcategories instead of the total number of sentences in that large category.
 
-### Get all counts with a script
 
-There is a script in `am-tools/scripts` which will run the three existing counters on all four graphbanks. It's simple and you can edit it if you want it to behave differently. Currently it assumes the corpora are `<path/to/amconll_files/DM.amconll>` etc, and that you have DM, PAS, PSD, and AMR.  To run it:
-
-```bash
-bash all_counts.sh <path/to/amconll_files> <path/to/output_folder>
-
-```
-   
-   
-It will put the output files in `<output_path>/sources/DM/`, `<output_path>/supertags/DM/` etc.
    
  ## Visualising examples
  
