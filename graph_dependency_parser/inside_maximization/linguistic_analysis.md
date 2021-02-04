@@ -21,6 +21,8 @@ bash all_counts.sh <path/to/amconll_files> <path/to/output_folder>
    
 It will put the output files in `<output_path>/sources/DM/`, `<output_path>/supertags/DM/` etc.
 
+### Details of counters
+
 There are three Java scripts that categorise corpus entries, count the entries in each category, and print new amconll files for each category. These are:
   1. `CountEdges`: creates a map from AM operation (= dep tree edge labels) to sentences that use that operation. 
    * Creates a directory called `edges` and a daughter `edges/examples`
