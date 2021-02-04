@@ -27,6 +27,7 @@ There are three Java scripts that categorise corpus entries, count the entries i
    * Prints a summary of the counts to `edges/summary.txt`, e.g. 
    
    > Edges in train-final/DM
+   >
    > 0. MOD_S2  ####  308231
    > 1. APP_S0  ####  171516
    > 2. IGNORE  ####  169012
