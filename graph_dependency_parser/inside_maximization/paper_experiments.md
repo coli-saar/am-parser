@@ -109,7 +109,7 @@ with the last one also running a 'retrain' experiment (supervised training on a 
 
 ### 6 sources
 
-Running the joint neural learning with 6 sources takes extra memory. I therefore created `/proj/irtg/sempardata/unsupervised2020/am-parser-bigmemory/`, which is an am-parser clone but in `graph_dependency_parser/important_imports.py` gives Pyjnius 150G instead of 50G memory. Also batch sizes are reduced to 24 (AMR 16), and evaluation starts at epoch 10 (AMR 14) since training is slower.
+Running the joint neural learning with 6 sources takes extra memory. I therefore created `/proj/irtg/sempardata/unsupervised2020/am-parser-bigmemory/`, which is an am-parser clone but in `graph_dependency_parser/important_imports.py` gives Pyjnius 150G instead of 50G memory. Also batch sizes are reduced to 24 (AMR 16), and evaluation starts at epoch 10 (AMR 14) since training is slower. I ran those experiments on tony-1 since the joneses can't handle it.
 
 ### AMR all edges (not in paper)
 
