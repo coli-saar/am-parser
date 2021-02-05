@@ -50,7 +50,7 @@ For the neural parser, use the `unsupervised2020` branch of `am-parser` commit `
 
 ### Neural joint learning (unsupervised)
 
-For this, have a look at the scripts in `/proj/irtg/sempardata/unsupervised2020/am-parser/scripts/unsupervised2020/`. They run commands of essentially this shape:
+For this, have a look at the scripts in `/proj/irtg/sempardata/unsupervised2020/am-parser/scripts/unsupervised2020/` (or actually https://github.com/coli-saar/am-parser/tree/unsupervised2020/scripts/unsupervised2020). They run commands of essentially this shape:
 
 ```
 python -u train.py jsonnets/unsupervised2020/automata/DMallAutomaton.jsonnet
@@ -60,27 +60,50 @@ python -u train.py jsonnets/unsupervised2020/automata/DMallAutomaton.jsonnet
 &> /proj/irtg/sempardata/unsupervised2020/logs/DMAuto3-allAutomaton-jan20.log &
 ```
 
-(this example coming from `dm3pas3psd4amr4-jan15.sh`). I added some linebreaks for readability here; this should all be one line in practice. This command has several components:
+(this example coming from https://github.com/coli-saar/am-parser/tree/unsupervised2020/scripts/unsupervised2020/dm3pas3psd4amr4-jan15.sh). I added some linebreaks for readability here; this should all be one line in practice. This command has several components:
 
 1. `python -u train.py` the basic python command
 2. `jsonnets/unsupervised2020/automata/DMallAutomaton.jsonnet` the AllenNLP config file with all the information about the model. Use `XallAutomaton.jsonnet` with `X` from `AMR, DM, PAS, PSD`.
-3. `-s /local/jonasg/unsupervised2020/temp/DMAuto3-allAutomaton-jan20/` is the output path where the trained model and generated `amconll` files are created (the former for the best epoch, the latter for each epoch). There are two types: the first is e.g. `DM_amconll_list_train_epoch99.amconll` (and the same for dev) contain trees based on the viterbi tree of the tree automaton (for the sentences in the `train.zip` and `dev.zip` respectively). The second type is e.g. `dev_epoch_99.amconll` which contains predictions (unrestricted by the tree automaton, i.e. may yield the wrong graph) on the whole dev set. **If you reproduce the experiments, please use new output folders** (you probably don't have write permission there anyway).
+3. `-s /local/jonasg/unsupervised2020/temp/DMAuto3-allAutomaton-jan20/` is the output path where the trained model and generated `amconll` files are created (the former for the best epoch, the latter for each epoch). There are two types: the first is e.g. `DM_amconll_list_train_epoch99.amconll` (and the same for dev) contain trees based on the viterbi tree of the tree automaton (for the sentences in the `train.zip` and `dev.zip` respectively). The second type is e.g. `dev_epoch_99.amconll` which contains predictions (unrestricted by the tree automaton, i.e. may yield the wrong graph) on the whole dev set. **If you reproduce the experiments, please use new output folders** (you probably don't have write permission there anyway). Comet.ml stores the file locations and servers for each experiment, e.g. 
 3. `-f --file-friendly-logging` don't worry about this
-4. `-o ' {"trainer" : {"cuda_device" :  1 }, "train_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/train.zip"]], "validation_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/dev.zip"]]}'` this overwrites some of the `.jsonnet` config file. I use it to (a) specify which GPU to use, and (b) give it the paths to the input data (here, the DM tree automata with 3 sources). If I want test set evaluation, I also set that up here (see e.g. `test-allAutomaton-dm3pas3psdOld4amr3-jan23.sh`)
+4. `-o ' {"trainer" : {"cuda_device" :  1 }, "train_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/train.zip"]], "validation_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/dev.zip"]]}'` this overwrites some of the `.jsonnet` config file. I use it to (a) specify which GPU to use (c.f. https://github.com/coli-saar/am-parser/wiki/Training-the-Parser), and (b) give it the paths to the input data (here, the DM tree automata with 3 sources). If I want test set evaluation, I also set that up here (see e.g. `test-allAutomaton-dm3pas3psdOld4amr3-jan23.sh`)
 5. `--comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags DM allAutomaton3 --project unsupervised2020` this sets up comet.ml logging. the number/letter sequence is my personal sequence, meaning it logs experiments into my account. I also specify which project (use `unsupervised2020-amr` for AMR, or your own). It also adds experiment-specific tags, see below.
 6. `&> /proj/irtg/sempardata/unsupervised2020/logs/DMAuto3-allAutomaton-jan20.log &` just logging things (**again, change this path please when reproducing**) and adding the `&` in the script in the end to have multiple commands run in parallel.
 
-**Tags:** 
+**Tags:**
+
+* I used the tags `DM` and `PAS` for the two graphbanks. For PSD, i used the `oldPre` tag (see PSD pre/postprocessing below), and for AMR I used no extra tag since it is a separate comet project anyway.
+* I used the `allAutomatonX` tag with X the number of sources for the joint neural method. For the baselines, I used the tags `randomX`, `EM_0iterX` and `EMX`.
+* For the runs that were also evaluated on the test set, I used the tags `testa`, `testb` and `testc` for the three runs.
+
+The results are also in this spreadsheet: https://docs.google.com/spreadsheets/d/1nBs_88iLZliUK2VPq1flDhRhVuDv4D899KPdvbMJUyA/edit?usp=sharing
 
 
 ### Baselines (supervised)
 
+Training the baselines is similar, but uses different jsonnet files (since the neural architecture is different for supervised training) and of course the respective amconll files as input, not the zip files with the automata. The relevant scripts are:
 
+* https://github.com/coli-saar/am-parser/blob/unsupervised2020/scripts/unsupervised2020/trainSDP_EM3.sh
+* https://github.com/coli-saar/am-parser/blob/unsupervised2020/scripts/unsupervised2020/trainSDP_EM_0iter3.sh
+* https://github.com/coli-saar/am-parser/blob/unsupervised2020/scripts/unsupervised2020/trainSDP_random3.sh
+* https://github.com/coli-saar/am-parser/blob/unsupervised2020/scripts/unsupervised2020/amrEM3-iter0-rnd-retrain3.sh
+
+with the last one also running a 'retrain' experiment (supervised training on a training file generated by the neural joint learning model) that didn't make it into the paper.
 
 ## Variants
 
-### AMR all edges
-
-### PSD pre/postprocessing
-
 ### 6 sources
+
+### AMR all edges (not in paper)
+
+I also ran the AMR experiments without the step in preprocessing that removes coreference edges based on the old AM decomposition heuristics. Everything with `allEdges` or `AllEdges` refers to this. To obtain the training data, I ran the same commands as in https://github.com/coli-saar/am-parser/blob/master/scripts/preprocess-no-baseline.sh, but only up to the calls of `de.saar.coli.amrtagging.formalisms.amr.tools.datascript.RawAMRCorpus2TrainingData` (the rest is not necessary for any experiment here), and I ran these calls without the `--corefSplit` flag (note that this only works in the `new_decomposition` branch at this point, since previously this flag was bugged and always defaulted to true, whether given or not).
+
+### PSD pre/postprocessing (not in paper)
+
+
+
+### Supervised edge existance and lexical label (not in paper)
+
+To use supervised loss for edge existence and lexical labels (since they are given even if the source names are not), use the `Xautomaton.jsonnet` files with `X` from `AMR, DM, PAS, PSD`. Comet experiments for this used the tag `autoS` where S is the number of sources. Note that this worked worse for AMR but similar to the `allAutomaton` method for SDP.
+
+
