@@ -57,7 +57,7 @@ Similar scripts exist for creating the training data for the baselines. Again in
 
 The AMR decomposition scripts want as input the preprocessed AMR corpus. For this, use the `preprocess-no-baseline.sh` script of the original `am-parser`, i.e. https://github.com/coli-saar/am-parser/blob/master/scripts/preprocess-no-baseline.sh (this may be renamed to `preprocessAMR.sh` in the course of Pauline's cleanup work). Usage see here: https://github.com/coli-saar/am-parser/wiki/Converting-individual-formalisms-to-AM-CoNLL#amr
 
-We are then interested in the `namesDatesNumbers_AlsFixed_sorted.corpus` files in the `data/alto/train/` and `data/alto/dev/` folders of the output folder of that preprocessing script. These are the `AMRtrain.corpus` and `AMRdev.corpus` files in `/proj/irtg/sempardata/unsupervised2020/` (see also the `/proj/irtg/sempardata/unsupervised2020/readme.txt)`).
+We are then interested in the `namesDatesNumbers_AlsFixed_sorted.corpus` files in the `data/alto/train/` and `data/alto/dev/` folders of the output folder of that preprocessing script. These are the `AMRtrain.corpus` and `AMRdev.corpus` files in `/proj/irtg/sempardata/unsupervised2020/` (see also the `/proj/irtg/sempardata/unsupervised2020/readme.txt`).
 
 ## Neural parser
 
