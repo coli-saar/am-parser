@@ -94,13 +94,17 @@ with the last one also running a 'retrain' experiment (supervised training on a 
 
 ### 6 sources
 
+Running the joint neural learning with 6 sources takes extra memory. I therefore created `/proj/irtg/sempardata/unsupervised2020/am-parser-bigmemory/`, which is an am-parser clone but in `graph_dependency_parser/important_imports.py` gives Pyjnius 150G instead of 50G memory. Also batch sizes are reduced to 24 (AMR 16), and evaluation starts at epoch 10 (AMR 14) since training is slower.
+
 ### AMR all edges (not in paper)
 
 I also ran the AMR experiments without the step in preprocessing that removes coreference edges based on the old AM decomposition heuristics. Everything with `allEdges` or `AllEdges` refers to this. To obtain the training data, I ran the same commands as in https://github.com/coli-saar/am-parser/blob/master/scripts/preprocess-no-baseline.sh, but only up to the calls of `de.saar.coli.amrtagging.formalisms.amr.tools.datascript.RawAMRCorpus2TrainingData` (the rest is not necessary for any experiment here), and I ran these calls without the `--corefSplit` flag (note that this only works in the `new_decomposition` branch at this point, since previously this flag was bugged and always defaulted to true, whether given or not).
 
 ### PSD pre/postprocessing (not in paper)
 
+There are three versions of the PSD conjunction pre- and postprocessing: (a) none, (b) as in ACL19 ('old') and (c) new (which also performs the pre/postprocessing for modifier edges). I used (b) in the paper since it is the easiest to explain ('same as ACL19'), is comparable to ACL19 and had best performance. For this, use the `--useLegacyPSDpreprocessing` option in `de.saar.coli.amtools.decomposition.SourceAutomataCLI`. For (a), use the `--noPSDpreprocessing` option in `SourceAutomataCLI` and in https://github.com/coli-saar/am-parser/blob/unsupervised2020/configs/eval_commands.libsonnet (or rather your local copy) replace in "commands" whatever is after "PSD" with "self.DM" (like it is for PAS). For (c), use no extra option in `SourceAutomataCLI`. In the evaluation commands, the difference between (b) and (c) is the `--legacyACL19` option of `ToSDPCorpus` (only available in the master branch). 
 
+**TODO** I may have accidentally not used the `--legacyACL19` option in our experiments. I seem to remember that it didn't make a difference in that direction anyway (since the additional preprocessing didn't happen, trying to do additional postprocessing simply doesn't do anything), but I should double check for the camera ready version.
 
 ### Supervised edge existance and lexical label (not in paper)
 
