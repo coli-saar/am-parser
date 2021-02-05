@@ -32,7 +32,22 @@ echo $dmCommand
 eval $dmCommand
 ```
 
-It first does some setup, describing output path and the path to the jar file, and loading input filepaths on the server from `storeFilePaths.sh`. Then it prints and evaluates the main command, which is a call to the `de.saar.coli.amtools.decomposition.SourceAutomataCLI` class (`SourceAutomataCLIAMR` for AMR; have a look at `createAMRAutomata.sh` for its use). This will, in the output folder (i.e. the `-o` option; **if you reproduce the experiment, please use different folders here**), create a `train.zip` and a `dev.zip`, which contain all the information needed to train the neural parser while jointly learning the source names, in particular all tree automata and an `amconll` file with the sentences (note that the command also puts a log file into the same folder).
+It first does some setup, describing output path and the path to the jar file, and loading input filepaths on the server from `/proj/irtg/sempardata/unsupervised2020/scripts/storeFilePaths.sh`. Then it prints and evaluates the main command, which is a call to the `de.saar.coli.amtools.decomposition.SourceAutomataCLI` class (`SourceAutomataCLIAMR` for AMR; have a look at `createAMRAutomata.sh` for its use). This will, in the output folder (i.e. the `-o` option; **if you reproduce the experiment, please use different folders here**), create a `train.zip` and a `dev.zip`, which contain all the information needed to train the neural parser while jointly learning the source names, in particular all tree automata and an `amconll` file with the sentences (note that the command also puts a log file into the same folder).
+
+If you want to reproduce this (and I assume you don't want to do this for all sources and graphbanks), I recommend you just run that java command directly rather than using the script, to avoid accidentally overwriting something. I hope all the parameters are self-explanatory. Here is the content of `storeFilePaths.sh` so you can get the paths more easily:
+
+```
+export DM_TRAIN="/proj/irtg/sempardata/sdp/2015/train.dm.sdp"
+export PAS_TRAIN="/proj/irtg/sempardata/sdp/2015/train.pas.sdp"
+export PSD_TRAIN="/proj/irtg/sempardata/sdp/2015/train.psd.sdp"
+export AMR_TRAIN="/proj/irtg/sempardata/unsupervised2020/AMRtrain.corpus"
+export DM_DEV="/proj/irtg/sempardata/sdp/2015/dev.dm.sdp"
+export PAS_DEV="/proj/irtg/sempardata/sdp/2015/dev.pas.sdp"
+export PSD_DEV="/proj/irtg/sempardata/sdp/2015/dev.psd.sdp"
+export AMR_DEV="/proj/irtg/sempardata/unsupervised2020/AMRdev.corpus"
+```
+
+This takes less than an hour usually, but a few hours for 6 sources (also doesn't need the full 800G memory for lower source numbers).
 
 ### Baselines
 
