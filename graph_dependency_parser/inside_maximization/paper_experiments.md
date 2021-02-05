@@ -32,7 +32,7 @@ echo $dmCommand
 eval $dmCommand
 ```
 
-It first does some setup, describing output path and the path to the jar file, and loading input filepaths on the server from `storeFilePaths.sh`. Then it prints and evaluates the main command, which is a call to the `de.saar.coli.amtools.decomposition.SourceAutomataCLI` class (`SourceAutomataCLIAMR` for AMR; have a look at `createAMRAutomata.sh` for its use). This will, in the output folder (i.e. the `-o` option), create a `train.zip` and a `dev.zip`, which contain all the information needed to train the neural parser while jointly learning the source names, in particular all tree automata and an `amconll` file with the sentences (note that the command also puts a log file into the same folder).
+It first does some setup, describing output path and the path to the jar file, and loading input filepaths on the server from `storeFilePaths.sh`. Then it prints and evaluates the main command, which is a call to the `de.saar.coli.amtools.decomposition.SourceAutomataCLI` class (`SourceAutomataCLIAMR` for AMR; have a look at `createAMRAutomata.sh` for its use). This will, in the output folder (i.e. the `-o` option; **if you reproduce the experiment, please use different folders here**), create a `train.zip` and a `dev.zip`, which contain all the information needed to train the neural parser while jointly learning the source names, in particular all tree automata and an `amconll` file with the sentences (note that the command also puts a log file into the same folder).
 
 ### Baselines
 
@@ -46,10 +46,41 @@ We are then interested in the `namesDatesNumbers_AlsFixed_sorted.corpus` files i
 
 ## Neural parser
 
-
+For the neural parser, use the `unsupervised2020` branch of `am-parser` commit `16e50ee`, or the code in `/proj/irtg/sempardata/unsupervised2020/am-parser`
 
 ### Neural joint learning (unsupervised)
 
+For this, have a look at the scripts in `/proj/irtg/sempardata/unsupervised2020/am-parser/scripts/unsupervised2020/`. They run commands of essentially this shape:
+
+```
+python -u train.py jsonnets/unsupervised2020/automata/DMallAutomaton.jsonnet
+-s /local/jonasg/unsupervised2020/temp/DMAuto3-allAutomaton-jan20/ -f --file-friendly-logging
+-o ' {"trainer" : {"cuda_device" :  1 }, "train_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/train.zip"]], "validation_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/dev.zip"]]}'
+--comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags DM allAutomaton3 --project unsupervised2020
+&> /proj/irtg/sempardata/unsupervised2020/logs/DMAuto3-allAutomaton-jan20.log &
+```
+
+(this example coming from `dm3pas3psd4amr4-jan15.sh`). I added some linebreaks for readability here; this should all be one line in practice. This command has several components:
+
+1. `python -u train.py` the basic python command
+2. `jsonnets/unsupervised2020/automata/DMallAutomaton.jsonnet` the AllenNLP config file with all the information about the model. Use `XallAutomaton.jsonnet` with `X` from `AMR, DM, PAS, PSD`.
+3. `-s /local/jonasg/unsupervised2020/temp/DMAuto3-allAutomaton-jan20/` is the output path where the trained model and generated `amconll` files are created (the former for the best epoch, the latter for each epoch). There are two types: the first is e.g. `DM_amconll_list_train_epoch99.amconll` (and the same for dev) contain trees based on the viterbi tree of the tree automaton (for the sentences in the `train.zip` and `dev.zip` respectively). The second type is e.g. `dev_epoch_99.amconll` which contains predictions (unrestricted by the tree automaton, i.e. may yield the wrong graph) on the whole dev set. **If you reproduce the experiments, please use new output folders** (you probably don't have write permission there anyway).
+3. `-f --file-friendly-logging` don't worry about this
+4. `-o ' {"trainer" : {"cuda_device" :  1 }, "train_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/train.zip"]], "validation_data_path": [["DM", "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/dev.zip"]]}'` this overwrites some of the `.jsonnet` config file. I use it to (a) specify which GPU to use, and (b) give it the paths to the input data (here, the DM tree automata with 3 sources). If I want test set evaluation, I also set that up here (see e.g. `test-allAutomaton-dm3pas3psdOld4amr3-jan23.sh`)
+5. `--comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags DM allAutomaton3 --project unsupervised2020` this sets up comet.ml logging. the number/letter sequence is my personal sequence, meaning it logs experiments into my account. I also specify which project (use `unsupervised2020-amr` for AMR, or your own). It also adds experiment-specific tags, see below.
+6. `&> /proj/irtg/sempardata/unsupervised2020/logs/DMAuto3-allAutomaton-jan20.log &` just logging things (**again, change this path please when reproducing**) and adding the `&` in the script in the end to have multiple commands run in parallel.
+
+**Tags:** 
 
 
 ### Baselines (supervised)
+
+
+
+## Variants
+
+### AMR all edges
+
+### PSD pre/postprocessing
+
+### 6 sources
