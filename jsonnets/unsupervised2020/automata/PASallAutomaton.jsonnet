@@ -17,6 +17,7 @@ local hidden_dim_mlp = 1024;
 
 local bert_model = "bert-large-uncased";
 
+local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
 local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local encoder_output_dim = hidden_dim; #encoder output dim, per direction, so total will be twice as large
@@ -203,7 +204,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
     #=========================EVALUATE ON TEST=================================
     "evaluate_on_test" : false,
-    "test_evaluators" : [],
+    "test_evaluators" : [test_evaluators(amconll_dataset_reader, data_iterator)[my_task]], #when training is done, call evaluation on test sets with best model as described here.
     #==========================================================================
 
     "trainer": {
