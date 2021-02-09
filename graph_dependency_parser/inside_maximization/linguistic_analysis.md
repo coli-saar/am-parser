@@ -102,7 +102,7 @@ bash visualise_unsupervised.sh <path/to/output/amconll_file.amconll>
 
 Note it won't show the final graphs; try https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#4-get-pdf-with-graph-for-one-sentence if you want to see the graph for a sentence. 
 
-There is a random seed, so you will get the same sample as we did. If you want to change the filtering or seed, see https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
+If you want to change the filtering or seed, see https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
 
 
 ## Supertag entropy
