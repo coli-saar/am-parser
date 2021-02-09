@@ -3,9 +3,13 @@
 
 In Section 7 of our paper, we describe some basic linguistic analysis of the parser output. This section explains how to replicate the analysis or to do your own analysis of amconll files of data. 
 
-We automatically created subcorpora based on information in the amconll files, and then visualised sampled sentences from those subcorpora. In this way we got some counts of certain patterns, and could sample the sentences with those patterns. The subcorpora are written to new amconll files, which you can then read in with a visualiser. Summaries of the sizes of the subcorpora are written to text files. Below, we first explain how to get the subcorpora and then [how to visualise the samples.]()
+We automatically created subcorpora based on information in the amconll files, and then visualised sampled sentences from those subcorpora. In this way we got some counts of certain patterns, and could sample the sentences with those patterns. The subcorpora are written to new amconll files, which you can then read in with a visualiser. Summaries of the sizes of the subcorpora are written to text files. Below, we first explain how to get the subcorpora and then [how to visualise the samples](https://github.com/coli-saar/am-parser/blob/unsupervised2020/graph_dependency_parser/inside_maximization/linguistic_analysis.md#visualising-examples).
 
+## Requirements
 
+* `am-tools.jar`, which you should have already if you've built `am-parser`. It will be in **TODO path**. If you haven't built the parser, you can build the am-tools jar file separately. Use **TODO branch, commit x**. 
+
+* For visualisation, you need the requirements listed [here](https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach)
 
 
 ## Counting and printing examples of phenomena
@@ -18,15 +22,14 @@ There are three Java scripts that categorise corpus entries, count the entries i
  * Sources: counts sources by graph edge label
  * Edges: counts AM dep-tree edge labels (AM operations)
 
-There is a script in `am-tools/scripts` which will run the three existing counters on all four graphbanks. It's simple and you can edit it if you want it to behave differently. Currently it assumes the corpora are `<path/to/amconll_files/DM.amconll>` etc, and that you have DM, PAS, PSD, and AMR.  To run it:
+There is a script in `am-parser/analyzers/` which will run the three existing counters on all four graphbanks. It's simple and you can edit it if you want it to behave differently. Currently it assumes the corpora are `<path/to/amconll_files/DM.amconll>` etc, and that you have DM, PAS, PSD, and AMR.  To run it, `cd` to the `analyzers/` folder and run:
 
 ```bash
-bash all_counts.sh <path/to/amconll_files> <path/to/output_folder>
+bash all_counts.sh <path/to/am-tools jar file> <path/to/amconll_files> <path/to/output_folder>
 
 ```
    
-   
-It will put the output files in `<output_path>/sources/DM/`, `<output_path>/supertags/DM/` etc.
+It will put the output files in `<output_path>/sources/DM/`, `<output_path>/supertags/AMR/` etc.
 
 ### Details of counters
 
@@ -89,9 +92,9 @@ Note also there is a bug where for each large category we print the number of su
    
  ## Visualising examples
  
-We used a script from `am-parser` designed to compare two different analyses, so it will show the AM dep-tree twice. We used the "own GUI approach" explained here: https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
- 
-You can visualise a random sample of AM dep-trees from the specialsed amconll files you generated with the Java scripts. To make your life easier, you can use the script `analyzers/visualise_unsupervised.sh` which takes as argument the path to the amconll file you want to visualise samples from. It will filter out sentences shorter than 5 and longer than 15 words, randomise the order, and display the AM dependency trees. 
+We used a script from `am-parser` designed to compare two different analyses, so it will show the AM dep-tree twice. We used the ["own GUI approach"](https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach).
+
+You can visualise a random sample of AM dep-trees from the subcorpus amconll files you generated with the Java scripts. To make your life easier, you can use the script `analyzers/visualise_unsupervised.sh` which takes as argument the path to the amconll file you want to visualise samples from. It will filter out sentences shorter than 5 and longer than 15 words, randomise the order, and display the AM dependency trees. 
 
 ```bash
 bash visualise_unsupervised.sh <path/to/output/amconll_file.amconll>
@@ -100,3 +103,18 @@ bash visualise_unsupervised.sh <path/to/output/amconll_file.amconll>
 Note it won't show the final graphs; try https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#4-get-pdf-with-graph-for-one-sentence if you want to see the graph for a sentence. 
 
 There is a random seed, so you will get the same sample as we did. If you want to change the filtering or seed, see https://github.com/coli-saar/am-parser/wiki/Error-analysis:-visualization-of-AM-dependency-trees#2-the-own-gui-approach. 
+
+
+## Supertag entropy
+
+You can compare the supertag entropy for the neural and EM outputs.
+
+### Script
+
+There is a bash script `am-parser/analyzers/entropy.sh`. It assumes the `ambconll` files are called `DM.amconll` etc., but it's very simple so you can edit it if needed. It prints to standard output, so you can pipe it to a file in the bash command if you want to keep it. (i.e. append `> path/to/entropy_file.txt` to the bash code below.) 
+
+`cd` to `analyzers/` and run: 
+
+```bash
+bash entropy.sh <path/to/am-tools.jar> <path/to/neural/output/> <path/to/EM/output/>
+```
