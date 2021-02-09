@@ -111,7 +111,7 @@ You can compare the supertag entropy for the neural and EM outputs.
 
 ### Script
 
-There is a bash script `am-parser/analyzers/entropy.sh`. It assumes the `ambconll` files are called `DM.amconll` etc., but it's very simple so you can edit it if needed. It prints to standard output, so you can pipe it to a file in the bash command if you want to keep it. (i.e. append `> path/to/entropy_file.txt` to the bash code below.) 
+There is a bash script `am-parser/analyzers/entropy.sh`. It assumes the amconll files are called `DM.amconll` etc., but it's very simple so you can edit it if needed. It prints to standard output, so you can pipe it to a file in the bash command if you want to keep it. (i.e. append `> path/to/entropy_file.txt` to the bash code below.) 
 
 `cd` to `analyzers/` and run: 
 
