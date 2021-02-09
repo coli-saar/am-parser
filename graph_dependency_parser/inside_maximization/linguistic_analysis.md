@@ -1,5 +1,12 @@
 # Linguistic Analysis
-To be added to the wiki when we publish the paper
+**To be added to the wiki when we publish the paper**
+
+In Section 7 of our paper, we describe some basic linguistic analysis of the parser output. This section explains how to replicate the analysis or to do your own analysis of amconll files of data. 
+
+We automatically created subcorpora based on information in the amconll files, and then visualised sampled sentences from those subcorpora. In this way we got some counts of certain patterns, and could sample the sentences with those patterns. The subcorpora are written to new amconll files, which you can then read in with a visualiser. Summaries of the sizes of the subcorpora are written to text files. Below, we first explain how to get the subcorpora and then [how to visualise the samples.]()
+
+
+
 
 ## Counting and printing examples of phenomena
 
