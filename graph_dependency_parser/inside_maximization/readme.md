@@ -66,3 +66,29 @@ Run training: `python -u train.py jsonnets/toyAMR.jsonnet -s example/toyAMRoutpu
 Later, eval by hand and create AMR file:
 
 `java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus example/toyAMRoutput/dev_epoch_200.amconll -o example/toyAMRoutput/amr/ --relabel --wn downloaded_models/wordnet3.0/dict/ --lookup downloaded_models/lookup/lookupdata17/ --th 0 --add-sense-to-nn-label&& python2 external_eval_tools/smatch/smatch.py -f example/toyAMRoutput/amr/parserOut.txt example/toyAMR/toyAMRgold.txt --pr --significant 4 > example/toyAMRoutput/amr/metrics.txt && cat example/toyAMRoutput/amr/metrics.txt`
+
+
+
+## Jan 15
+
+jones-2:
+amr3 learning rates:
+0.002
+0.001
+0.0005
+0.0002
+
+
+jones-1:
+get amconll files for standard settings
+PAS3
+DM3
+PSD4
+AMR4
+
+
+jones-3:
+PSD6
+PSD4 lr 0.0005
+AMR4 lr 0.0005
+AMR4 lr 0.002

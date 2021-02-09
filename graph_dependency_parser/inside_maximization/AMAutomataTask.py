@@ -28,7 +28,7 @@ from allennlp.data import Vocabulary
 from allennlp.models import Model
 from allennlp.modules import InputVariationalDropout
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
-from allennlp.nn.util import get_lengths_from_binary_sequence_mask
+from allennlp.nn.util import get_lengths_from_binary_sequence_mask, get_device_of
 from allennlp.training.metrics import CategoricalAccuracy, AttachmentScores
 from allennlp.training.metrics.average import Average
 from overrides import overrides
@@ -57,15 +57,18 @@ POS_TO_IGNORE = {'``', "''", ':', ',', '.', 'PU', 'PUNCT', 'SYM'}
 
 PyjniusHelper = autoclass('de.saar.coli.amtools.decomposition.PyjniusHelper')
 
+
 def none_or_else(exp, val):
     if exp is not None:
         return val
     return None
 
+
 def mix_loss(coefficient, tensor):
     if abs(coefficient - 1.0) < 0.0001:
         return tensor
     return coefficient * tensor
+
 
 class AMAutomataTask(Model):
     """
@@ -74,7 +77,7 @@ class AMAutomataTask(Model):
     loss_names = ["edge_existence", "edge_label", "supertagging", "lexlabel"]
 
     def __init__(self, vocab: Vocabulary,
-                 name:str,
+                 name: str,
                  edge_model: EdgeModel,
                  loss_function: EdgeLoss,
                  supertagger: Supertagger,
@@ -82,13 +85,14 @@ class AMAutomataTask(Model):
                  supertagger_loss: SupertaggingLoss,
                  lexlabel_loss: SupertaggingLoss,
                  lexlabelcopier: Copier = None,
-                 output_null_lex_label : bool = True,
-                 loss_mixing: Dict[str,float] = None,
+                 output_null_lex_label: bool = True,
+                 loss_mixing: Dict[str, float] = None,
+                 all_automaton_loss = False,
                  dropout: float = 0.0,
                  validation_evaluator: Optional[Evaluator] = None,
                  regularizer: Optional[RegularizerApplicator] = None):
 
-        super().__init__(vocab,regularizer)
+        super().__init__(vocab, regularizer)
         self.name = name
         self.edge_model = edge_model
         self.supertagger = supertagger
@@ -98,6 +102,7 @@ class AMAutomataTask(Model):
         self.loss_function = loss_function
         self.lexlabelcopier = lexlabelcopier
         self.loss_mixing = loss_mixing or dict()
+        self.all_automaton_loss = all_automaton_loss
         self.validation_evaluator = validation_evaluator
         self.output_null_lex_label = output_null_lex_label
 
@@ -110,15 +115,21 @@ class AMAutomataTask(Model):
             else:
                 if self.loss_mixing[loss_name] is None:
                     if loss_name not in ["supertagging", "lexlabel"]:
-                        raise ConfigurationError("Only the loss mixing coefficients for supertagging and lexlabel may be None, but not "+loss_name)
+                        raise ConfigurationError(
+                            "Only the loss mixing coefficients for supertagging and lexlabel may be None, but not " + loss_name)
 
         not_contained = set(self.loss_mixing.keys()) - set(AMAutomataTask.loss_names)
         if len(not_contained):
             logger.critical(f"The following loss name(s) are unknown: {not_contained}")
             raise ValueError(f"The following loss name(s) are unknown: {not_contained}")
 
+        if self.all_automaton_loss:
+            self.loss_mixing["edge_existence"] = 0.0
+            self.loss_mixing["lexlabel"] = 0.0
+
         self._lexlabel_acc = CategoricalAccuracy()
         self._attachment_scores = AttachmentScores()
+        self._running_amconll = []  # list of AmConllSentence
         self._inside_metric = Average()
         self._loss_metric = Average()
         self.current_epoch = 0
@@ -129,16 +140,16 @@ class AMAutomataTask(Model):
         logger.info(f"Found POS tags corresponding to the following punctuation : {punctuation_tag_indices}. "
                     "Ignoring words with these POS tags for evaluation.")
 
-        self.compute_softmax_for_scores = False # set to true when dumping scores to incorporate softmax computation into computation time
+        self.compute_softmax_for_scores = False  # set to true when dumping scores to incorporate softmax computation into computation time
 
     def check_all_dimensions_match(self, encoder_output_dim):
 
         check_dimensions_match(encoder_output_dim, self.edge_model.encoder_dim(),
-                               "encoder output dim", self.name+" input dim edge model")
+                               "encoder output dim", self.name + " input dim edge model")
         check_dimensions_match(encoder_output_dim, self.supertagger.encoder_dim(),
-                               "encoder output dim", self.name+" supertagger input dim")
+                               "encoder output dim", self.name + " supertagger input dim")
         check_dimensions_match(encoder_output_dim, self.lexlabeltagger.encoder_dim(),
-                               "encoder output dim", self.name+" lexical label tagger input dim")
+                               "encoder output dim", self.name + " lexical label tagger input dim")
 
     @overrides
     def forward(self,  # type: ignore
@@ -169,10 +180,10 @@ class AMAutomataTask(Model):
         :param head_indices: the gold edge labels for each word (incoming edge, see amconll files) (batch_size, seq_len)
         :return:
         """
-        
+
         print_time = True
         print_diagnostics = False  # = self.training
-        
+
         start_time = time()
         encoded_text_parsing = self._dropout(encoded_text_parsing)
         if encoded_text_tagging is not None:
@@ -185,11 +196,12 @@ class AMAutomataTask(Model):
         # print(f"edge_existence_scores: {edge_existence_scores}")
 
         # shape (batch_size, seq_len, num_supertags)
-        if encoded_text_tagging is not None and self.supertagger is not None and self.lexlabeltagger is not None\
-                and self.loss_mixing["supertagging"] is not None\
+        if encoded_text_tagging is not None and self.supertagger is not None and self.lexlabeltagger is not None \
+                and self.loss_mixing["supertagging"] is not None \
                 and self.loss_mixing["lexlabel"] is not None:
             supertagger_logits = self.supertagger.compute_logits(encoded_text_tagging)
-            lexlabel_logits = self.lexlabeltagger.compute_logits(encoded_text_tagging) # shape (batch_size, seq_len, num label tags)
+            lexlabel_logits = self.lexlabeltagger.compute_logits(
+                encoded_text_tagging)  # shape (batch_size, seq_len, num label tags)
         else:
             supertagger_logits = None
             lexlabel_logits = None
@@ -210,50 +222,55 @@ class AMAutomataTask(Model):
 
         output_dict = {
             "heads": predicted_heads,
-            "edge_existence_scores" : edge_existence_scores,
+            "edge_existence_scores": edge_existence_scores,
             "label_logits": edge_label_logits,  # shape (batch_size, seq_len, num edge labels)
-            "full_label_logits" : self.edge_model.full_label_scores(encoded_text_parsing), #these are mostly required for the projective decoder
+            "full_label_logits": self.edge_model.full_label_scores(encoded_text_parsing),
+            # these are mostly required for the projective decoder
             "mask": mask,
             "words": [meta["words"] for meta in metadata],
             "attributes": [meta["attributes"] for meta in metadata],
-            "token_ranges" : [meta["token_ranges"] for meta in metadata],
+            "token_ranges": [meta["token_ranges"] for meta in metadata],
             "encoded_text_parsing": encoded_text_parsing,
             "encoded_text_tagging": encoded_text_tagging,
             "position_in_corpus": [meta["position_in_corpus"] for meta in metadata],
-            "formalism" : self.name
+            "formalism": self.name
         }
 
         if encoded_text_tagging is not None and self.loss_mixing["supertagging"] is not None:
-            output_dict["supertag_scores"] = supertagger_logits # shape (batch_size, seq_len, num supertags)
-            output_dict["best_supertags"] = Supertagger.top_k_supertags(supertagger_logits, 1).squeeze(2) # shape (batch_size, seq_len)
+            output_dict["supertag_scores"] = supertagger_logits  # shape (batch_size, seq_len, num supertags)
+            output_dict["best_supertags"] = Supertagger.top_k_supertags(supertagger_logits, 1).squeeze(
+                2)  # shape (batch_size, seq_len)
 
         if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
             if not self.output_null_lex_label:
                 bottom_lex_label_index = self.vocab.get_token_index("_", namespace=self.name + "_lex_labels")
-                masked_lexlabel_logits = lexlabel_logits.clone().detach() # shape (batch_size, seq_len, num label tags)
-                masked_lexlabel_logits [:,:,bottom_lex_label_index] = - 1e20
+                masked_lexlabel_logits = lexlabel_logits.clone().detach()  # shape (batch_size, seq_len, num label tags)
+                masked_lexlabel_logits[:, :, bottom_lex_label_index] = - 1e20
             else:
                 masked_lexlabel_logits = lexlabel_logits
 
-            output_dict["lexlabels"] = Supertagger.top_k_supertags(masked_lexlabel_logits, 1).squeeze(2)  # shape (batch_size, seq_len)
+            output_dict["lexlabels"] = Supertagger.top_k_supertags(masked_lexlabel_logits, 1).squeeze(
+                2)  # shape (batch_size, seq_len)
 
         is_annotated = metadata[0]["is_annotated"]
         if any(metadata[i]["is_annotated"] != is_annotated for i in range(batch_size)):
             raise ValueError("Batch contained inconsistent information if data is annotated.")
-        if "is_inherently_annotated" in metadata[0]:
-            if any(metadata[i]["is_inherently_annotated"] != metadata[0]["is_inherently_annotated"] for i in range(batch_size)):
-                print("Batch contained inconsistent information if data is annotated.")
-                for meta in metadata:
-                    if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
-                        print('meta["is_inherently_annotated"]' + str(meta["is_inherently_annotated"]))
-                        r = []
-                        for i, w in enumerate(meta["words"]):
-                            fields = list(w)
-                            if fields[-1] is None:
-                                fields = fields[:-1]  # when token range not present -> remove it
-                            r.append("\t".join([str(x) for x in [i] + fields]))
-                        print("\n".join(r)+"\n")
+        # if "is_inherently_annotated" in metadata[0]:
+        #     if any(metadata[i]["is_inherently_annotated"] != metadata[0]["is_inherently_annotated"] for i in
+        #            range(batch_size)):
+        #         print("Batch contained inconsistent information if data is annotated.")
+        #         for meta in metadata:
+        #             if "is_inherently_annotated" in meta and not meta["is_inherently_annotated"]:
+        #                 print('meta["is_inherently_annotated"]' + str(meta["is_inherently_annotated"]))
+        #                 r = []
+        #                 for i, w in enumerate(meta["words"]):
+        #                     fields = list(w)
+        #                     if fields[-1] is None:
+        #                         fields = fields[:-1]  # when token range not present -> remove it
+        #                     r.append("\t".join([str(x) for x in [i] + fields]))
+        #                 print("\n".join(r) + "\n")
 
+        orig_lexlabel_logits = lexlabel_logits # TODO I think this is not compatible with copying at this point
         lexlabel_logits = lexlabel_logits[:, 1:, :].contiguous()
         if self.lexlabelcopier is not None:
             lexlabel_prob_matrix, p_vocab, p_lemma, p_token = self.lexlabelcopier.compute_logprobs(
@@ -274,21 +291,58 @@ class AMAutomataTask(Model):
 
         # Compute loss:
         if is_annotated and head_indices is not None and rule_index is not None:
+            #  torch.autograd.set_detect_anomaly(True)  # this allows pinpoining errors better in debugging, but costs speed
 
             # convert neural outputs into a format (view) that makes it possible to associate them with automaton rules via rule_index
-            # To be precise, the indices stored in rule_index[i] correspond to indices of all_logits[i] (i = entry in batch)
+            # To be precise, the indices stored in rule_index[i] correspond to indices of all_logprobs[i] (i = entry in batch)
             st_size = supertagger_logits.size()
             el_size = edge_label_logits.size()
             if print_diagnostics:
                 print(f"st_size: {st_size}")
                 print(f"el_size: {el_size}")
+                print(f"orig_lexlabel_logits size: {orig_lexlabel_logits.size()}")
+                print(f"lexlabels size: {lexlabels.size()}")
+                print(f"head_indices size: {head_indices.size()}")
+                print(f"edge_existence_scores size: {edge_existence_scores.size()}")
+
             supertagger_logprobs = torch.nn.functional.log_softmax(supertagger_logits, dim=2)
             edge_label_logprobs = torch.nn.functional.log_softmax(edge_label_logits, dim=2)
-            all_logits = torch.cat([supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
-                                   dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
+            if self.all_automaton_loss:
+                lexlabel_logprobs = torch.nn.functional.log_softmax(orig_lexlabel_logits, dim=2)
+                edge_existence_logprobs = torch.nn.functional.log_softmax(edge_existence_scores, dim=2)
+                cuda_check = lexlabels.is_cuda
+                if cuda_check:
+                    device = lexlabels.get_device()
+                else:
+                    device = "cpu"
+                lexlabel_buffer = torch.zeros(batch_size, 1, dtype=torch.long, device=device)
+                # print(lexlabel_buffer)
+                lexlabel_lookup = torch.cat([lexlabel_buffer, lexlabels], dim=1).view(batch_size, seq_len, 1)
+                # print(lexlabel_lookup)
+                # print(lexlabel_logits)
+                lexlabel_logprobs = torch.gather(lexlabel_logprobs, 2, lexlabel_lookup)
+                edge_existence_logprobs = torch.gather(edge_existence_logprobs, 2,
+                                                       head_indices.view(batch_size, seq_len, 1))
+
+                tag_logprobs = supertagger_logprobs + lexlabel_logprobs  # with broadcasting
+                edge_logprobs = edge_label_logprobs + edge_existence_logprobs  # with broadcasting
+                if print_diagnostics:
+                    print(f"supertagger_logprobs.size {supertagger_logprobs.size()}")
+                    print(f"lexlabel_logprobs.size {lexlabel_logprobs.size()}")
+                    print(f"tag_logprobs.size {tag_logprobs.size()}")
+                    print(f"edge_label_logprobs.size {edge_label_logprobs.size()}")
+                    print(f"edge_existence_logprobs.size {edge_existence_logprobs.size()}")
+                    print(f"edge_logprobs.size {edge_logprobs.size()}")
+                all_logprobs = torch.cat(
+                    [tag_logprobs.view(batch_size, -1), edge_logprobs.view(batch_size, -1)],
+                    dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
+            else:
+                all_logprobs = torch.cat(
+                    [supertagger_logprobs.view(st_size[0], -1), edge_label_logprobs.view(el_size[0], -1)],
+                    dim=1)  # dimension batch_len x (sent_len * (st_label_count + edge_label_count))
 
             # printing some information for testing
-            # print(f"all_logits.size(): {all_logits.size()}")
+            # print(f"all_logprobs.size(): {all_logprobs.size()}")
             # print(f"rule_index.size(): {rule_index.size()}")
             # print(f"rule_index: {rule_index}")
             # rule_iterator = metadata[0]["rule_iterator"]
@@ -296,13 +350,15 @@ class AMAutomataTask(Model):
             # for rule, logit_index in zip(to_python(rule_iterator), rule_index[0]):
             #     print(rule.toString(automaton))
             #     print(logit_index)
-            #     print(all_logits[0][logit_index])
+            #     print(all_logprobs[0][logit_index])
 
             if print_time:
                 print(f"time before automaton loss: {time() - start_time}")
             start_time = time()
             # automaton loss
-            logprobs_for_rules_premask = torch.gather(all_logits, 1, rule_index)
+            if print_diagnostics:
+                print(f"rule_index {rule_index}")
+            logprobs_for_rules_premask = torch.gather(all_logprobs, 1, rule_index)
             logprobs_for_rules = logprobs_for_rules_premask * rule_mask.int().float()
             if print_diagnostics:
                 print(f"rule_mask: {rule_mask}")
@@ -314,7 +370,7 @@ class AMAutomataTask(Model):
             outer_weights_python = []
             # iterate over each entry in batch:
             for logits, meta, indices in zip(logprobs_for_rules, metadata, rule_index):
-                logits_python = logits.tolist() # need to convert to python primitive to send it to java as a float[]
+                logits_python = logits.tolist()  # need to convert to python primitive to send it to java as a float[]
                 all_rules_in_bottom_up_order = meta["all_rules_in_bottom_up_order"]
                 max_state_id_plus_one = meta["max_state_id_plus_one"]
                 final_states = meta["final_states"]
@@ -348,6 +404,37 @@ class AMAutomataTask(Model):
                     if print_diagnostics:
                         print(outer_weight)
 
+                viterbi_rule_list_and_weight = PyjniusHelper.getViterbi(logits_python, all_rules_in_bottom_up_order,
+                                                                 max_state_id_plus_one, final_states)
+                amconll_attributes = dict(meta["attributes"])
+                amconll_attributes["predicted_weight"] = str(viterbi_rule_list_and_weight.right)
+                amconll_attributes["total_inside_weight"] = str(numpy.exp(total_inside))
+                amconll_sent = AMSentence(meta["words"], amconll_attributes)
+                outgoing_edge_positions = set()
+                for rule in viterbi_rule_list_and_weight.left:
+                    if meta["supertag_map"].containsKey(rule):
+                        position_and_supertag = meta["supertag_map"].get(rule)
+                        st_and_type = AMSentence.split_supertag(position_and_supertag.right)
+                        word = amconll_sent.words[position_and_supertag.left-1]
+                        word = word.set_fragment(st_and_type[0])
+                        word = word.set_typ(st_and_type[1])
+                        amconll_sent.words[position_and_supertag.left-1] = word
+                    elif meta["edge_map"].containsKey(rule):
+                        positions_and_edgelabel = meta["edge_map"].get(rule)
+                        word = amconll_sent.words[positions_and_edgelabel.left.right-1]
+                        #  word = word.set_head(positions_and_edgelabel.left.left)  # not actually necessary, already in the word
+                        outgoing_edge_positions.add(positions_and_edgelabel.left.left-1)
+                        word = word.set_edge_label(positions_and_edgelabel.right)
+                        amconll_sent.words[positions_and_edgelabel.left.right-1] = word
+                for i, word in enumerate(amconll_sent.words):
+                    if word.head == 0:
+                        if i in outgoing_edge_positions:
+                            word = word.set_edge_label("ROOT")
+                        else:
+                            word = word.set_edge_label("IGNORE")
+                    amconll_sent.words[i] = word
+                self._running_amconll.append(amconll_sent)
+
             if print_time:
                 print(f"time for inside outside: {time() - start_time}")
             start_time = time()
@@ -355,13 +442,13 @@ class AMAutomataTask(Model):
             # print(outer_weights_python)
 
             # back to pytorch tensors
-            outer_weights = logprobs_for_rules.new(outer_weights_python) 
-            #print(f"outer_weights[0]: {outer_weights[0]}")
+            outer_weights = logprobs_for_rules.new(outer_weights_python)
+            # print(f"outer_weights[0]: {outer_weights[0]}")
 
             # compute loss batched, returning a vector with a loss for each entry in the batch
             # print(outer_weights+logprobs_for_rules)
             # print(torch.logsumexp(outer_weights+logprobs_for_rules, dim=1))
-            inner_sum_vector = outer_weights+logprobs_for_rules
+            inner_sum_vector = outer_weights + logprobs_for_rules
             # batch_loss_tensor = -torch.sum(inner_sum_vector, dim=1)
             batch_loss_tensor = -torch.logsumexp(inner_sum_vector, dim=1)  # this is too much rich get richer
             # print(batch_loss_tensor)
@@ -375,8 +462,6 @@ class AMAutomataTask(Model):
                 logprobs_for_rules_premask.register_hook(lambda grad: print(f"logprobs_for_rules_premask grad: {grad}"))
                 edge_label_logits.register_hook(lambda grad: print(f"edge_label_logits grad: {grad}"))
 
-
-
                 print(f"Tree inside loss: {loss}")
             loss = mix_loss(self.loss_mixing["supertagging"], loss)
 
@@ -386,7 +471,10 @@ class AMAutomataTask(Model):
 
             # gold_edge_label_logits = self.edge_model.label_scores(encoded_text_parsing, head_indices)
             # edge_label_loss = self.loss_function.label_loss(gold_edge_label_logits, mask, head_tags)
-            edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
+            if self.loss_mixing["edge_existence"] > 0:
+                edge_existence_loss = self.loss_function.edge_existence_loss(edge_existence_scores, head_indices, mask)
+            else:
+                edge_existence_loss = 0
             if print_diagnostics:
                 print(f"edge_existence loss: {edge_existence_loss}")
 
@@ -397,8 +485,7 @@ class AMAutomataTask(Model):
             # else:
             #     supertagging_nll = None
 
-
-            if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None:
+            if encoded_text_tagging is not None and self.loss_mixing["lexlabel"] is not None and self.loss_mixing["lexlabel"] > 0:
                 if self.lexlabelcopier is not None:
                     lexlabel_logprob_diagonal = torch.log(torch.diagonal(lexlabel_prob_matrix, dim1=1, dim2=2))
                     lexlabel_nll = -torch.sum(lexlabel_logprob_diagonal)  # negative log likelihood loss
@@ -407,7 +494,8 @@ class AMAutomataTask(Model):
             else:
                 lexlabel_nll = None
 
-            loss += mix_loss(self.loss_mixing["edge_existence"], edge_existence_loss) # +  mix_loss(self.loss_mixing["edge_label"], edge_label_loss)
+            loss += mix_loss(self.loss_mixing["edge_existence"],
+                             edge_existence_loss)  # +  mix_loss(self.loss_mixing["edge_label"], edge_label_loss)
 
             # if supertagging_nll is not None:
             #     loss += mix_loss(self.loss_mixing["supertagging"], supertagging_nll)
@@ -422,11 +510,12 @@ class AMAutomataTask(Model):
             # We calculate attachment scores for the whole sentence
             # but excluding the symbolic ROOT token at the start,
             # which is why we start from the second element in the sequence.
-            if edge_existence_loss is not None: # and edge_label_loss is not None:
+            if edge_existence_loss is not None:  # and edge_label_loss is not None:
                 self._attachment_scores(predicted_heads[:, 1:],
                                         predicted_edge_labels[:, 1:],
                                         head_indices[:, 1:],
-                                        predicted_edge_labels[:, 1:], # this should be gold, but this way we still get UAS
+                                        predicted_edge_labels[:, 1:],
+                                        # this should be gold, but this way we still get UAS
                                         evaluation_mask)
             evaluation_mask = mask[:, 1:].contiguous()
             # if supertagging_nll is not None:
@@ -461,12 +550,13 @@ class AMAutomataTask(Model):
         :param output_dict:
         :return:
         """
-        if self.supertagger is not None and self.loss_mixing["supertagging"] is not None: #we have a supertagger, so this is proper AM dependency parsing
+        if self.supertagger is not None and self.loss_mixing[
+            "supertagging"] is not None:  # we have a supertagger, so this is proper AM dependency parsing
             return self.prepare_for_ftd(output_dict)
-        else: #we don't have a supertagger, perform good old dependency parsing
+        else:  # we don't have a supertagger, perform good old dependency parsing
             return self.only_cle(output_dict)
 
-    def only_cle(self, output_dict : Dict[str, torch.Tensor]):
+    def only_cle(self, output_dict: Dict[str, torch.Tensor]):
         """
         Therefore, we take the result of forward and perform the following steps (for each sentence in batch):
         - remove padding
@@ -475,35 +565,39 @@ class AMAutomataTask(Model):
             - lexlabels: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
             - supertags: nested list: contains for each sentence, for each word the most likely lexical label (w/o artificial root)
         """
-        full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
-        edge_existence_scores = output_dict.pop("edge_existence_scores").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
+        full_label_logits = output_dict.pop(
+            "full_label_logits").cpu().detach().numpy()  # shape (batch size, seq len, seq len, num edge labels)
+        edge_existence_scores = output_dict.pop(
+            "edge_existence_scores").cpu().detach().numpy()  # shape (batch size, seq len, seq len, num edge labels)
         heads = output_dict.pop("heads")
         heads_cpu = heads.cpu().detach().numpy()
         mask = output_dict.pop("mask")
-        edge_label_logits = output_dict.pop("label_logits").cpu().detach().numpy()  # shape (batch_size, seq_len, num edge labels)
+        edge_label_logits = output_dict.pop(
+            "label_logits").cpu().detach().numpy()  # shape (batch_size, seq_len, num edge labels)
 
         output_dict.pop("encoded_text_parsing")
-        output_dict.pop("encoded_text_tagging") #don't need that
+        output_dict.pop("encoded_text_tagging")  # don't need that
 
         lengths = get_lengths_from_binary_sequence_mask(mask)
 
-        #here we collect things, in the end we will have one entry for each sentence:
+        # here we collect things, in the end we will have one entry for each sentence:
         all_edge_label_logits = []
         head_indices = []
         all_full_label_logits = []
         all_edge_existence_scores = []
 
         for i, length in enumerate(lengths):
-            instance_heads_cpu = list(heads_cpu[i,1:length])
-            #apply changes to instance_heads tensor:
-            instance_heads = heads[i,:]
+            instance_heads_cpu = list(heads_cpu[i, 1:length])
+            # apply changes to instance_heads tensor:
+            instance_heads = heads[i, :]
             for j, x in enumerate(instance_heads_cpu):
-                instance_heads[j+1] = torch.tensor(x) #+1 because we removed the first position from instance_heads_cpu
+                instance_heads[j + 1] = torch.tensor(
+                    x)  # +1 because we removed the first position from instance_heads_cpu
 
-            all_edge_label_logits.append(edge_label_logits[i,1:length,:])
+            all_edge_label_logits.append(edge_label_logits[i, 1:length, :])
 
-            all_full_label_logits.append(full_label_logits[i,:length, :length,:])
-            all_edge_existence_scores.append(edge_existence_scores[i,:length, :length])
+            all_full_label_logits.append(full_label_logits[i, :length, :length, :])
+            all_edge_existence_scores.append(edge_existence_scores[i, :length, :length])
             head_indices.append(instance_heads_cpu)
 
         output_dict["label_logits"] = all_edge_label_logits
@@ -526,31 +620,35 @@ class AMAutomataTask(Model):
         """
         t0 = time()
         best_supertags = output_dict.pop("best_supertags").cpu().detach().numpy()
-        supertag_scores = output_dict.pop("supertag_scores") # shape (batch_size, seq_len, num supertags)
-        full_label_logits = output_dict.pop("full_label_logits").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
-        edge_existence_scores = output_dict.pop("edge_existence_scores").cpu().detach().numpy() #shape (batch size, seq len, seq len, num edge labels)
+        supertag_scores = output_dict.pop("supertag_scores")  # shape (batch_size, seq_len, num supertags)
+        full_label_logits = output_dict.pop(
+            "full_label_logits").cpu().detach().numpy()  # shape (batch size, seq len, seq len, num edge labels)
+        edge_existence_scores = output_dict.pop(
+            "edge_existence_scores").cpu().detach().numpy()  # shape (batch size, seq len, seq len, num edge labels)
         k = 10
-        if self.validation_evaluator: #retrieve k supertags from validation evaluator.
-            if isinstance(self.validation_evaluator.predictor,AMconllPredictor):
+        if self.validation_evaluator:  # retrieve k supertags from validation evaluator.
+            if isinstance(self.validation_evaluator.predictor, AMconllPredictor):
                 k = self.validation_evaluator.predictor.k
-        k += 10 # perhaps there are some ill-formed supertags, make that very unlikely that there are not enough left after filtering.
-        top_k_supertags = Supertagger.top_k_supertags(supertag_scores, k).cpu().detach().numpy() # shape (batch_size, seq_len, k)
+        k += 10  # perhaps there are some ill-formed supertags, make that very unlikely that there are not enough left after filtering.
+        top_k_supertags = Supertagger.top_k_supertags(supertag_scores,
+                                                      k).cpu().detach().numpy()  # shape (batch_size, seq_len, k)
         supertag_scores = supertag_scores.cpu().detach().numpy()
-        lexlabels = output_dict.pop("lexlabels").cpu().detach().numpy() #shape (batch_size, seq_len)
+        lexlabels = output_dict.pop("lexlabels").cpu().detach().numpy()  # shape (batch_size, seq_len)
         if self.lexlabelcopier is not None:
-            p_vocab = output_dict.pop("p_vocab").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
-            p_lemma = output_dict.pop("p_lemma").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
-            p_token = output_dict.pop("p_token").cpu().detach().numpy() # shape (batch_size, seq_len-1, 1)
+            p_vocab = output_dict.pop("p_vocab").cpu().detach().numpy()  # shape (batch_size, seq_len-1, 1)
+            p_lemma = output_dict.pop("p_lemma").cpu().detach().numpy()  # shape (batch_size, seq_len-1, 1)
+            p_token = output_dict.pop("p_token").cpu().detach().numpy()  # shape (batch_size, seq_len-1, 1)
             words = output_dict["words"]
         heads = output_dict.pop("heads")
         heads_cpu = heads.cpu().detach().numpy()
         mask = output_dict.pop("mask")
-        edge_label_logits = output_dict.pop("label_logits").cpu().detach().numpy()  # shape (batch_size, seq_len, num edge labels)
+        edge_label_logits = output_dict.pop(
+            "label_logits").cpu().detach().numpy()  # shape (batch_size, seq_len, num edge labels)
         encoded_text_parsing = output_dict.pop("encoded_text_parsing")
-        output_dict.pop("encoded_text_tagging") #don't need that
+        output_dict.pop("encoded_text_tagging")  # don't need that
         lengths = get_lengths_from_binary_sequence_mask(mask)
 
-        #here we collect things, in the end we will have one entry for each sentence:
+        # here we collect things, in the end we will have one entry for each sentence:
         all_edge_label_logits = []
         all_supertags = []
         head_indices = []
@@ -560,60 +658,69 @@ class AMAutomataTask(Model):
         all_edge_existence_scores = []
         all_supertag_scores = []
 
-        #we need the following to identify the root
-        root_edge_label_id = self.vocab.get_token_index("ROOT",namespace=self.name+"_head_tags")
-        bot_id = self.vocab.get_token_index(AMSentence.get_bottom_supertag(),namespace=self.name+"_supertag_labels")
+        # we need the following to identify the root
+        root_edge_label_id = self.vocab.get_token_index("ROOT", namespace=self.name + "_head_tags")
+        bot_id = self.vocab.get_token_index(AMSentence.get_bottom_supertag(), namespace=self.name + "_supertag_labels")
 
         for i, length in enumerate(lengths):
-            instance_heads_cpu = list(heads_cpu[i,1:length])
-            #Postprocess heads and find root of sentence:
-            instance_heads_cpu, root = find_root(instance_heads_cpu, best_supertags[i,1:length], edge_label_logits[i,1:length,:], root_edge_label_id, bot_id, modify=True)
+            instance_heads_cpu = list(heads_cpu[i, 1:length])
+            # Postprocess heads and find root of sentence:
+            instance_heads_cpu, root = find_root(instance_heads_cpu, best_supertags[i, 1:length],
+                                                 edge_label_logits[i, 1:length, :], root_edge_label_id, bot_id,
+                                                 modify=True)
             roots.append(root)
-            #apply changes to instance_heads tensor:
-            instance_heads = heads[i,:]
+            # apply changes to instance_heads tensor:
+            instance_heads = heads[i, :]
             for j, x in enumerate(instance_heads_cpu):
-                instance_heads[j+1] = torch.tensor(x) #+1 because we removed the first position from instance_heads_cpu
+                instance_heads[j + 1] = torch.tensor(
+                    x)  # +1 because we removed the first position from instance_heads_cpu
 
             # re-calculate edge label logits since heads might have changed:
-            label_logits = self.edge_model.label_scores(encoded_text_parsing[i].unsqueeze(0), instance_heads.unsqueeze(0)).squeeze(0).detach().cpu().numpy()
-            #(un)squeeze: fake batch dimension
-            all_edge_label_logits.append(label_logits[1:length,:])
+            label_logits = self.edge_model.label_scores(encoded_text_parsing[i].unsqueeze(0),
+                                                        instance_heads.unsqueeze(0)).squeeze(0).detach().cpu().numpy()
+            # (un)squeeze: fake batch dimension
+            all_edge_label_logits.append(label_logits[1:length, :])
 
-            all_full_label_logits.append(full_label_logits[i,:length, :length,:])
-            all_edge_existence_scores.append(edge_existence_scores[i,:length, :length])
+            all_full_label_logits.append(full_label_logits[i, :length, :length, :])
+            all_edge_existence_scores.append(edge_existence_scores[i, :length, :length])
 
-            #calculate supertags for this sentence:
-            all_supertag_scores.append(supertag_scores[i,1:length,:]) #new shape (sent length, num supertags)
+            # calculate supertags for this sentence:
+            all_supertag_scores.append(supertag_scores[i, 1:length, :])  # new shape (sent length, num supertags)
             supertags_for_this_sentence = []
-            for word in range(1,length):
+            for word in range(1, length):
                 supertags_for_this_word = []
-                for top_k in top_k_supertags[i,word]:
-                    fragment, typ = AMSentence.split_supertag(self.vocab.get_token_from_index(top_k, namespace=self.name+"_supertag_labels"))
-                    score = supertag_scores[i,word,top_k]
+                for top_k in top_k_supertags[i, word]:
+                    fragment, typ = AMSentence.split_supertag(
+                        self.vocab.get_token_from_index(top_k, namespace=self.name + "_supertag_labels"))
+                    score = supertag_scores[i, word, top_k]
                     supertags_for_this_word.append((score, fragment, typ))
-                if bot_id not in top_k_supertags[i,word]: #\bot is not in the top k, but we have to add it anyway in order for the decoder to work properly.
-                    fragment,typ = AMSentence.split_supertag(AMSentence.get_bottom_supertag())
-                    supertags_for_this_word.append((supertag_scores[i,word,bot_id],fragment,typ))
+                if bot_id not in top_k_supertags[
+                    i, word]:  # \bot is not in the top k, but we have to add it anyway in order for the decoder to work properly.
+                    fragment, typ = AMSentence.split_supertag(AMSentence.get_bottom_supertag())
+                    supertags_for_this_word.append((supertag_scores[i, word, bot_id], fragment, typ))
                 supertags_for_this_sentence.append(supertags_for_this_word)
             all_supertags.append(supertags_for_this_sentence)
             if self.lexlabelcopier is not None:
                 lexlabels_decoded = []
                 for j in range(1, length):
-                    lemma = words[i][j-1].lemma
-                    token = words[i][j-1].token
+                    lemma = words[i][j - 1].lemma
+                    token = words[i][j - 1].token
                     label_id = lexlabels[i][j]
-                    probability_triple = numpy.array([p_vocab[i][j-1, 0], p_lemma[i][j-1, 0], p_token[i][j-1, 0]])
-                    lexlabels_decoded.append(self.lexlabelcopier.get_most_likely(probability_triple, label_id, self.vocab,
-                                                                                 self.name+"_lex_labels", lemma, token))
+                    probability_triple = numpy.array([p_vocab[i][j - 1, 0], p_lemma[i][j - 1, 0], p_token[i][j - 1, 0]])
+                    lexlabels_decoded.append(
+                        self.lexlabelcopier.get_most_likely(probability_triple, label_id, self.vocab,
+                                                            self.name + "_lex_labels", lemma, token))
                 # print("lexlabels_decoded")
                 # print(lexlabels_decoded)
                 all_predicted_lex_labels.append(lexlabels_decoded)
             else:
-                all_predicted_lex_labels.append([self.vocab.get_token_from_index(label,namespace=self.name+"_lex_labels") for label in lexlabels[i,1:length]])
+                all_predicted_lex_labels.append(
+                    [self.vocab.get_token_from_index(label, namespace=self.name + "_lex_labels") for label in
+                     lexlabels[i, 1:length]])
             head_indices.append(instance_heads_cpu)
 
         t1 = time()
-        normalized_diff = (t1-t0) / len(lengths)
+        normalized_diff = (t1 - t0) / len(lengths)
         output_dict["normalized_prepare_ftd_time"] = [normalized_diff for _ in range(len(lengths))]
         output_dict["lexlabels"] = all_predicted_lex_labels
         output_dict["supertags"] = all_supertags
@@ -624,7 +731,6 @@ class AMAutomataTask(Model):
         output_dict["edge_existence_scores"] = all_edge_existence_scores
         output_dict["supertag_scores"] = all_supertag_scores
         return output_dict
-
 
     def _greedy_decode_edge_labels(self, edge_label_logits: torch.Tensor) -> torch.Tensor:
         """
@@ -671,13 +777,14 @@ class AMAutomataTask(Model):
         # Mask padded tokens, because we only want to consider actual words as heads.
         if mask is not None:
             minus_mask = (1 - mask).byte().unsqueeze(2)
+            # existence_scores = existence_scores.masked_fill(minus_mask, -numpy.inf)
+            # use inplace operation to save memory (note the underscore at the end of the operation)
             existence_scores.masked_fill_(minus_mask, -numpy.inf)
 
         # Compute the heads greedily.
         # shape (batch_size, sequence_length)
         _, heads = existence_scores.max(dim=2)
         return heads
-
 
     def _get_mask_for_eval(self,
                            mask: torch.LongTensor,
@@ -713,10 +820,10 @@ class AMAutomataTask(Model):
         :return:
         """
         r = self.get_metrics(reset)
-        if reset: #epoch done
-            if self.training: #done on the training data
+        if reset:  # epoch done
+            if self.training:  # done on the training data
                 self.current_epoch += 1
-            else: #done on dev/test data
+            else:  # done on dev/test data
                 if self.validation_evaluator:
                     metrics = self.validation_evaluator.eval(parser_model, self.current_epoch, model_path)
                     for name, val in metrics.items():
@@ -735,5 +842,7 @@ class AMAutomataTask(Model):
         # las = r["LAS"]
         # if "Constant_Acc" in r:
         #     r["mean_constant_acc_las"] = (las + r["Constant_Acc"]) / 2
+        r["amconll_list"] = self._running_amconll
+        if reset:
+            self._running_amconll = []
         return r
-

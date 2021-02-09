@@ -62,14 +62,14 @@ class AMConllDatasetReader(DatasetReader):
         if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
             with open(file_path, 'r') as amconll_file:
                 logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
-                sents = list(parse_amconll(amconll_file))
+                sents = list(parse_amconll(amconll_file, validate=False))
                 for i,am_sentence in  enumerate(sents):
                     if i <= len(sents) * self.fraction:
                         yield self.text_to_instance(formalism,i,am_sentence)
         else:
             with open(file_path, 'r') as amconll_file:
                 logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-                for i,am_sentence in  enumerate(parse_amconll(amconll_file)):
+                for i,am_sentence in  enumerate(parse_amconll(amconll_file, validate=False)):
                     yield self.text_to_instance(formalism,i,am_sentence)
 
     @overrides
@@ -102,6 +102,30 @@ class AMConllDatasetReader(DatasetReader):
         indices, supertags and lexical labels as fields.
         """
         fields: Dict[str, Field] = {}
+
+
+        # sometimes, the ROOT edge label is missing in the sentence
+        # we fix this here, although it may a bit hacky # TODO maybe this can be fixed in the files instead
+        # In particular, this shows up in the "retrain" method of the unsupervised2020 project and the AMR baselines
+        word_ids_with_supertag_and_no_edge_label = []
+        has_root = False
+        for i, word in enumerate(am_sentence.words):
+            if not word.fragment == "_":
+                if word.label == "_" or word.label == "IGNORE":
+                    word_ids_with_supertag_and_no_edge_label.append(i)
+            if word.label == "ROOT":
+                has_root = True
+        if len(word_ids_with_supertag_and_no_edge_label) == 1 and not has_root:
+            i = word_ids_with_supertag_and_no_edge_label[0]
+            am_sentence.words[i] = am_sentence.words[i].set_edge_label("ROOT")
+        if am_sentence.is_annotated():
+            for i in range(len(am_sentence.words)):
+                if am_sentence.words[i].label == "_":
+                    am_sentence.words[i] = am_sentence.words[i].set_edge_label("IGNORE")
+                if am_sentence.words[i].lexlabel == "NULL":
+                    am_sentence.words[i] = am_sentence.words[i].set_lexlabel("_")
+            # print("am sentence fixed")
+            # print(am_sentence)
 
         tokens = TextField([Token(w) for w in am_sentence.get_tokens(shadow_art_root=True)], self._token_indexers)
         fields["words"] = tokens

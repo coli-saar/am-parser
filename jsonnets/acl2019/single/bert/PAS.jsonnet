@@ -116,14 +116,14 @@ local data_iterator = {
 
 
     #=========================EVALUATE ON TEST=================================
-    "evaluate_on_test" : true,
+    "evaluate_on_test" : false,
     "test_evaluators" : [test_evaluators(dataset_reader, data_iterator)[main_task]], #when training is done, call evaluation on test sets with best model as described here.
     #==========================================================================
 
     "trainer": {
         "type" : "am-trainer",
         "num_epochs": num_epochs,
-        "patience" : 10,
+        "patience" : 40,
         "cuda_device": device,
         "optimizer": {
             "type": "adam",

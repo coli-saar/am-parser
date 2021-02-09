@@ -7,7 +7,7 @@
 # Evaluate on the right test corpora?
 
 local lr = 0.001;
-local num_epochs = 60;
+local num_epochs = 100;
 local patience = 10000;
 local pos_dim = 32;
 local lemma_dim = 64;
@@ -17,6 +17,7 @@ local hidden_dim_mlp = 1024;
 
 local bert_model = "bert-large-uncased";
 
+local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
 local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local encoder_output_dim = hidden_dim; #encoder output dim, per direction, so total will be twice as large
@@ -28,11 +29,11 @@ local use_freda = 0; #0 = no, 1 = yes
 local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encoder_output_dim; #freda again doubles output dimension
 
 #============TASKS==============
-local my_task = "AMR-2017";
-local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/train.zip";
-local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/dev.zip";
-local dev_amconll_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/dev.amconll";
-local dev_sdp_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/goldAMR.txt";
+local my_task = "PSD";
+local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/PSD/train.zip";
+local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/PSD/dev.zip";
+local dev_amconll_corpus_path = "/proj/irtg/sempardata/uniformify2020/new_psd_preprocessing/dev/dev.amconll";
+local dev_sdp_corpus_path = "/proj/irtg/sempardata/sdp/2015/dev.psd.sdp";
 #===============================
 
 local dataset_reader =  {
@@ -67,7 +68,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "name" : name,
     "dropout": 0.3,
 
-    "output_null_lex_label" : false,
+    "output_null_lex_label" : true,
+    "all_automaton_loss": true,
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",
@@ -120,7 +122,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 			"formalism" : my_task,
 			"system_input" : dev_amconll_corpus_path,
 			"gold_file": dev_sdp_corpus_path,
-			"use_from_epoch" : 8,
+			"use_from_epoch" : 6,
 			"predictor" : {
                 "type" : "amconll_automata_predictor",
                 "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
@@ -200,7 +202,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
     #=========================EVALUATE ON TEST=================================
     "evaluate_on_test" : false,
-    "test_evaluators" : [],
+    "test_evaluators" : [test_evaluators(amconll_dataset_reader, data_iterator)[my_task]], #when training is done, call evaluation on test sets with best model as described here.
     #==========================================================================
 
     "trainer": {

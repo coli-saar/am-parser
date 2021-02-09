@@ -28,11 +28,12 @@ local use_freda = 0; #0 = no, 1 = yes
 local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encoder_output_dim; #freda again doubles output dimension
 
 #============TASKS==============
-local my_task = "AMR-2017";
-local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/train.zip";
-local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/AMR/dev.zip";
-local dev_amconll_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/dev.amconll";
-local dev_sdp_corpus_path = "/proj/irtg/sempardata/ACL2019/AMR/2017/dev/goldAMR.txt";
+local my_task = "DM";
+local corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/train.zip";
+local sdp_corpus_path = "/proj/irtg/sempardata/sdp/2015/train.dm.sdp";
+local dev_corpus_path = "/proj/irtg/sempardata/unsupervised2020/amconll/Auto3/DM/dev.zip";
+local dev_amconll_corpus_path = "/proj/irtg/sempardata/uniformify2020/original_decompositions/DM/dev/dev.amconll";
+local dev_sdp_corpus_path = "/proj/irtg/sempardata/sdp/2015/dev.dm.sdp";
 #===============================
 
 local dataset_reader =  {
@@ -67,7 +68,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "name" : name,
     "dropout": 0.3,
 
-    "output_null_lex_label" : false,
+    "output_null_lex_label" : true,
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",
@@ -120,7 +121,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 			"formalism" : my_task,
 			"system_input" : dev_amconll_corpus_path,
 			"gold_file": dev_sdp_corpus_path,
-			"use_from_epoch" : 8,
+			"use_from_epoch" : 6,
 			"predictor" : {
                 "type" : "amconll_automata_predictor",
                 "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.

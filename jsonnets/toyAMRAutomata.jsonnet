@@ -66,7 +66,9 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "name" : name,
     "dropout": 0.0,
 
-    "output_null_lex_label" : true,
+    "output_null_lex_label" : false,
+	
+	"all_automaton_loss": true,
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",

@@ -128,6 +128,11 @@ class AMConllAutomataDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
+        # fixing null lex labels that were wrong in some of the am-tools code. TODO fix it in am-tools instead
+        for i in range(len(am_sentence.words)):
+            if am_sentence.words[i].lexlabel == "NULL":
+                am_sentence.words[i] = am_sentence.words[i].set_lexlabel("_")
+
         all_rules_in_bottom_up_order = automaton.getAllRulesInBottomUpOrder()
         # for rule in to_python(rule_iterator):
         #     print(rule.toString(automaton))
@@ -174,7 +179,10 @@ class AMConllAutomataDatasetReader(DatasetReader):
                                             "is_inherently_annotated": am_sentence.is_annotated(), # for debugging
                                             "max_state_id_plus_one": automaton.getStateInterner().getNextIndex(),
                                             "final_states": automaton.getFinalStates(),
-                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order})
+                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order,
+                                            "signature": automaton.getSignature(),
+                                            "supertag_map": supertag_map,
+                                            "edge_map": edge_map})
         # checking rule identity across maps and automaton
         # print("Rules in supertag_map:")
         # for rule in to_python(supertag_map.keySet()):

@@ -103,9 +103,9 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
         #LOSS:
         "loss_mixing" : {
-            "edge_existence" : 1.0,
+            "edge_existence" : 0.5,
             "supertagging": 1.0,
-            "lexlabel": 1.0
+            "lexlabel": 0.5
         },
         "loss_function" : {
             "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
