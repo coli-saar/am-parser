@@ -79,3 +79,7 @@ When training your own model, the configuration files have many places where you
 There are currently two edge models implemented, the Dozat & Manning 2016 and the Kiperwasser & Goldberg 2016 one.
 Apart from the edge models, the are also two different loss functions, a softmax log-likelihood and a hinge loss that requires running the CLE algorithm at training time.
 
+# Links
+
+* Documentation on linguistic analysis for unsupervised ACL2021 submission is temporarily housed at https://github.com/coli-saar/am-parser/blob/unsupervised2020/graph_dependency_parser/inside_maximization/linguistic_analysis.md
+
