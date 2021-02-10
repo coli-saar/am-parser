@@ -65,15 +65,23 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
     """
 
     # init: todo: implement
+    # todo: read() problem: we have two separate files not one...
+    # dirty hack: use init to obtain differing suffixes for filenames,
+    # filepath parameter of read only contains common prefix then
+    # todo: do I even need the target token indexer?
     def __init__(self, source_token_indexers: Dict[str, TokenIndexer] = None,
                  target_token_indexers: Dict[str, TokenIndexer] = None,
+                 source_target_suffixes_pair: Tuple[str, str] = ("pas.amconll", "dm.amconll"),
+                 lazy: bool = False,
                  **kwargs) -> None:
-        super().__init__(**kwargs)
+        super().__init__(lazy, **kwargs)
         # unlike nla_semparse, amconll tokenized, so don't need to do it :)
         self._source_token_indexers = (source_token_indexers
                                        or {"tokens": SingleIdTokenIndexer()})
         self._target_token_indexers = (target_token_indexers
                                        or self._source_token_indexers)
+        self.src_filepath_suffix = source_target_suffixes_pair[0]
+        self.tgt_filepath_suffix = source_target_suffixes_pair[1]
         return
 
     # todo: what happens for test with gold output?
@@ -91,9 +99,10 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
 
     # todo: what method will allow me to input TWO filenames?
     @overrides
-    def _read(self, file_paths: Tuple[str, str]) -> Iterable[Instance]:
+    def _read(self, file_path: str) -> Iterable[Instance]:
         # assert(len(file_paths)==2)
-        src_file, tgt_file = file_paths
+        # todo: how to join filepath common prefix with individual suffixes?
+        src_file, tgt_file = file_path + self.src_filepath_suffix, file_path + self.tgt_filepath_suffix
         for instance in self._read_src_tgt_filepair(src_file, tgt_file):
             yield instance
     
@@ -105,7 +114,9 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
         assert(len(src_amsent) == len(tgt_amsent))
         fields: Dict[str, Field] = {}
 
-        # todo: TextField or SequenceLabelField? also token indexers?
+        # note: a SequenceLabelField contains labels for the elements in the
+        # corresponding TextField
+        # todo: token indexers?
         src_tokens = TextField([Token(w) for w in src_amsent.get_tokens(shadow_art_root=True)], self._source_token_indexers)
         # tgt_tokens = TextField([Token(w) for w in tgt_amsent.get_tokens(shadow_art_root=True)], self._target_token_indexers)
 
@@ -154,11 +165,12 @@ def main():
     dataset_reader = Seq2SeqTypeAMConllDatasetReader(
         source_token_indexers=source_token_indexers,
         target_token_indexers=target_token_indexers,
+        source_target_suffixes_pair= ("pas.amconll", "dm.amconll")
     )
-    prefixpath = "./toydata/train/"
+    prefixpath = "./toydata/dev/toy_dev_"
+    #prefixpath = "./toydata/train/toy_train_"
     # todo: which read function?
-    instances = dataset_reader._read((prefixpath+"toy_train_pas.amconll",
-                                     prefixpath+"toy_train_dm.amconll"))
+    instances = dataset_reader._read(prefixpath)
 
     for instance in instances:
         print(instance)
