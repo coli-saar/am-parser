@@ -6,7 +6,7 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
 
 {
   dataset_reader: {
-    type: 'typeseq2seqreader', # see amconllpairreader.py
+    type: 'typeamconllreader', # see typeamconllreader.py
     lazy: false,
     source_token_indexers: {
       xtokens: {  # debug: called it xtokens to see where it is referenced
@@ -18,18 +18,18 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
     # source_target_suffixes_pair: ['dm.amconll', 'pas.amconll'], # reverse direction
   },
   # 'train_data_path': {
-  #  'source': 'typeseq2seq/toydata/train/toy_train_pas.amconll',
-  #  'target': 'typeseq2seq/toydata/train/toy_train_dm.amconll',
+  #  'source': 'typetagging/toydata/train/toy_train_pas.amconll',
+  #  'target': 'typetagging/toydata/train/toy_train_dm.amconll',
   # },
   # 'validation_data_path': {
-  #  'source': 'typeseq2seq/toydata/dev/toy_dev_pas.amconll',
-  #  'target': 'typeseq2seq/toydata/dev/toy_dev_dm.amconll',
+  #  'source': 'typetagging/toydata/dev/toy_dev_pas.amconll',
+  #  'target': 'typetagging/toydata/dev/toy_dev_dm.amconll',
   # },
-  train_data_path: 'typeseq2seq/toydata/train/toy_train_',
-  validation_data_path: 'typeseq2seq/toydata/dev/toy_dev_',
+  train_data_path: 'typetagging/toydata/train/toy_train_',
+  validation_data_path: 'typetagging/toydata/dev/toy_dev_',
   model: {
-    type: 'typeseq2seqmodel', # see corresponding py class and file
-    text_field_embedder: {  # param of TypeSeq2SeqModel.__init__
+    type: 'typetaggingmodel', # see corresponding py class and file
+    text_field_embedder: {  # param of TypeTaggingModel.__init__
       token_embedders: {
         xtokens: {
         type: 'embedding',  # <<----todo--->> embedding here
@@ -48,7 +48,7 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
         embedding_dim: src_type_dim,
         vocab_namespace: "src_types",
     },
-    encoder: { # param of TypeSeq2SeqModel.__init__
+    encoder: { # param of TypeTaggingModel.__init__
       type: 'lstm',
       input_size: encoder_input_dim,
       hidden_size: 50,

@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 # note: took inspiration form graph_dependency_parser, allennlp's nla_semparse
 # and Joe Barrow's allenNLP tutorial
-@Model.register("typeseq2seqmodel")
-class TypeSeq2SeqModel(Model):
+@Model.register("typetaggingmodel")
+class TypeTaggingModel(Model):
     """
     Predict AM types from tokens and AM types for another formalism
 

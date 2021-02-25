@@ -55,10 +55,10 @@ def get_paired_amsentences(file1stream: TextIO, file2stream: TextIO):
     return id2amsentpair
 
 
-@DatasetReader.register("typeseq2seqreader")
-class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
+@DatasetReader.register("typeamconllreader")
+class TypeAMConllReader(DatasetReader):
     """
-    Reading pair of amconll files containing AM types: for seq2seq type learning
+    Reading pair of amconll files containing AM types: for type tagging
 
     Note: sentence pairs are constructed based on matching id attribute
     Parameters  todo
@@ -164,7 +164,7 @@ def main():
     target_token_indexers = {
         "tokens": SingleIdTokenIndexer(namespace="target_tokens")
     }
-    dataset_reader = Seq2SeqTypeAMConllDatasetReader(
+    dataset_reader = TypeAMConllReader(
         source_token_indexers=source_token_indexers,
         target_token_indexers=target_token_indexers,
         source_target_suffixes_pair= ("pas.amconll", "dm.amconll")
