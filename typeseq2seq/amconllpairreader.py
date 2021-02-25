@@ -64,7 +64,7 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
     Parameters  todo
     """
 
-    # init: todo: implement
+    # init:
     # todo: read() problem: we have two separate files not one...
     # dirty hack: use init to obtain differing suffixes for filenames,
     # filepath parameter of read only contains common prefix then
@@ -76,8 +76,9 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
                  **kwargs) -> None:
         super().__init__(lazy, **kwargs)
         # unlike nla_semparse, amconll tokenized, so don't need to do it :)
-        self._source_token_indexers = (source_token_indexers
-                                       or {"tokens": SingleIdTokenIndexer()})
+        self._source_token_indexers = source_token_indexers
+        #self._source_token_indexers = (source_token_indexers
+        #                               or {"tokens": SingleIdTokenIndexer()})
         self._target_token_indexers = (target_token_indexers
                                        or self._source_token_indexers)
         self.src_filepath_suffix = source_target_suffixes_pair[0]
@@ -91,7 +92,7 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
         # todo: what is not copied from amconll.py: only_read_fraction_of_train
         id2amsentpair = dict()
         with open(src_file, 'r') as src_f, open(tgt_file, 'r') as tgt_f:
-            logger.info("Reading AM types from amconll dataset at: %s (source) and %s", src_file, tgt_file)
+            logger.info("Reading AM types from amconll dataset at: %s (source) and %s (target)", src_file, tgt_file)
             # note: overlap for the two files is computed based on matching ids
             id2amsentpair = get_paired_amsentences(src_f, tgt_f)
         for sentid, src_tgt_amsentpair in id2amsentpair.items():
@@ -100,7 +101,9 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
     # todo: what method will allow me to input TWO filenames?
     @overrides
     def _read(self, file_path: str) -> Iterable[Instance]:
-        # assert(len(file_paths)==2)
+        # for now, we will use a dirty hack and assume that the `file_path` is
+        # incomplete and we append differing suffixies for the source or target
+        # files respectively
         # todo: how to join filepath common prefix with individual suffixes?
         src_file, tgt_file = file_path + self.src_filepath_suffix, file_path + self.tgt_filepath_suffix
         for instance in self._read_src_tgt_filepair(src_file, tgt_file):
@@ -117,7 +120,7 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
         # note: a SequenceLabelField contains labels for the elements in the
         # corresponding TextField
         # todo: token indexers?
-        src_tokens = TextField([Token(w) for w in src_amsent.get_tokens(shadow_art_root=True)], self._source_token_indexers)
+        src_tokens = TextField(tokens=[Token(w) for w in src_amsent.get_tokens(shadow_art_root=True)], token_indexers=self._source_token_indexers)
         # tgt_tokens = TextField([Token(w) for w in tgt_amsent.get_tokens(shadow_art_root=True)], self._target_token_indexers)
 
         fields["src_words"] = src_tokens
@@ -130,7 +133,7 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
         fields["tgt_types"] = SequenceLabelField(tgt_amsent.get_types(), src_tokens, label_namespace="tgt_types")
 
         fields["metadata"] = MetadataField({
-            "src_words": src_amsent.words, "tgt_words": tgt_amsent.words,
+            "src_words": src_amsent.words, "tgt_words": tgt_amsent.words,  # AMSentence.words is a List[Entry]
             "src_attributes": src_amsent.attributes,
             "tgt_attributes": tgt_amsent.attributes})
         # "formalism": formalism, "position_in_corpus" : position_in_corpus,
@@ -154,7 +157,6 @@ class Seq2SeqTypeAMConllDatasetReader(DatasetReader):
 
 
 def main():
-    # todo: write test
     print("(Debugging) Testing the dataset reader...")
     source_token_indexers = {
         "tokens": SingleIdTokenIndexer(namespace="source_tokens")
@@ -169,7 +171,9 @@ def main():
     )
     prefixpath = "./toydata/dev/toy_dev_"
     #prefixpath = "./toydata/train/toy_train_"
+    # path = {'source': './toydata/train/toy_train_pas.amconll', 'target': './toydata/train/toy_train_dm.amconll'}
     # todo: which read function?
+    #instances = dataset_reader.read(path)
     instances = dataset_reader._read(prefixpath)
 
     for instance in instances:
