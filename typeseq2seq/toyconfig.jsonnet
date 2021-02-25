@@ -13,7 +13,9 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
         type: 'single_id',
         namespace: 'src_words'
       }
-    }
+    },
+    source_target_suffixes_pair: ['pas.amconll', 'dm.amconll'],  # correct
+    # source_target_suffixes_pair: ['dm.amconll', 'pas.amconll'], # reverse direction
   },
   # 'train_data_path': {
   #  'source': 'typeseq2seq/toydata/train/toy_train_pas.amconll',
