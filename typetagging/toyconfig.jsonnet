@@ -1,8 +1,17 @@
 # config file for toy data set (while implementing/debugging)
-local token_dim = 50;
+local epochs = 10;
+local cudadevice = 0;  # -1
+
 local pos_dim = 32;
+# local pos_dim = 0;
+# local src_type_dim = 0;
 local src_type_dim = 64;
+local token_dim = 50;
 local encoder_input_dim = token_dim + src_type_dim + pos_dim;
+
+# if dimension is 0, defaults to null --> no embedding used for this part
+local pos_emb = if pos_dim > 0 then {embedding_dim: pos_dim, vocab_namespace: "src_pos"};
+local src_type_emb = if src_type_dim > 0 then {embedding_dim: src_type_dim, vocab_namespace: "src_types"};
 
 {
   dataset_reader: {
@@ -40,14 +49,8 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
         }
       }
     },
-    pos_tag_embedding: {
-        embedding_dim: pos_dim,
-        vocab_namespace: "src_pos",
-    },
-    src_type_embedding: {
-        embedding_dim: src_type_dim,
-        vocab_namespace: "src_types",
-    },
+    pos_tag_embedding: pos_emb,
+    src_type_embedding: src_type_emb,
     encoder: { # param of TypeTaggingModel.__init__
       type: 'lstm',
       input_size: encoder_input_dim,
@@ -64,11 +67,11 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
     }
   },
   trainer: {
-    num_epochs: 10,
+    num_epochs: epochs,
     patience: 3,  # used for early stopping
     validation_metric: '-loss',  # used for early stopping
     # or "+sequence_accuracy" ?
-    cuda_device: -1,  # todo: add cuda
+    cuda_device: cudadevice,
     grad_clipping: 5.0,  # todo: do we need gradient clipping?
     optimizer: {  # just using some default here
       type: 'adam',

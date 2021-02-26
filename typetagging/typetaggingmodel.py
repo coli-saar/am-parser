@@ -64,7 +64,8 @@ class TypeTaggingModel(Model):
 
         # input dimension: words + src_types  + postags
         representation_dim = text_field_embedder.get_output_dim()
-        representation_dim += src_type_embedding.get_output_dim()
+        if src_type_embedding is not None:
+            representation_dim += src_type_embedding.get_output_dim()
         if pos_tag_embedding is not None:
            representation_dim += pos_tag_embedding.get_output_dim()
 
@@ -124,18 +125,24 @@ class TypeTaggingModel(Model):
         # print(metadata[0]['src_attributes'])  # debug
         concatenated_input.append(self._embedder(src_words))
         #concatenated_input.append(self._embedder(src_types))
-        concatenated_input.append(self._src_type_embedding(src_types))
+        if src_types is not None and self._src_type_embedding is not None:
+            concatenated_input.append(self._src_type_embedding(src_types))
+        elif self._src_type_embedding is not None:
+            raise ConfigurationError("Model uses a source type embedding, but no source types were passed.")
         if src_pos is not None and self._pos_tag_embedding is not None:
             concatenated_input.append(self._pos_tag_embedding(src_pos))
         elif self._pos_tag_embedding is not None:
             raise ConfigurationError("Model uses a POS embedding, but no POS tags were passed.")
-        #if len(concatenated_input) > 1:
-        embedded_text_input = torch.cat(concatenated_input, -1)
+        if len(concatenated_input) > 1:  # words + (pos or src types)
+            embedded_text_input = torch.cat(concatenated_input, -1)
+        else:
+            embedded_text_input = concatenated_input[0]  # only words
         # Shape: (batch_size, seq_len, total_embedding_dim)
 
         # 1b: Input masking (padding in batch and such)
         mask = get_text_field_mask(src_words)
         # Shape: (batch_size, seq_len) value: bool (True=Unmasked)
+        # todo: we could experiment with dropout here
 
         # 2. encode
         encoded = self._encoder(embedded_text_input, mask)
