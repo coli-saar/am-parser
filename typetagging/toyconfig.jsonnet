@@ -13,6 +13,10 @@ local encoder_input_dim = token_dim + src_type_dim + pos_dim;
 local pos_emb = if pos_dim > 0 then {embedding_dim: pos_dim, vocab_namespace: "src_pos"};
 local src_type_emb = if src_type_dim > 0 then {embedding_dim: src_type_dim, vocab_namespace: "src_types"};
 
+# in train/valid path and dataset_reader init parameter:
+# insertion point for source_target_foldername_pair
+local splitmarker = '@@SPLITMARKER@@';
+
 {
   dataset_reader: {
     type: 'typeamconllreader', # see typeamconllreader.py
@@ -23,19 +27,12 @@ local src_type_emb = if src_type_dim > 0 then {embedding_dim: src_type_dim, voca
         namespace: 'src_words'
       }
     },
-    source_target_suffixes_pair: ['pas.amconll', 'dm.amconll'],  # correct
-    # source_target_suffixes_pair: ['dm.amconll', 'pas.amconll'], # reverse direction
+    source_target_foldername_pair: ['PAS', 'DM'], # normal direction
+    # source_target_foldername_pair: ['DM', 'PAS'], # reverse direction
+    splitmarker: splitmarker,
   },
-  # 'train_data_path': {
-  #  'source': 'typetagging/toydata/train/toy_train_pas.amconll',
-  #  'target': 'typetagging/toydata/train/toy_train_dm.amconll',
-  # },
-  # 'validation_data_path': {
-  #  'source': 'typetagging/toydata/dev/toy_dev_pas.amconll',
-  #  'target': 'typetagging/toydata/dev/toy_dev_dm.amconll',
-  # },
-  train_data_path: 'typetagging/toydata/train/toy_train_',
-  validation_data_path: 'typetagging/toydata/dev/toy_dev_',
+  train_data_path: 'typetagging/toydata/' + splitmarker + '/train/train.amconll',
+  validation_data_path: 'typetagging/toydata/' + splitmarker + '/gold-dev/gold-dev.amconll',
   model: {
     type: 'typetaggingmodel', # see corresponding py class and file
     text_field_embedder: {  # param of TypeTaggingModel.__init__

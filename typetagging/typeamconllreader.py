@@ -22,10 +22,8 @@ import logging
 from overrides import overrides
 
 from allennlp.common.file_utils import cached_path
-from allennlp.common.util import START_SYMBOL, END_SYMBOL
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader, Instance
-from allennlp.data.fields import Field, TextField, SequenceLabelField, MetadataField, LabelField
-from allennlp.data.instance import Instance
+from allennlp.data.fields import Field, TextField, SequenceLabelField, MetadataField
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Token
 
@@ -35,6 +33,12 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 def get_id2amsent_from_file(filestream: TextIO) -> Dict[str, AMSentence]:
+    """
+    Get a sentence ID to AMSentence mapping from an opened filestream
+
+    :param filestream: one already opened AMCoNLL file
+    :return: dictionary mapping sentence IDs(str) to AMSentence objects
+    """
     id2amsentence = dict()
     for amsentence in parse_amconll(filestream):
         sentid = amsentence.attributes.get("id", None)
@@ -43,7 +47,14 @@ def get_id2amsent_from_file(filestream: TextIO) -> Dict[str, AMSentence]:
     return id2amsentence
 
 
-def get_paired_amsentences(file1stream: TextIO, file2stream: TextIO):
+def get_paired_amsentences(file1stream: TextIO, file2stream: TextIO) -> Dict[str,Tuple[AMSentence, AMSentence]]:
+    """
+    Get intersection of AMSentences (based on matching IDs) from two files
+
+    :param file1stream: opened AMCoNLL file number 1 (first part of pair)
+    :param file2stream: opened AMCoNLL file number 2 (second part of pair)
+    :return: Dictionary mapping sentence IDs(str) to AMSentence pairs
+    """
     # todo: if this function is generic enough, maybe move to another script
     # note: maybe see also analyzers/compare_amconll.py
     file1_id2sent = get_id2amsent_from_file(file1stream)
@@ -60,18 +71,27 @@ class TypeAMConllReader(DatasetReader):
     """
     Reading pair of amconll files containing AM types: for type tagging
 
-    Note: sentence pairs are constructed based on matching id attribute
-    Parameters  todo
+    Note: Sentence pairs are constructed based on matching id attribute.
+    Note: AMSentences are in separate files (one per formalism), so we need
+    two files as input and find matching sentences.
+    For now we employ a dirty hack by assuming a certain `splitmarker` in the
+    input path and use `source_target_foldername_pair` values as replacements
+    to get two files from one file_path param of the `_read` function.
     """
+    # We want to read from files that look something like this:
+    # train:
+    # superdir/PAS/train/train.amconll  AND  superdir/DM/train/train.amconll
+    # dev:
+    # superdir/PAS/gold-dev/gold-dev.amconll  AND  superdir/DM/gold-dev/gold-dev.amconll
+    # So what we tell allenNLP (for the train case, analogous for dev):
+    # train_data_path: 'superdir/' + splitmarker + '/train/train.amconll'
+    # source_target_foldername_pair: ['PAS', 'DM']
 
-    # init:
-    # todo: read() problem: we have two separate files not one...
-    # dirty hack: use init to obtain differing suffixes for filenames,
-    # filepath parameter of read only contains common prefix then
     # todo: do I even need the target token indexer?
     def __init__(self, source_token_indexers: Dict[str, TokenIndexer] = None,
-                 target_token_indexers: Dict[str, TokenIndexer] = None,
-                 source_target_suffixes_pair: Tuple[str, str] = ("pas.amconll", "dm.amconll"),
+                 #target_token_indexers: Dict[str, TokenIndexer] = None,
+                 source_target_foldername_pair: Tuple[str, str] = ("PAS", "DM"),
+                 splitmarker: str = "@@SPLITMARKER@@",
                  lazy: bool = False,
                  **kwargs) -> None:
         super().__init__(lazy, **kwargs)
@@ -79,10 +99,11 @@ class TypeAMConllReader(DatasetReader):
         self._source_token_indexers = source_token_indexers
         #self._source_token_indexers = (source_token_indexers
         #                               or {"tokens": SingleIdTokenIndexer()})
-        self._target_token_indexers = (target_token_indexers
-                                       or self._source_token_indexers)
-        self.src_filepath_suffix = source_target_suffixes_pair[0]
-        self.tgt_filepath_suffix = source_target_suffixes_pair[1]
+        #self._target_token_indexers = (target_token_indexers
+        #                               or self._source_token_indexers)
+        self.src_foldername = source_target_foldername_pair[0]
+        self.tgt_foldername = source_target_foldername_pair[1]
+        self.splitmarker = splitmarker
         return
 
     # todo: what happens for test with gold output?
@@ -98,14 +119,20 @@ class TypeAMConllReader(DatasetReader):
         for sentid, src_tgt_amsentpair in id2amsentpair.items():
             yield self.text_to_instance(src_tgt_amsentpair)
 
-    # todo: what method will allow me to input TWO filenames?
     @overrides
     def _read(self, file_path: str) -> Iterable[Instance]:
-        # for now, we will use a dirty hack and assume that the `file_path` is
-        # incomplete and we append differing suffixies for the source or target
-        # files respectively
-        # todo: how to join filepath common prefix with individual suffixes?
-        src_file, tgt_file = file_path + self.src_filepath_suffix, file_path + self.tgt_filepath_suffix
+        # how to join filepath common prefix with individual suffixes?
+        # dirty hack: file_path contains SPLITMARKER (hopefully): split path
+        # there to insert foldernames for the two formalisms so we can have
+        # two files (one per formalism) with just one file_path input param
+        # todo: find a better solution for the two-files-as-input problem
+        if not file_path.count(self.splitmarker) == 1:
+            raise RuntimeError("Filepath should contain the `splitmarker` "
+                               "specified at initialization time exactly once!")
+        prefix, suffix = file_path.split(self.splitmarker)
+        # plain string concat below todo do I need pathlib or the like?
+        src_file = prefix + self.src_foldername + suffix
+        tgt_file = prefix + self.tgt_foldername + suffix
         for instance in self._read_src_tgt_filepair(src_file, tgt_file):
             yield instance
     
@@ -161,23 +188,29 @@ def main():
     source_token_indexers = {
         "tokens": SingleIdTokenIndexer(namespace="source_tokens")
     }
-    target_token_indexers = {
-        "tokens": SingleIdTokenIndexer(namespace="target_tokens")
-    }
+    # target_token_indexers = {
+    #     "tokens": SingleIdTokenIndexer(namespace="target_tokens")
+    # }
+    splitmarker = "@@SPLITMARKER@@"
     dataset_reader = TypeAMConllReader(
         source_token_indexers=source_token_indexers,
-        target_token_indexers=target_token_indexers,
-        source_target_suffixes_pair= ("pas.amconll", "dm.amconll")
+        # target_token_indexers=target_token_indexers,
+        source_target_foldername_pair= ("PAS", "DM"),
+        splitmarker=splitmarker
     )
-    prefixpath = "./toydata/dev/toy_dev_"
-    #prefixpath = "./toydata/train/toy_train_"
-    # path = {'source': './toydata/train/toy_train_pas.amconll', 'target': './toydata/train/toy_train_dm.amconll'}
+    path = "./toydata/" + splitmarker + "/gold-dev/gold-dev.amconll"
+    # path = "./toydata/" + SPLITMARKER + "/train/train.amconll"
+    #path = "./toydata/train/toy_train_"
     # todo: which read function?
-    #instances = dataset_reader.read(path)
-    instances = dataset_reader._read(prefixpath)
+    instances = dataset_reader._read(path)
 
     for instance in instances:
         print(instance)
+        # field = instance["src_pos"]
+        # field = instance.get("src_words")
+        # print(field[0].text)
+        # print(field[0]==field[3])  # pos: NNP == NNP
+        # print(field[0]==field[1])  # pos: NNP !=
     print("--done--")
 
 
