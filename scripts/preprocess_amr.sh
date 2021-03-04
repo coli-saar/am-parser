@@ -23,15 +23,24 @@
 usage="Preprocess an AMR corpus, in ACL 2019 style.\n\n
 
 Arguments: \n
-\n\t     -m  main directory where corpus lives
+\n\t     -d  main directory where corpus lives
+\n\t	 -m  memory limit to be used for the task (default: 6G)
+\n\t	 -o  directory where output files will be put (default: new 'output'folder in main directory)
+\n\t	 -t  number of threads (default: 1)
 "
 
-while getopts "m:h" opt; do
+while getopts "d:m:o:t:h" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
 	   ;;
-	m) maindir="$OPTARG"
+	d) maindir="$OPTARG"
+	   ;;
+	m) memLimit="$OPTARG"
+	   ;;
+	o) outputPath="$OPTARG"
+	   ;;
+	t) threads="$OPTARG"
 	   ;;
        	\?) echo "Invalid option -$OPTARG" >&2
 	    ;;
@@ -39,7 +48,7 @@ while getopts "m:h" opt; do
 done
 
 if [ "$maindir" = "" ]; then
-    printf "\n No main directory given. Please use -m option."
+    printf "\n No main directory given. Please use -d option."
     exit 1
 fi
 
@@ -52,7 +61,11 @@ rawAMRCorpus=$maindir/corpus # folder containing the raw corpus as if just downl
 # folder containing the alto corpora (train, dev and test folders; will use versions $NNdataCorpusName for input to neural network (i.e. the constraints) and $evalDataCorpusName for evaluation input
 # TODO move the following to the appropriate script: 'path to the folder containing train, dev and test folders (usually PATH_TO_CORPUS/data/amrs/split/)'
 
-outputPath=$maindir/data # path to the output folder for the NN training data and evaluation input (this will generate train and dev folders inside)
+# path to the output folder for the NN training data and evaluation input (this will generate train and dev folders inside)
+
+if [ "$outputPath" = "" ]; then
+    outputPath=$maindir/data
+fi
 
 log=$outputPath/preprocessLog
 
@@ -98,9 +111,13 @@ bash scripts/setup_AMR.sh
 NNdataCorpusName="namesDatesNumbers_AlsFixed_sorted.corpus"  # from which we get the NN training data
 evalDataCorpusName="finalAlto.corpus"                        # from which we get the dev and test evaluation data
 trainMinuteLimit=600                                         # limit for generating NN training data
-devMinuteLimit=20                                            # limit for geneating NN dev data
-threads=1
-memLimit=6G
+devMinuteLimit=20                                            # limit for generating NN dev data
+if [ "$threads" = "" ]; then
+    threads=1
+fi
+if [ "$memLimit" = "" ]; then
+    memLimit=6G
+fi
 posTagger="downloaded_models/stanford/english-bidirectional-distsim.tagger"
 nerTagger="downloaded_models/stanford/english.conll.4class.distsim.crf.ser.gz"
 wordnet="downloaded_models/wordnet3.0/dict/"

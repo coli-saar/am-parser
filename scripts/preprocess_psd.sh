@@ -23,16 +23,19 @@ export LC_ALL=en_US.UTF-8
 usage="Preprocess a psd 2015 Shared task corpus, in ACL 2019 style.\n\n
 
 Arguments: \n
-\n\t     -m  main directory where corpus lives
+\n\t     -d  main directory where corpus lives
+\n\t	 -m  amount of ram used for the task (default: 3G)
 \n\t     -o  directory where output files will be put (default: 'output' within main directory)
 "
 
-while getopts "m:o:h" opt; do
+while getopts "d:m:o:h" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
 	   ;;
-	m) maindir="$OPTARG"
+	d) maindir="$OPTARG"
+	   ;;
+	m) mem = "$OPTARG"
 	   ;;
 	o) outputPath="$OPTARG"
 	   ;;
@@ -42,10 +45,14 @@ while getopts "m:o:h" opt; do
 done
 
 if [ "$maindir" = "" ]; then
-    printf "No main directory given. Please use -m option.\n"
+    printf "No main directory given. Please use -d option.\n"
     exit 1
 else
     printf "Processing files in main directory $maindir\n"
+fi
+
+if [ "$mem" = "" ]; then
+    mem = 3G
 fi
 
 if [ "$outputPath" = "" ]; then
@@ -54,9 +61,7 @@ if [ "$outputPath" = "" ]; then
 fi
 printf "Placing output in $outputPath\n"
 
-mem=3G
 alto="am-tools.jar"
-
 
 train_and_dev="$maindir/en.psd.sdp"
 
