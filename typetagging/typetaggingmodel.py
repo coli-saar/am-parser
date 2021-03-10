@@ -27,7 +27,7 @@ import torch.nn as nn
 
 from allennlp.common.checks import check_dimensions_match, ConfigurationError
 from allennlp.data import Vocabulary
-from allennlp.modules import Seq2SeqEncoder, TextFieldEmbedder, Embedding
+from allennlp.modules import Seq2SeqEncoder, TextFieldEmbedder, Embedding, FeedForward
 from allennlp.models.model import Model
 from allennlp.nn.util import get_text_field_mask, sequence_cross_entropy_with_logits
 from allennlp.training.metrics import CategoricalAccuracy, SpanBasedF1Measure, F1Measure, SequenceAccuracy
@@ -51,7 +51,7 @@ class TypeTaggingModel(Model):
                  src_type_embedding: Embedding,
                  pos_tag_embedding: Embedding = None,
                  encoder: Seq2SeqEncoder = Seq2SeqEncoder,
-                 # decoder
+                 classifier: FeedForward = FeedForward
                  ) -> None:
         super().__init__(vocab)
         self._embedder = text_field_embedder
@@ -71,10 +71,13 @@ class TypeTaggingModel(Model):
 
         check_dimensions_match(representation_dim, encoder.get_input_dim(),
                                "text field embedding dim", "encoder input dim")
-
-        # todo: copied classifer from Joe Barrow's tutorial: change?
-        self._classifier = nn.Linear(in_features=encoder.get_output_dim(),
-                                    out_features=self.num_classes)
+        # feed forward network
+        self._classifier = classifier
+        # final layer:
+        # we need to scale the output size of the classifier to #classes
+        self.final_layer = nn.Linear(
+            in_features=self._classifier.get_output_dim(),
+            out_features=self.num_classes)
         # todo: delete debugging messages
         print("DEBUG: Vocab size of target types: ", self.num_classes)
         print("DEBUG: Vocab: tok2index for tgt types: ", vocab.get_index_to_token_vocabulary(self.label_namespace))
@@ -150,7 +153,10 @@ class TypeTaggingModel(Model):
         # Shape: (batch_size, seq_len, encoder_dim)
 
         # 3. decode/classifier
-        type_logits = self._classifier(encoded)
+        cls_output = self._classifier(encoded)
+        # Shape: (batch_size, seq_len, classifier_last_layer_hidden_size)
+        # linear transformation to match number of classes
+        type_logits = self.final_layer(cls_output)
         # Shape: (batch_size, seq_len, output_vocab_size)
         # todo: needed for make_output_human_readable ? -> move there?
         reshaped_log_probs = type_logits.view(-1, self.num_classes)
@@ -164,7 +170,7 @@ class TypeTaggingModel(Model):
         output: Dict[str, torch.Tensor] = {}
         output["mask"] = mask
         output["metadata"] = metadata
-        output["logits"] = type_logits  # todo ok?
+        output["logits"] = type_logits
         # needed for make_output_human_readable:
         output["class_probabilities"] = class_probabilities
 
