@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Dict, Tuple, List, Any, Iterable, TextIO
+from typing import Dict, Tuple, List, Any, Iterable, TextIO, Optional
 import logging
+import random
 
 from overrides import overrides
 
@@ -92,9 +93,10 @@ class TypeAMConllReader(DatasetReader):
                  #target_token_indexers: Dict[str, TokenIndexer] = None,
                  source_target_foldername_pair: Tuple[str, str] = ("PAS", "DM"),
                  splitmarker: str = "@@SPLITMARKER@@",
-                 lazy: bool = False,
-                 **kwargs) -> None:
-        super().__init__(lazy, **kwargs)
+                 maxtrainsize: Optional[int] = None,
+                 lazy: bool = False
+                 ) -> None:
+        super().__init__(lazy)
         # unlike nla_semparse, amconll tokenized, so don't need to do it :)
         self._source_token_indexers = source_token_indexers
         #self._source_token_indexers = (source_token_indexers
@@ -104,6 +106,11 @@ class TypeAMConllReader(DatasetReader):
         self.src_foldername = source_target_foldername_pair[0]
         self.tgt_foldername = source_target_foldername_pair[1]
         self.splitmarker = splitmarker
+        self.maxtrainsize = maxtrainsize
+        self.use_small_train = self.maxtrainsize is not None
+        if self.use_small_train:
+            assert(self.maxtrainsize > 0)
+            logger.info("Max trainsize set to %s ", self.maxtrainsize)
         return
 
     # todo: what happens for test with gold output?
@@ -116,8 +123,14 @@ class TypeAMConllReader(DatasetReader):
             logger.info("Reading AM types from amconll dataset at: %s (source) and %s (target)", src_file, tgt_file)
             # note: overlap for the two files is computed based on matching ids
             id2amsentpair = get_paired_amsentences(src_f, tgt_f)
-        for sentid, src_tgt_amsentpair in id2amsentpair.items():
-            yield self.text_to_instance(src_tgt_amsentpair)
+        # collect all sentence IDs and eventually reduce the training set:
+        used_sent_ids = id2amsentpair.keys()
+        if self.use_small_train and src_file.endswith("train.amconll") and self.maxtrainsize < len(used_sent_ids):  # todo: only when train? what about dev?
+            logger.info("Only pick %s (randomly sampled) out of %s total train sentences", self.maxtrainsize, len(used_sent_ids))
+            used_sent_ids = random.sample(used_sent_ids, k=self.maxtrainsize)
+        # convert sentence pairs to instances
+        for sentid in used_sent_ids:
+            yield self.text_to_instance(id2amsentpair[sentid])
 
     @overrides
     def _read(self, file_path: str) -> Iterable[Instance]:

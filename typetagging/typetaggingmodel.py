@@ -185,8 +185,10 @@ class TypeTaggingModel(Model):
         return output
 
     # https://docs.allennlp.org/main/api/models/model/#make_output_human_readable
+    # def make_output_human_readable(self, output_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    # https://github.com/allenai/allennlp/blob/v0.8.4/allennlp/models/model.py#L174
     @overrides
-    def make_output_human_readable(self, output_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    def decode(self, output_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         """
         adds human readable output to the dict returned by forward()
 

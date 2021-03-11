@@ -11,6 +11,9 @@ local epochs = 15;
 local patience = 2;
 local cudadevice = 0;  # -1
 
+# local maxtrainsize = null;
+local maxtrainsize = 1000;
+
 local include_pos = true;
 local include_srctypes = true;
 
@@ -67,6 +70,7 @@ local splitmarker = '@@SPLITMARKER@@';
     source_target_foldername_pair: ['PAS', 'DM'],  # normal
     # source_target_foldername_pair: ['DM', 'PAS'],  # reversed
     splitmarker: splitmarker,
+    maxtrainsize: maxtrainsize, # default is: null
   },
   train_data_path: '/home/wurzel/HiwiAK/data/sempardata/ACL2019/SemEval/2015/' + splitmarker + '/train/train.amconll',
   validation_data_path: '/home/wurzel/HiwiAK/data/sempardata/ACL2019/SemEval/2015/' + splitmarker + '/gold-dev/gold-dev.amconll',
@@ -74,7 +78,7 @@ local splitmarker = '@@SPLITMARKER@@';
     type: 'typetaggingmodel', # see corresponding py class and file
     # below follow parameters of TypeTaggingModel.__init__
     text_field_embedder: {
-      token_embedders: {
+      token_embedders: {  # todo: needed in v0.8.4 allennlp? or newer version?
         # tokens: {
         #   type: 'embedding',
         #   vocab_namespace: "src_words",
@@ -128,12 +132,17 @@ local splitmarker = '@@SPLITMARKER@@';
       # dropout: Union[float, List[float]] = 0.0
     }
   },
-  data_loader: {  # allenNLP v0.9: iterator
-    batch_sampler: {
-      type: 'bucket',  # try to put instances with similar length in same batch
-      batch_size: 48
-      # "padding_noise": 0.0 ??
-    }
+  iterator: {
+    type: 'bucket',
+    sorting_keys: [['src_words', 'num_tokens']],
+    batch_size: 48,
+    # newer allennlp:
+    # data_loader: { # instead of iterator
+    # batch_sampler: {
+    #  type: 'bucket',  # try to put instances with similar length in same batch
+    #  batch_size: 48
+    #  # "padding_noise": 0.0 ??
+    #}
   },
   trainer: {
     num_epochs: epochs,
