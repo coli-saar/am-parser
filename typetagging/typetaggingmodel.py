@@ -24,6 +24,7 @@ from overrides import overrides
 import numpy
 import torch
 import torch.nn as nn
+from torch.nn.modules import Dropout
 
 from allennlp.common.checks import check_dimensions_match, ConfigurationError
 from allennlp.data import Vocabulary
@@ -48,8 +49,9 @@ class TypeTaggingModel(Model):
     """
     def __init__(self, vocab: Vocabulary,
                  text_field_embedder: TextFieldEmbedder,
-                 src_type_embedding: Embedding,
-                 pos_tag_embedding: Embedding = None,
+                 src_type_embedding: Optional[Embedding] = None,
+                 pos_tag_embedding: Optional[Embedding] = None,
+                 input_dropout: float = 0.0,
                  encoder: Seq2SeqEncoder = Seq2SeqEncoder,
                  classifier: FeedForward = FeedForward
                  ) -> None:
@@ -58,6 +60,7 @@ class TypeTaggingModel(Model):
         # print(self._embedder)  # debug print
         self._pos_tag_embedding = pos_tag_embedding
         self._src_type_embedding = src_type_embedding
+        self._input_dropout = Dropout(input_dropout)
         self._encoder = encoder
         self.label_namespace = 'tgt_types'
         self.num_classes = vocab.get_vocab_size(self.label_namespace)
@@ -146,6 +149,8 @@ class TypeTaggingModel(Model):
         mask = get_text_field_mask(src_words)
         # Shape: (batch_size, seq_len) value: bool (True=Unmasked)
         # todo: we could experiment with dropout here
+        # right now using pytorch dropout, could also try allennlps InputVariationalDropout
+        embedded_text_input = self._input_dropout(embedded_text_input)
 
         # 2. encode
         encoded = self._encoder(embedded_text_input, mask)

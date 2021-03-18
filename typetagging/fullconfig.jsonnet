@@ -5,7 +5,6 @@
 #
 # tested with allennlp 0.8.4 (same version as mentioned in readme)
 # note:
-# todo: include pretrained contextualized embeddings (bert? elmo?)
 # todo: add more dropout maybe? (input, encoder, classifier ...)
 
 local epochs = 50;
@@ -13,18 +12,21 @@ local patience = 2;
 local cudadevice = 0;  # -1
 
 # local maxtrainsize = null;  # full dataset
-local maxtrainsize = 1000;
+local maxtrainsize = 1000;  # todo currently deterministic for debugging
 
-# local source_target_pair = ['DM', 'PAS'];
+# local source_target_pair = ['PAS', 'DM-low-100-3'];
 local source_target_pair = ['PAS', 'DM'];
 # local source_target_pair = ['PAS', 'PSD'];
 
 # in train/valid path and dataset_reader init parameter:
 # insertion point for source_target_pair
 local splitmarker = '@@SPLITMARKER@@';
+local common_prefix = '/home/wurzel/HiwiAK/data/sempardata/ACL2019/SemEval/2015/';
 
 
 local encoder_hidden_size = 128;
+local input_dropout = 0.2;  # todo if non-zero adjust elmo dropout
+local encoder_dropout = 0.3;
 
 # todo: is there a more convenient way?
 local include_pos = false;
@@ -127,7 +129,7 @@ local getEmbedder(name='glove') =
                 options_file: elmo_option_file,
                 weight_file: elmo_weight_file,
                 do_layer_norm: false,
-                dropout: 0.5, # todo set to 0 if dropout is applied already on the input
+                dropout: 0, # 0.5  todo set to 0 if dropout is applied already on the input
                 requires_grad: finetune_pretrained_embed,
                 # vocab_namespace: "src_words",  # todo why is this not allowed?
             }
@@ -164,7 +166,7 @@ local encoder = {
     # --would require: lstm   as type:
     # parameters from allennlp.modules.LstmSeq2SeqEncoder (pytorch wrapper)
     bidirectional: true,
-    dropout: 0.3, # default: 0
+    dropout: encoder_dropout, # default: 0
     # -- would require: stacked_bidirectional_lstm  as type:
     # parameters from allennlp.modules.StackedBiDirectionalLSTM: (slower)
     # recurrent_dropout_probability: 0.0, # float, optional (default = 0.0)
@@ -195,6 +197,7 @@ local model = {
     # the embeddings only if needed. # todo is there an easier way?
     ##pos_tag_embedding: pos_emb,
     ##src_type_embedding: src_type_emb,
+    input_dropout: input_dropout,
     encoder: encoder,
     classifier: classifier
 };
@@ -221,8 +224,8 @@ local getFinalModel() =
     splitmarker: splitmarker,
     maxtrainsize: maxtrainsize, # default is: null
   },
-  train_data_path: '/home/wurzel/HiwiAK/data/sempardata/ACL2019/SemEval/2015/' + splitmarker + '/train/train.amconll',
-  validation_data_path: '/home/wurzel/HiwiAK/data/sempardata/ACL2019/SemEval/2015/' + splitmarker + '/gold-dev/gold-dev.amconll',
+  train_data_path: common_prefix + splitmarker + '/train/train.amconll',
+  validation_data_path: common_prefix + splitmarker + '/gold-dev/gold-dev.amconll',
   model: getFinalModel(),
   iterator: {
     type: 'bucket',
