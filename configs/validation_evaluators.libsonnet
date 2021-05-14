@@ -148,7 +148,24 @@ function (dataset_reader, data_iterator) {
                     "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
                     "evaluation_command" : eval_commands['commands']['MRP-UCCA']
             }
-        }
+        },
+
+        "COGS": {
+            "type": "standard_evaluator",
+            "formalism" : "COGS",
+            "system_input" : "data/COGS/dev/dev.amconll", # todo what to type here
+            "gold_file": "data/COGS/dev/dev.tsv", # todo what to type here
+            "use_from_epoch" : -1, # todo what to type here
+            "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : threads,
+                "give_up": give_up,
+                "evaluation_command" : eval_commands['commands']['COGS']
+            }
+        },
 
 
 

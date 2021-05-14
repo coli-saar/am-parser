@@ -127,7 +127,27 @@ function (dataset_reader, data_iterator) {
      #"MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 7, 300), # <- submitted MRP system
      "MRP-UCCA" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-UCCA","UCCA", 18, 300),
 
-     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 900)
+     "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 900),
+
+     "COGS" : [
+        ["COGS",
+            { #prefix used for evaluation metric
+                "type": "standard_evaluator",
+                "formalism" : "COGS",
+                "system_input" : "data/COGS/test/test.amconll", # todo what to insert here?
+                "gold_file": "data/COGS/test/test.tsv",  # todo what to insert here?
+                "predictor" : {
+                    "type" : "amconll_predictor",
+                    "dataset_reader" : dataset_reader,
+                    "data_iterator" : data_iterator,
+                    "k" : k,
+                    "threads" : 1,
+                    "give_up": give_up,
+                    "evaluation_command" : eval_commands['commands']['COGS']
+                }
+            }
+        ]
+     ],
 
 
 }

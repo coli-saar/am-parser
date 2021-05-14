@@ -121,6 +121,12 @@ local sdp_regexes = {
                         ["mrp",'python3 '+MTOOL+' --read mrp --score mrp --cores 4 --limit 2 --gold {gold_file} {tmp}/output_post_no_labels.mrp'],
                         ]
         },
+        "COGS" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
+            "result_regexes" : {"ExactMatch" : [0, "Exact match accuracy: \n(?P<value>.+)"],
+                                "EditDistance" : [1, "Average token-level edit distance: \n(?P<value>.+)"],}
+        },
 
     },
 
@@ -142,7 +148,9 @@ local sdp_regexes = {
         "EWT" : "+EWT_LAS",
         "GUM" : "+GUM_LAS",
         "LinES" : "+LinES_LAS",
-        "ParTUT" : "+ParTUT_LAS"
+        "ParTUT" : "+ParTUT_LAS",
+
+        "COGS": "ExactMatch",
 
     },
 
