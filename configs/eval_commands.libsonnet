@@ -124,8 +124,9 @@ local sdp_regexes = {
         "COGS" : {
             "type" : "bash_evaluation_command",
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
-            "result_regexes" : {"ExactMatch" : [0, "Exact match accuracy: \n(?P<value>.+)"],
-                                "EditDistance" : [1, "Average token-level edit distance: \n(?P<value>.+)"],}
+            # don't forget to edit the regexes when output format of ToCOGSCorpus is altered.
+            "result_regexes" : {"ExactMatch" : [4, "Exact match accuracy: (?P<value>.+)"], # number is line number (start at 0)
+                                "EditDistance" : [5, "Average token-level edit distance: (?P<value>.+)"],}
         },
 
     },
@@ -150,7 +151,7 @@ local sdp_regexes = {
         "LinES" : "+LinES_LAS",
         "ParTUT" : "+ParTUT_LAS",
 
-        "COGS": "ExactMatch",
+        "COGS": "+ExactMatch",
 
     },
 
