@@ -8,18 +8,18 @@
 
 # todo: lots of 'change back' to dos for changed hyperparameters for debugging
 local lr = 0.01; # 0.001
-local num_epochs = 5; # 100
-local patience = 10000; # 10000
+local num_epochs = 100; # 100
+local patience = 20; # 10000
 # # we don't have PoS-tags, lemmas or Named Entities in COGS
 # local pos_dim = 32,
 # local lemma_dim = 64,
 # local ner_dim = 16,
-local hidden_dim = 64; // 256
-local hidden_dim_mlp = 128; // 1024
+local hidden_dim = 32; # 256
+local hidden_dim_mlp = 64; # 1024
 
-local batch_size = 8;  #32, todo change back
-local k_supertags_evaldecoder = 3;  # 6, number of supertags to be used during decoding todo change back
-local formalism_eval_from_epoch = 0;  # 6, (edit distance, exact match calculation) # todo change back to 6
+local batch_size = 1;  #32, todo change back
+local k_supertags_evaldecoder = 4;  # 6, number of supertags to be used during decoding todo change back
+local formalism_eval_from_epoch = 1;  # 6, (edit distance, exact match calculation) # todo change back to 6
 
 
 #============EMBEDDINGS=========
@@ -41,7 +41,7 @@ local bert_text_field_embedder = {
     },
 };
 
-local token_embedding_dim = 128;  # 128, 256, 512, 768(=3*256), train has 743 vocab, bert large 1024
+local token_embedding_dim = 32;  # 128, 256, 512, 768(=3*256), train has 743 vocab, bert large 1024
 local token_indexer = {"tokens": {"type": 'single_id'}};
 local token_text_field_embedder = {
     "type": 'basic',
@@ -96,7 +96,7 @@ local train_zip_corpus_path = path_prefix + "amconll/train.zip"; # amconll/Auto3
 # local train_tsv_corpus_path = path_prefix + "COGS/data/train1k_noprim.tsv";  # not used
 local dev_zip_corpus_path = path_prefix + "amconll/dev.zip";
 local dev_amconll_corpus_path = path_prefix + "amconll/dp_dev.amconll";  # output of PrepareDevData.java
-local dev_tsv_corpus_path = path_prefix + "small/dev100.tsv";
+local dev_tsv_corpus_path = path_prefix + "small/dev10.tsv";
 # local dev_tsv_corpus_path = path_prefix + "COGS/data/dev.tsv";
 #===============================
 
@@ -123,7 +123,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "dropout": 0.0, #0.3 #todo change back
 
     "output_null_lex_label" : true,  # todo what is this?
-    "all_automaton_loss": true,  # todo do this? or skip?
+    "all_automaton_loss": true,  # todo do this? or skip? right now doesn't learn lexlabel at all
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",
@@ -184,7 +184,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
                 "threads" : 1,
-                "give_up": 5,  #15, time limit in seconds before retry parsing with k-1 supertags todo change back
+                "give_up": 15,  #15, time limit in seconds before retry parsing with k-1 supertags todo change back
                 "evaluation_command" : eval_commands['commands'][my_task]
             }
         },
@@ -208,7 +208,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
         "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],
 
-        "input_dropout": 0.3, #0.3 todo change back
+        "input_dropout": 0.0, #0.3 todo change back
         "encoder": {
             "type" : if use_freda == 1 then "freda_split" else "shared_split_encoder",
             "formalisms" : [my_task],
@@ -261,7 +261,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "type": "adam",
             "lr": lr,
         },
-        "validation_metric" : "-EditDistance",  # todo change "+ExactMatch" ?
+        "validation_metric" : "-COGS_EditDistance",  # todo change "+ExactMatch" ?
         # "validation_metric" : eval_commands['metric_names'][my_task],  # "+ExactMatch" ?
         "num_serialized_models_to_keep" : 1
     }
