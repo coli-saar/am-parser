@@ -32,23 +32,24 @@ python3 am-parser/scripts/cogs2021/stripprimitives.py --cogsdatadir COGSDATADIR
    1. Get the correct `am-tools.jar` that can deal with COGS (on the branch mentioned above!).
    With IntelliJ: `gradle >  am-tools > Tasks > shadow > shadowJar > Run` and 
    copy the resulting file (`am-tools/build/libs/am-tools.jar`) into the `am-parser` folder.
+   The following two steps can be performed with the `get_train_dev.sh` script (it contains the directories as variables you can edit).
    2. Call `de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS` to get the zip-files with train and dev data:
    You have to provide 
    - the path to the train and dev corpora as input (e.g. `-t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv`)
    - an output path (e.g. `-o AMCONLLDIR`)
    - the number of sources you want (e.g. `-nrSources 3`)
    - the algorithm option should be `--algorithm automata`.  
-   **todo** below command not tested, find out what's working
 ```bash
-java -cp am-tools.main de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS -t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR -nrSources 3 --algorithm automata
+cd am-parser
+java -cp am-tools.jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS -t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR --nrSources 3 --algorithm automata
 ```
    3. Prepare dev data for evaluation:  
       the produced amconll file is used as `system_input` for the `validation_evaluator`.
       Note: the `--corpus` should be the same as the dev corpus above
-      (In principle you could use an output directory different from the previous stepm but we won't do this here)
-      **todo below command not tested**
+      (In principle you could use an output directory different from the previous step, but we won't do this here)
 ```bash
-java -cp am-tools.main de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus COGSDATADIR/dev.tsv --outPath AMCONLLDIR --prefix dp_dev
+cd am-parser
+java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus COGSDATADIR/dev.tsv --outPath AMCONLLDIR --prefix dp_dev
 ```
 5. **to do** a config file, e.g. `am-parser/jsonnets/cogs2021/debugging.jsonnet` 
    make sure the file paths in the config file (and also imported libsonnet files) 
@@ -61,6 +62,7 @@ java -cp am-tools.main de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevD
    Let's assume its files (`metrics.json`, `model.tar.gz` among others) should 
    be written to some folder `MODELFOLDER` (e.g. `../cogs2021/temp`) 
    and you have one GPU (cuda device 0).
+   Note: I had to `LC_ALL=en_US.UTF-8` as with my German local a learning rate of `0.01` is interpreted as just `0`.
 ```bash
 cd am-parser
 python -u train.py jsonnets/cogs2021/CONFIGFILE.jsonnet -s MODELFOLDER/  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  0  } }' &> ./train_cogs.log
