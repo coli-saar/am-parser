@@ -61,14 +61,20 @@ but zip files containing tree automata.
 Remember we need the right am-tools.jar file (from the [cogs_new_decomp branch](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp))!
 In this step we will create files which we will put into a new directory.
 Create a new directory and let's call the directory path `AMCONLLDIR`.
-  - local (pw): `~HiwiAK/cogs2021/amconll/`
+  - local (pw): `~/HiwiAK/cogs2021/amconll/`
   - coli servers: **to do: location on coli servers**
 
 After you performed the two sub-steps (a,b) below, your `AMCONLLDIR` should contain 
   - zip files for train and dev set (`train.zip`, `dev.zip`), and 
   - an amconll file of the dev set for validation (probably called `dev_dp.amconll`).
-The following two points (a,b) can be performed with the `get_train_dev.sh` script 
-(it contains the directories as variables you can edit).
+The following two points (a,b) can be performed with the `get_train_dev.sh` script.
+```bash
+cd AMPARSERDIR
+bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train_nonprim.tsv -d COGSDATADIR/dev.tsv -o AMCOLLDIR -s 3 -p dp_dev
+# actually `-s 3` (3 sources) and `-p dp_dev` (file dp_dev.amconll will be created) are defaults, so without them it's the same:
+# bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train_nonprim.tsv -d COGSDATADIR/dev.tsv -o AMCOLLDIR
+```
+- pw debugging: `/bin/bash /home/wurzel/HiwiAK/am-parser/scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/`
 
 #### (a) Getting zip files: `SourceAutomataCLICOGS`
 The input are the TSV files of COGS, output are zip files.
@@ -76,7 +82,7 @@ Call `de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS` with the right c
 You have to provide 
 - the path to the train and dev corpora as input (e.g. `-t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv`)
 - an output path (e.g. `-o AMCONLLDIR`)
-- the number of sources you want (e.g. `-nrSources 3`)
+- the number of sources you want (e.g. `--nrSources 3`)
 - the algorithm option should be `--algorithm automata`.  
 ```bash
 cd AMPARSERDIR
@@ -98,7 +104,7 @@ java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevDa
 ### Step 2: Training the parser (using am-parser)
 
 #### (a) Pick a config file
-e.g. `AMPARSERDIR/jsonnets/cogs2021/debugging.jsonnet` 
+e.g. `AMPARSERDIR/jsonnets/cogs2021/debugging.jsonnet`.   
 Make sure the file paths in the config file (and also imported libsonnet files) 
 work for you and contain the files you are interested in 
 (e.g. `COGSDATADIR` and `AMCONLLDIR` and corresponding filenames in the folders).
@@ -123,12 +129,12 @@ python -u train.py jsonnets/cogs2021/CONFIGFILE.jsonnet -s MODELDIR/  -f --file-
   - I had to `LC_ALL=en_US.UTF-8` as with my German local a learning rate of `0.01` is interpreted as just `0`.
   - `./debugging_train.sh`
 
-*Monitoring training progress*
+*Monitoring training progress*  
 While training you can do `tensorboard --logdir=MODELDIR` to check model progress 
 (important: last slash in path of MODELDIR should be omitted here).
 Or you use [comet.ml](https://www.comet.ml/site/).
 
-*How long does training take?*
+*How long does training take?*  
 Training time obviously depends on many factors such as 
 - the number of epochs, batch size, size of the neural model and other hyperparameters
 - the corpora used (full corpus? train or train100?)
@@ -149,7 +155,11 @@ then the prediction will create 3 files in this folder:
 - `COGS_gold.amconll` gold AM dependency trees
 - `COGS_pred.amconll` predictions as AM dependency trees
 - `COGS.tsv` predictions in the native TSV format of COGS
-Run the following assuming that you have one GPU available (`-g 0`) and would like to save logs to `EVALLOGFILE`:
+
+Run the following assuming that 
+- you have one GPU available (`-g 0`) 
+- you would like to save logs to `EVALLOGFILE`
+- you would like to generate predictions for the `test.tsv` file
 ```bash
 cd AMPARSERDIR
 bash ./scripts/cogs2021/unsupervised_predict.sh -i COGSDATADIR/test.tsv -o OUTPUTDIR -m MODELDIR/model.tar.gz -g 0 &> EVALLOGFILE

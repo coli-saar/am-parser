@@ -18,26 +18,99 @@
 ## limitations under the License.
 ##
 # getting train and dev zip files for training the am-parser and also dev amconll file for evaluation
-# todo make variables below command line parameters?
+# todo test command line parsing: especially for erroneous input
+# get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/
+# get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/ -s 3 -p dp_dev
 
 jar="am-tools.jar"
+# i.e. assumed to be in current directory, maybe cd to am-parser directory first
 
-# cogsdatadir should contain the tsv files for train and dev
-cogsdatadir="/home/wurzel/HiwiAK/cogs2021/small"
-traintsvfile="train20_nonprim.tsv"
-devtsvfile="dev10.tsv"
+# Documenting parameters:
+usage="Takes . \n\n
 
-# amconlldir: where output (zip files and amconll file will be written to)
-amconlldir="/home/wurzel/HiwiAK/cogs2021/amconll/"
-devevalprefix="dp_dev"
+Required arguments: \n
+\n\t     -t  train file: Path to the train file in the TSV format of COGS.
+\n\t     -d  dev file: Path to the dev file in the TSV format of COGS.
+\n\t     -o  output folder: where the results will be stored.
+
+\noptions:
+
+\n\t   -s  number of sources (default: 3).
+\n\t   -p  dev eval prefix (default: dp_dev).
+"
+
+#defaults:
+prefix="dp_dev"
 sources=3
 
-cd ~/HiwiAK/am-parser/
+# Gathering parameters:
+# note: although -t,-d,-o are basically mandatory, we don't use positional
+# arguments: hopefully easier to use and not confuse positions.
+while getopts "t:d:o:s:p:h" opt; do
+    case $opt in
+  h) echo -e $usage
+     exit
+     ;;
+  t) train="$OPTARG"
+     ;;
+  d) dev="$OPTARG"
+     ;;
+  o) output="$OPTARG"
+     ;;
+  s) sources="$OPTARG"
+     ;;
+  p) prefix="$OPTARG"
+     ;;
+  \?) echo "Invalid option -$OPTARG" >&2
+      ;;
+    esac
+done
 
-printf "\n-->Automata for train ($traintsvfile) and dev ($devtsvfile) in $cogsdatadir : will create zip files in $amconlldir: ...\n"
-java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $cogsdatadir/$traintsvfile --devCorpus $cogsdatadir/$devtsvfile --outPath $amconlldir --nrSources $sources --algorithm automata
+# input validation:
+if [ -f "$jar" ]; then
+    echo "jar file found at $jar."
+else
+    echo "jar file not found at $jar."
+    exit 1
+fi
 
-printf "\n-->Prepare dev data for evaluation ($devevalprefix amconll file in $amconlldir will be created from $cogsdatadir/$devtsvfile) ...\n"
-java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $cogsdatadir/$devtsvfile --outPath $amconlldir --prefix $devevalprefix
+if [ -f "$train" ]; then
+    echo "train file found at $train"
+else
+    echo "train file not found at $train. Please check the -t parameter"
+    exit 1
+fi
+
+if [ -f "$dev" ]; then
+    echo "dev file found at $dev"
+else
+    echo "dev file not found at $dev. Please check the -d parameter"
+    exit 1
+fi
+
+if [ "$output" = "" ]; then
+    printf "\nERROR: No output folder path given. Please use -o option.\n"
+    exit 1
+fi
+
+echo "INFO: Number of sources: $sources"
+if [ $sources -lt 1 ]; then
+    prinf "\nERROR: source smaller 1 not allowed.\n"
+    exit 1
+fi
+
+echo "INFO: Output prefix: $prefix"
+if [ "$prefix" = "" ]; then
+    echo "Empty prefix not allowed."
+    exit 1
+fi
+
+## Finally the interesting part:
+
+printf "\n--> Automata for train ($train) and dev ($dev) : will create zip files in $output: ...\n"
+java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata
+
+printf "\n--> Prepare dev data for evaluation ($prefix amconll file in $output will be created from $dev) ...\n"
+java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $dev --outPath $output --prefix $prefix
 
 printf "\nDone!\n"
