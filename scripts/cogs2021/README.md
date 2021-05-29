@@ -7,95 +7,181 @@ of [Kim & Linzen (2020)](https://www.aclweb.org/anthology/2020.emnlp-main.731/).
 
 ## Steps:
 
-1. Download the am-parser and checkout the `cogs_unsupervised` branch.
-   Install necessary packages and dependencies (see the main README).
-   Note: we need a special `am_tools.jar`, see below.
-   
+### prerequisites: am-parser, am-tools, COGS corpus
 
-2. Get the COGS corpus
+#### (a) Set up the conda environment and am-parser install
+Use the conda environment `allennlp` as described in the [am-parser wiki](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers#first-time-setup).
+Clone the am-parser repository and make sure to checkout the ['cogs_unsupervised' branch](https://github.com/coli-saar/am-parser/tree/cogs_unsupervised)
+as this is the branch containing the relevant code.
+Install necessary packages and dependencies for the am-parser (see the main README).
+Note: we need a special `am_tools.jar`, see the next point.
+We will use `AMPARSERDIR` to refer to directory path of the `am-parser`.
+- local (pw): use `am-parser` conda environment instead, am-parser at `~/HiwiAK/am-parser`
+- coli servers: the am-parser directory can be found at `x` (commit `x`) (**to do: location/commit on server**)
+
+#### (b) getting the right am-tools.jar file
+The code for COGS can be found in the ['cogs_new_decomp' branch of am-tools](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp).
+To get the jar file run the `shadowJar` task of gradle 
+(IntelliJ: `gradle >  am-tools > Tasks > shadow > shadowJar > Run`) 
+and the jar file will be generated at `am-tools/build/libs/am-tools.jar`.
+Copy this jar file into the am-parser folder.
+On the servers the am-tools.jar file was produced using commit `x` of am-tools. (**to do: location/commit on server**).
+Important: If the am-parser can't find an am-tools.jar file it might try to download it, but this won't be the version we need for the COGS experiments! 
+
+#### (c) download COGS data
+The COGS data is available as a [GitHub repository](https://github.com/najoungkim/COGS).
 ```bash
 git clone https://github.com/najoungkim/COGS.git
 ```
-   In what follows we will use `COGSDATADIR` to refer to 
-   the path to the `data` subdirectory of this repository.
+The `data` subdirectory contains the corpora files (TSV format).
+In what follows we will sometimes use `COGSDATADIR` to refer to the path to the `data` subdirectory of this repository.
+- local (pw): `~/HiwiAK/cogs2021/COGS/data`
+- coli servers: the directory can be found at `x` (commit `x`) (**to do: location/commit on server**).
 
-3. (Pre-experiments w/o primitives **to do: get rid of this restriction** ) 
-   Strip all primitives (in train, train100) bc so far pre/postprocessing 
-   can't deal with some of them
+#### (d) preliminary: strip primitives
+(Pre-experiments w/o primitives **to do: get rid of this restriction** ) 
+Strip all primitives (in train, train100) because so far pre/postprocessing can't deal with some of them.
 ```bash
-python3 am-parser/scripts/cogs2021/stripprimitives.py --cogsdatadir COGSDATADIR
+cd AMPARSERDIR
+python3 scripts/cogs2021/stripprimitives.py --cogsdatadir COGSDATADIR
 ```
-   where `COGSDATADIR` is the path to the `data` subdirectory of the COGS repository (e.g. `../cogs2021/COGS/data/`).
+where `COGSDATADIR` is the path to the `data` subdirectory of the COGS repository.
+- local (pw): `python3 scripts/cogs2021/stripprimitives.py --cogsdatadir ~/HiwiAK/cogs2021/COGS/data/`
 
-4. use the ([`cogs_new_decomp` branch](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp) of am-tools:
-   After the sub-steps below your `AMCONLLDIR` (e.g. `../cogs2021/amconll/`) should contain a `train.zip`, `dev.zip` and a `dev_dp.amconll` file.
-   1. Get the correct `am-tools.jar` that can deal with COGS (on the branch mentioned above!).
-   With IntelliJ: `gradle >  am-tools > Tasks > shadow > shadowJar > Run` and 
-   copy the resulting file (`am-tools/build/libs/am-tools.jar`) into the `am-parser` folder.
-   The following two steps can be performed with the `get_train_dev.sh` script (it contains the directories as variables you can edit).
-   2. Call `de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS` to get the zip-files with train and dev data:
-   You have to provide 
-   - the path to the train and dev corpora as input (e.g. `-t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv`)
-   - an output path (e.g. `-o AMCONLLDIR`)
-   - the number of sources you want (e.g. `-nrSources 3`)
-   - the algorithm option should be `--algorithm automata`.  
+
+
+### Step 1: Decomposition and graph conversion (using am-tools)
+
+The conversion COGS logical forms to graphs and back is implemented in am-tools,
+the conversion to graphs is a preprocessing step, the conversion from graphs a postprocessing step.
+After the preprocessing, we need to decompose the graphs into blobs and infer an AM dependency structure.
+Because we use the 'unsupervised' version here (learning source names) the result of the decomposition is not an AMCONLL file,
+but zip files containing tree automata.
+
+Remember we need the right am-tools.jar file (from the [cogs_new_decomp branch](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp))!
+In this step we will create files which we will put into a new directory.
+Create a new directory and let's call the directory path `AMCONLLDIR`.
+  - local (pw): `~HiwiAK/cogs2021/amconll/`
+  - coli servers: **to do: location on coli servers**
+
+After you performed the two sub-steps (a,b) below, your `AMCONLLDIR` should contain 
+  - zip files for train and dev set (`train.zip`, `dev.zip`), and 
+  - an amconll file of the dev set for validation (probably called `dev_dp.amconll`).
+The following two points (a,b) can be performed with the `get_train_dev.sh` script 
+(it contains the directories as variables you can edit).
+
+#### (a) Getting zip files: `SourceAutomataCLICOGS`
+The input are the TSV files of COGS, output are zip files.
+Call `de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS` with the right command line options.
+You have to provide 
+- the path to the train and dev corpora as input (e.g. `-t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv`)
+- an output path (e.g. `-o AMCONLLDIR`)
+- the number of sources you want (e.g. `-nrSources 3`)
+- the algorithm option should be `--algorithm automata`.  
 ```bash
-cd am-parser
+cd AMPARSERDIR
 java -cp am-tools.jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS -t COGSDATADIR/train_noprim.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR --nrSources 3 --algorithm automata
 ```
-   3. Prepare dev data for evaluation:  
-      the produced amconll file is used as `system_input` for the `validation_evaluator`.
-      Note: the `--corpus` should be the same as the dev corpus above
-      (In principle you could use an output directory different from the previous step, but we won't do this here)
+
+
+#### (b) Getting amconll files for validation: `PrepareDevData`
+the produced amconll file is used as `system_input` for the `validation_evaluator`.
+Note: the `--corpus` should be the same as the dev corpus above.
+Specifically note the prefix option.
+(In principle you could use an output directory different from the previous step, but we won't do this here)
 ```bash
-cd am-parser
+cd AMPARSERDIR
 java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus COGSDATADIR/dev.tsv --outPath AMCONLLDIR --prefix dp_dev
 ```
-5. **to do** a config file, e.g. `am-parser/jsonnets/cogs2021/debugging.jsonnet` 
-   make sure the file paths in the config file (and also imported libsonnet files) 
-   work for you and contain the files you are interested in 
-   (e.g. `COGSDATADIR` and `AMCONLLDIR` and corresponding filenames in the folders).
-   - train on train or train100?
-   - number of sources? default is 3?
-   - use BERT or learn embeddings from cogs data alone ('tokens')?
-6. **Training** ([see also wiki of am-parser](https://github.com/coli-saar/am-parser/wiki/Training-the-Parser)).
-   Let's assume its files (`metrics.json`, `model.tar.gz` among others) should 
-   be written to some folder `MODELFOLDER` (e.g. `../cogs2021/temp`) 
-   and you have one GPU (cuda device 0).
-   Note: I had to `LC_ALL=en_US.UTF-8` as with my German local a learning rate of `0.01` is interpreted as just `0`.
+
+
+### Step 2: Training the parser (using am-parser)
+
+#### (a) Pick a config file
+e.g. `AMPARSERDIR/jsonnets/cogs2021/debugging.jsonnet` 
+Make sure the file paths in the config file (and also imported libsonnet files) 
+work for you and contain the files you are interested in 
+(e.g. `COGSDATADIR` and `AMCONLLDIR` and corresponding filenames in the folders).
+**to do** note on available config files: what do their names mean?
+- training on train or train100?
+- number of sources? default is 3?
+- use BERT or learn embeddings from cogs data alone ('tokens')?
+- other factors?
+
+#### (b) Actual training
+([see also wiki of am-parser](https://github.com/coli-saar/am-parser/wiki/Training-the-Parser)).
+Let's assume its files (`metrics.json`, `model.tar.gz` among others) should 
+be written to some folder `MODELDIR` (e.g. `../cogs2021/temp`), 
+you have one GPU (cuda device 0),
+and log output should be written to LOGFILE.
 ```bash
-cd am-parser
-python -u train.py jsonnets/cogs2021/CONFIGFILE.jsonnet -s MODELFOLDER/  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  0  } }' &> ./train_cogs.log
+cd AMPARSERDIR
+python -u train.py jsonnets/cogs2021/CONFIGFILE.jsonnet -s MODELDIR/  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  0  } }' &> LOGFILE
 ```
-   (pw: `./debugging_train.sh`)
-   While training you can do `tensorboard --logdir=MODELFOLDER` to check model progress 
-   (important: last slash in path of MODELFOLDER should be omitted here).
-   Or you use [comet.ml](https://www.comet.ml/site/).
+**to do: add server version and comet, more options?**
+- notes for pw local debugging:
+  - I had to `LC_ALL=en_US.UTF-8` as with my German local a learning rate of `0.01` is interpreted as just `0`.
+  - `./debugging_train.sh`
 
-7. **Evaluate on test data** ([see also wiki of am-parser](https://github.com/coli-saar/am-parser/wiki/Prediction-and-evaluation-on-test-data)).
-   Assume you want to store the output in some `OUTPUTDIR` (e.g. `../cogs2021/output`),
-   then the prediction will create 3 files in this folder:
-   - `COGS_gold.amconll` gold AM dependency trees
-   - `COGS_pred.amconll` predictions as AM dependency trees
-   - `COGS.tsv` predictions in the native TSV format of COGS
-   **to do: modifications not pushed yet** 
-   I had to modify `predict.sh`
-   (add `COGS` as allowed formalism, 
-   add respective lines to prepare the dev data (`PrepareDevData`) and 
-   to transform predictions back to COGS format including running evaluation (`ToCOGSCorpus`))
-   and `parse_file.py` (adaptions for the automata/unsupervised case) to get it to work.
+*Monitoring training progress*
+While training you can do `tensorboard --logdir=MODELDIR` to check model progress 
+(important: last slash in path of MODELDIR should be omitted here).
+Or you use [comet.ml](https://www.comet.ml/site/).
+
+*How long does training take?*
+Training time obviously depends on many factors such as 
+- the number of epochs, batch size, size of the neural model and other hyperparameters
+- the corpora used (full corpus? train or train100?)
+- the hardware (GPU?)
+Here are some examples: **to do: training times**
+- local (pw): just minutes on a small train/dev (20-nonprim, 10dev) for a small debugging model (32 word dim, 32/64 hidden, k=4 supertag decoding, batch size 1, no dropout) with early stopping (100 epochs, 20 patience).
+- coli servers: GPU? config file/epochs/train set...
+
+**to do: maybe make a spreadsheet with results and link it here?**
+
+
+### Step 3: (optional) predictions (using am-parser) and evaluation
+
+#### (a) Get predictions using a trained model
+Note that the training must be successfully completed (you should have a `model.tar.gz` in your `MODELDIR`).
+Assume you want to store the output in some `OUTPUTDIR` (e.g. `../cogs2021/output`),
+then the prediction will create 3 files in this folder:
+- `COGS_gold.amconll` gold AM dependency trees
+- `COGS_pred.amconll` predictions as AM dependency trees
+- `COGS.tsv` predictions in the native TSV format of COGS
+Run the following assuming that you have one GPU available (`-g 0`) and would like to save logs to `EVALLOGFILE`:
 ```bash
-bash am-parser/scripts/predict.sh -i COGSDATADIR/test.tsv -T COGS -o OUTPUTDIR -m MODELFOLDER/model.tar.gz -g 0
+cd AMPARSERDIR
+bash ./scripts/cogs2021/unsupervised_predict.sh -i COGSDATADIR/test.tsv -o OUTPUTDIR -m MODELDIR/model.tar.gz -g 0 &> EVALLOGFILE
 ```
-   **todo** question to pauline: do I really have to build EDM each time even when evaluating on a corpus different from EDS?
+Note: you could add the `-f` option for fast
+- local (pw): `bash ./scripts/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log`
 
 
-pw:
+(see also [the am-parser wiki on prediction and evaluation on test data](https://github.com/coli-saar/am-parser/wiki/Prediction-and-evaluation-on-test-data),
+but due to using the 'unsupervised' approach and a new formalism COGS might not be applicable).
+
+#### (b) Computing evaluation metrics
+The COGS authors use exact match accuracy as the main evaluation metric and
+reported overall results as well as result per generalization type (see 3rd column in the TSV).
+In their appendix they also mention token-level edit distance and ill-formedness (closing parenthesis missing).
+As of now (May 2021) there doesn't seem to be a separate evaluation script.
+(first author told me a while ago they computed their values using OpenNMT which they also used to train their models).
+**to do: which eval script used? incl generalization type specific results?**
+
+
+### pw notes local debugging
+
+- don't forget to copy most recent am-tools.jar into am-parser directory!
+- don't forget to change the file paths in config files and bash scripts 
+(am-tools train-dev prepare, jsonnet files, command line arguments for train and predict)
+- also if you re-run the pipeline, make sure that errors are not hidden by accidentally using a file created in the last run.
+- commands:
 ```bash
-/bin/bash /home/wurzel/HiwiAK/am-parser/scripts/cogs2021/debugging_train.sh
-bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
+bash ./scripts/cogs2021/debugging_train.sh
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
+# bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
 ```
-
 
 ## experiments:
 
