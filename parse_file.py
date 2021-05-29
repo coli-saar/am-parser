@@ -22,13 +22,15 @@ import json
 
 from allennlp.common.checks import ConfigurationError
 from allennlp.common.util import prepare_environment
+from allennlp.data import TokenIndexer
 
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
 from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor
+from graph_dependency_parser.components.dataset_readers.amconll import AMConllUnannotatedDatasetReader
+from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, AMconllAutomataPredictor
 from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -108,14 +110,21 @@ if args.v:
     logging.getLogger('allennlp.nn.initializers').disabled = True
     logging.getLogger('allennlp.modules.token_embedders.embedding').setLevel(logging.INFO)
 
+# todo rather have an --automata cli option?
+isUnsupervised = args.formalism == "COGS"
+
 # Load from archive
 archive = load_archive(args.archive_file, args.cuda_device, args.overrides, args.weights_file)
 config = archive.config
 prepare_environment(config)
 model = archive.model
 model.eval()
-if not isinstance(model, GraphDependencyParser):
-    raise ConfigurationError("The loaded model seems not to be an am-parser (GraphDependencyParser)")
+if not isinstance(model, GraphDependencyParser) and not isUnsupervised:
+   raise ConfigurationError("The loaded model seems not to be an am-parser (GraphDependencyParser)")
+# todo: add check for unsupervised case about parser class
+# graph_dependency_parser.inside_maximization.graph_dependency_parser_automata.GraphDependencyParser
+# if isUnsupervised and not isinstance(model, graph_dependency_parser_automata.GraphDependencyParser):
+#    raise ConfigurationError("The loaded model seems not to be an am-parser (GraphDependencyParser) (automaton version)")
 if not args.formalism in model.tasks:
     raise ConfigurationError(f"The model at hand was not trained on {args.formalism} but on {list(model.tasks.keys())}")
 
@@ -127,7 +136,11 @@ validation_dataset_reader_params = config.pop('validation_dataset_reader', None)
 if validation_dataset_reader_params is not None:
     dataset_reader = DatasetReader.from_params(validation_dataset_reader_params)
 else:
-    dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
+    if isUnsupervised:
+        # todo replace this ugly hack with nicer one
+        dataset_reader = AMConllUnannotatedDatasetReader(token_indexers={"tokens": TokenIndexer.from_params(config.pop('dataset_reader').pop('token_indexers'))})
+    else:
+        dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
 evaluation_data_path = args.input_file
 
 embedding_sources: Dict[str, str] = (json.loads(args.embedding_sources_mapping)
@@ -139,8 +152,10 @@ if args.extend_vocab:
     model.vocab.extend_from_instances(Params({}), instances=instances)
     model.extend_embedder_vocab(embedding_sources)
 
-
-predictor = AMconllPredictor(dataset_reader,args.k,args.give_up, args.threads, model=model)
+if isUnsupervised:
+    predictor = AMconllAutomataPredictor(dataset_reader, args.k, args.give_up, args.threads, model=model)
+else:
+    predictor = AMconllPredictor(dataset_reader,args.k,args.give_up, args.threads, model=model)
 
 predictor.parse_and_save(args.formalism, args.input_file, args.output_file)
 
