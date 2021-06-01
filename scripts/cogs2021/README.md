@@ -36,7 +36,7 @@ git clone https://github.com/najoungkim/COGS.git
 The `data` subdirectory contains the corpora files (TSV format).
 In what follows we will sometimes use `COGSDATADIR` to refer to the path to the `data` subdirectory of this repository.
 - local (pw): `~/HiwiAK/cogs2021/COGS/data`
-- coli servers: the directory can be found at `x` (commit `x`) (**to do: location/commit on server**).
+- coli servers: the directory can be found at `/proj/irtg/sempardata/cogs2021/data/COGS/data/` (commit `6f663835897945e94fd330c8cbebbdc494fbb690`) (**to do: change permissions**).
 
 #### (d) preliminary: strip primitives
 (Pre-experiments w/o primitives **to do: get rid of this restriction** ) 
@@ -62,7 +62,7 @@ Remember we need the right am-tools.jar file (from the [cogs_new_decomp branch](
 In this step we will create files which we will put into a new directory.
 Create a new directory and let's call the directory path `AMCONLLDIR`.
   - local (pw): `~/HiwiAK/cogs2021/amconll/`
-  - coli servers: **to do: location on coli servers**
+  - coli servers: **to do: location on coli servers**, e.g. `/proj/irtg/sempardata/cogs2021/first_experiments/auto3/training_input/`
 
 After you performed the two sub-steps (a,b) below, your `AMCONLLDIR` should contain 
   - zip files for train and dev set (`train.zip`, `dev.zip`), and 
@@ -74,7 +74,13 @@ bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train_nonprim.tsv -d COG
 # actually `-s 3` (3 sources) and `-p dp_dev` (file dp_dev.amconll will be created) are defaults, so without them it's the same:
 # bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train_nonprim.tsv -d COGSDATADIR/dev.tsv -o AMCOLLDIR
 ```
-- pw debugging: `/bin/bash /home/wurzel/HiwiAK/am-parser/scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/`
+- pw debugging: `/bin/bash ~/HiwiAK/am-parser/scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/`
+On the coli servers e.g. (maybe adjust experiment folder and whether nonprim version :
+```bash
+cd AMPARSERDIR
+bash get_train_dev.sh -t /proj/irtg/sempardata/cogs2021/data/COGS/data/train_nonprim.tsv -d /proj/irtg/sempardata/cogs2021/data/COGS/data/dev.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3/training_input/ -s 3 -p dp_dev
+# 3 sources, dp_dev.amconll created
+```
 
 #### (a) Getting zip files: `SourceAutomataCLICOGS`
 The input are the TSV files of COGS, output are zip files.
@@ -139,6 +145,7 @@ Training time obviously depends on many factors such as
 - the number of epochs, batch size, size of the neural model and other hyperparameters
 - the corpora used (full corpus? train or train100?)
 - the hardware (GPU?)
+
 Here are some examples: **to do: training times**
 - local (pw): just minutes on a small train/dev (20-nonprim, 10dev) for a small debugging model (32 word dim, 32/64 hidden, k=4 supertag decoding, batch size 1, no dropout) with early stopping (100 epochs, 20 patience).
 - coli servers: GPU? config file/epochs/train set...
@@ -166,7 +173,7 @@ bash ./scripts/cogs2021/unsupervised_predict.sh -i COGSDATADIR/test.tsv -o OUTPU
 ```
 Note: you could add the `-f` option for fast
 - local (pw): `bash ./scripts/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log`
-
+- coli severs, eg. `bash ./scripts/cogs2021/unsupervised_predict.sh -i /proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3/predictions -m /proj/irtg/sempardata/cogs2021/first_experiments/auto3/training_output/model.tar.gz -g 0 -f &> /proj/irtg/sempardata/cogs2021/first_experiments/auto3/predict-sh.log`
 
 (see also [the am-parser wiki on prediction and evaluation on test data](https://github.com/coli-saar/am-parser/wiki/Prediction-and-evaluation-on-test-data),
 but due to using the 'unsupervised' approach and a new formalism COGS might not be applicable).
@@ -188,6 +195,8 @@ As of now (May 2021) there doesn't seem to be a separate evaluation script.
 - also if you re-run the pipeline, make sure that errors are not hidden by accidentally using a file created in the last run.
 - commands:
 ```bash
+cd ~/HiwiAK/am-parser/
+bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train20_nonprim.tsv -d ../cogs2021/small/dev10.tsv -o ../cogs2021/amconll/ -s 3 -p dp_dev
 bash ./scripts/cogs2021/debugging_train.sh
 bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
 # bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
