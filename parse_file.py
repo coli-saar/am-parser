@@ -138,7 +138,10 @@ if validation_dataset_reader_params is not None:
 else:
     if isUnsupervised:
         # todo replace this ugly hack with nicer one
-        dataset_reader = AMConllUnannotatedDatasetReader(token_indexers={"tokens": TokenIndexer.from_params(config.pop('dataset_reader').pop('token_indexers'))})
+        # dataset_reader = AMConllUnannotatedDatasetReader(token_indexers={"tokens": TokenIndexer.from_params(config.pop('dataset_reader').pop('token_indexers'))})
+        #  # TokenIndexer.from_params(config.pop('dataset_reader').pop('token_indexers')) throws Configurationerror
+        # dataset_reader = AMConllUnannotatedDatasetReader(token_indexers={"tokens": SingleIdTokenIndexer()})  # todo how to retrieve right dataset reader from config?
+        dataset_reader = DatasetReader.from_params(config.pop('model').pop('tasks')[0].pop('validation_evaluator').pop('predictor').pop('dataset_reader'))
     else:
         dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
 evaluation_data_path = args.input_file
