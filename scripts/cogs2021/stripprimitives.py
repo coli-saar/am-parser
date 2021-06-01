@@ -53,8 +53,7 @@ import argparse
 
 def strip_primitives_from_file(inputfile, outputfile):
     primitives_found = 0
-    print(f"--Stripping primitives from input file {inputfile} "
-          f"and writing to {outputfile}")
+    print("--Stripping primitives from input file {} and writing to {}".format(inputfile, outputfile))
     with open(inputfile, "r", encoding="utf-8") as infile, \
             open(outputfile, "w", encoding="utf-8") as outfile:
         infilereader = csv.reader(infile, delimiter='\t')
@@ -68,7 +67,7 @@ def strip_primitives_from_file(inputfile, outputfile):
             else:
                 # todo use csv module for outputfile too instead of join() ?
                 outfile.write("\t".join(row)+"\n")
-    print(f"  #Primitives stripped: {primitives_found}")
+    print("  #Primitives stripped: {}".format(primitives_found))
     return
 
 
@@ -85,11 +84,11 @@ def main(argv):
 
     # input validation
     if not os.path.isdir(inputdir):
-        raise NotADirectoryError(f"Input path is not a directory: {inputdir}")
+        raise NotADirectoryError("Input path is not a directory: {}".format(inputdir))
     for file in files_with_prim:
         full_path = os.path.join(inputdir, file+".tsv")
         if not os.path.isfile(full_path):
-            raise FileNotFoundError(f"File not found: {full_path}")
+            raise FileNotFoundError("File not found: {}".format(full_path))
 
     # strip primitives from the respective files
     for file in files_with_prim:
