@@ -14,12 +14,15 @@ This is a quick guide on how to use our already trained models to make predictio
 - Python 2.7 for EDS and AMR evaluation (EDM metric and Smatch)
 - AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
+- comet-ml
+- overrides (tested with version 1.9)
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
 - The spacy core web md model: `python -m spacy download en_core_web_md`
 - You may require to set your version of sklearn (an AllenNLP requirement, usually automatically installed) manually to version 0.22 or lower, e.g. with `pip install scikit-learn==0.22.2`
 - a build of [am-tools](https://github.com/coli-saar/am-tools); will be downloaded automatically.
 
 (We recommend to set up a conda environment.)
+**If you still have problems running the parser** check the list of [third party packages](https://github.com/coli-saar/am-parser/wiki/Third-Party-Packages) in the Wiki. This list also contains packages necessary to run branches other than the Master branch.
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 
