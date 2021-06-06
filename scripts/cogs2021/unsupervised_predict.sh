@@ -107,15 +107,20 @@ echo "--> Convert input file to AMConLL format ..."
 java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData -c $input -o $output -p $prefix
 
 # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
-echo "--> Predicting ..."
+# (pw: opened a github issue that using one thread seems to be faster and idk why, therefore using --thread 1 here)
+echo "--> Predicting (fast? $fast)..."
 if [ "$fast" = "false" ]; then
-    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu
+    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1
 else
-    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --give_up 5
+    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1 --give_up 15
 fi
+
+echo "--> Done with predicting at time:"
+date
 # convert AMConLL file (consisting of AM dependency trees) to final output file (containing graphs in the representation-specific format)
 # and evaluate
 echo "--> converting AMConLL to final output file .."
-java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus -c "$amconll_prediction" -o "$output$type"".tsv" --gold "$input" --verbose
+java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus -c "$amconll_prediction" -o "$output$type""_pred.tsv" --gold "$input" --verbose
 
+echo "--> DONE!"
 # THE END
