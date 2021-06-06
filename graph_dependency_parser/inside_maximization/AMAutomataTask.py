@@ -523,6 +523,8 @@ class AMAutomataTask(Model):
             #     self._supertagging_acc(supertagger_logits, supertags, evaluation_mask)  # compare against gold data
             if lexlabel_nll is not None:
                 self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)  # compare against gold data
+            elif self.all_automaton_loss:  # TODO (pw): added this, ask JG whether this is correct
+                self._lexlabel_acc(lexlabel_logits, lexlabels, evaluation_mask)
 
             output_dict["arc_loss"] = edge_existence_loss
             # output_dict["edge_label_loss"] = edge_label_loss
