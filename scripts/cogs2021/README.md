@@ -172,7 +172,7 @@ cd AMPARSERDIR
 bash ./scripts/cogs2021/unsupervised_predict.sh -i COGSDATADIR/test.tsv -o OUTPUTDIR -m MODELDIR/model.tar.gz -g 0 &> EVALLOGFILE
 ```
 Note: you could add the `-f` option for fast
-- local (pw): `bash ./scripts/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log`
+- local (pw): `bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log`
 - coli severs, eg. `bash ./scripts/cogs2021/unsupervised_predict.sh -i /proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3/predictions -m /proj/irtg/sempardata/cogs2021/first_experiments/auto3/training_output/model.tar.gz -g 0 -f &> /proj/irtg/sempardata/cogs2021/first_experiments/auto3/predict-sh.log`
 
 (see also [the am-parser wiki on prediction and evaluation on test data](https://github.com/coli-saar/am-parser/wiki/Prediction-and-evaluation-on-test-data),
@@ -200,6 +200,39 @@ bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train20_nonprim.ts
 bash ./scripts/cogs2021/debugging_train.sh
 bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
 # bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
+```
+
+
+A* parser
+(note: astar implemented in am-tools: version on main branch is different from the one on the cogs branch!!!)
+Second version: (ultimately added `-p` option to `unsupervised_predict.sh`, still model was trained with fixed-tree decoder)
+```bash
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/temp/model.tar.gz -g 0 -p &> ../cogs2021/decoding/predict-sh.log
+```
+First version:
+```bash
+# train
+bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/ -s 3 -p dp_dev
+bash ./scripts/cogs2021/debugging_train.sh
+tensorboard --logdir=../cogs2021/temp
+
+# see  https://github.com/coli-saar/am-parser/wiki/Computing-scores
+# python dump_scores.py models/a_model <formalism> <input data.amconll> <output file.zip> --cuda-device 0
+python dump_scores.py ../cogs2021/temp COGS ../cogs2021/amconll/dp_dev.amconll ../cogs2021/decoding/scores/scores.zip --cuda-device 0
+# see https://github.com/coli-saar/am-parser/wiki/A*-Parser
+# --outside-estimator OPTION
+# --threads <N>
+# --statistics <statistics.csv>   #runtime stats
+# NOTE: in cogs branch am-tools.jar version: Astar is still in de.saar.coli.irtg.experimental.astar.Astar
+# java -cp <am-tools.jar> de.saar.coli.amtools.astar.Astar -s <scores.zip> -o <outdir> 
+java -cp am-tools.jar de.saar.coli.amtools.astar.Astar -s ../cogs2021/decoding/scores/scores.zip -o ../cogs2021/decoding/output
+# -> output directory now contains log_*.txt and result_*.amconll
+# speeding up computations?
+# java -cp <am-tools.jar> de.saar.coli.amtools.astar.io.SerializedScoreReader <scores.zip> <serialized-scores.zip>
+# compare to gold:
+mv ../cogs2021/decoding/output/results_*.amconll ../cogs2021/decoding/output/results.amconll
+mv ../cogs2021/decoding/output/log_*.txt ../cogs2021/decoding/output/log.txt
+java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus -c ../cogs2021/decoding/output/results.amconll -o ../cogs2021/decoding/eval/COGS_pred.tsv --gold ../cogs2021/small/dev10.tsv --verbose
 ```
 
 ## experiments:
