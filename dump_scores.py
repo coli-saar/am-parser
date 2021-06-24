@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
 
 import graph_dependency_parser #important import
+import graph_dependency_parser.important_imports  # for the unsupervised/automata case needed
 import argparse
 import zipfile
 import numpy as np
@@ -113,14 +114,18 @@ logging.getLogger('allennlp.common.params').disabled = True
 logging.getLogger('allennlp.nn.initializers').disabled = True
 logging.getLogger('allennlp.modules.token_embedders.embedding').setLevel(logging.INFO)
 
+# todo rather have an --automata cli option?
+isUnsupervised = args.formalism == "COGS"  # this is a hack
+
 # Load from archive
 archive = load_archive(args.archive_file, args.cuda_device, args.overrides, args.weights_file)
 config = archive.config
 prepare_environment(config)
 model = archive.model
 model.eval()
-if not isinstance(model, GraphDependencyParser):
+if not isinstance(model, GraphDependencyParser) and not isUnsupervised:
     raise ConfigurationError("The loaded model seems not to be an am-parser (GraphDependencyParser)")
+# todo add input validation for isUnsupervised case
 if not args.formalism in model.tasks:
     raise ConfigurationError(f"The model at hand was not trained on {args.formalism} but on {list(model.tasks.keys())}")
 
@@ -132,7 +137,10 @@ validation_dataset_reader_params = config.pop('validation_dataset_reader', None)
 if validation_dataset_reader_params is not None:
     dataset_reader = DatasetReader.from_params(validation_dataset_reader_params)
 else:
-    dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
+    if isUnsupervised:  # todo remove this ugly hack
+        dataset_reader = DatasetReader.from_params(config.pop('model').pop('tasks')[0].pop('validation_evaluator').pop('predictor').pop('dataset_reader'))
+    else:
+        dataset_reader = DatasetReader.from_params(config.pop('dataset_reader'))
 evaluation_data_path = args.input_file
 
 embedding_sources: Dict[str, str] = (json.loads(args.embedding_sources_mapping)
