@@ -21,6 +21,7 @@
 # heavily copied todo rather modify predict.sh?
 # COGS specific for now
 # bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
+# bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/temp/model.tar.gz -g 0 -p &> ../cogs2021/decoding/predict-sh.log
 
 type="COGS"
 
@@ -36,14 +37,15 @@ Required arguments: \n
 \noptions:
 
 \n\t   -m  archived model file in .tar.gz format.
-\n\t   -f  faster, less accurate evaluation (flag; default false)
+\n\t   -f  faster, less accurate evaluation (flag; default false) - only useful for fixed-tree decoder
+\n\t   -p  use projective A* decoder instead of fixed-tree decoder (flag; default false)
 \n\t   -g  which gpu to use (its ID, i.e. 0, 1 or 2 etc). Default is -1, using CPU instead"
 
 #defaults:
 fast=false
 gpu="-1"
 # Gathering parameters:
-while getopts "m:i:o:T:g:fh" opt; do
+while getopts "m:i:o:T:g:fph" opt; do
     case $opt in
   h) echo -e $usage
      exit
@@ -59,6 +61,8 @@ while getopts "m:i:o:T:g:fh" opt; do
   g) gpu="$OPTARG"
      ;;
   f) fast=true
+     ;;
+  p) projective=true
      ;;
   \?) echo "Invalid option -$OPTARG" >&2
       ;;
@@ -106,13 +110,39 @@ amconll_prediction=$output$type"_pred.amconll" # where the neural model writes i
 echo "--> Convert input file to AMConLL format ..."
 java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData -c $input -o $output -p $prefix
 
-# run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
-# (pw: opened a github issue that using one thread seems to be faster and idk why, therefore using --thread 1 here)
-echo "--> Predicting (fast? $fast)..."
-if [ "$fast" = "false" ]; then
-    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1
+if [ "$projective" = "false"]; then
+  # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
+  # (pw: opened a github issue that using one thread seems to be faster and idk why, therefore using --thread 1 here)
+  echo "--> Predicting with fixed-tree decocer (fast? $fast)..."
+  if [ "$fast" = "false" ]; then
+      python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1
+  else
+      python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1 --give_up 15
+  fi
 else
-    python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --threads 1 --give_up 15
+  echo "--> Predicting with projective A* decoder..."
+  # todo maybe remove old logs/result files?
+  echo " -> computing scores..."
+  scoreszip=$output"scores.zip"
+  # see  https://github.com/coli-saar/am-parser/wiki/Computing-scores
+  # python dump_scores.py models/a_model <formalism> <input data.amconll> <output file.zip> --cuda-device 0
+  # todo parameters to check:
+  # --supertag-limit 15 # How many labels per edge to include in the scores file
+  # --edge-label-limit 30 # How many labels per edge to include in the scores file
+  python3 dump_scores.py $model $type $amconll_input $scoreszip --cuda-device $gpu
+  echo " -> A* parsing..."
+  # see https://github.com/coli-saar/am-parser/wiki/A*-Parser
+  # --outside-estimator static  (static, trivial, supertagonly,    root_aware, ignore_aware)
+  # --threads <N>
+  # --statistics <statistics.csv>   #runtime stats
+  # NOTE: in cogs branch am-tools.jar version: Astar is still in de.saar.coli.irtg.experimental.astar.Astar
+  # java -cp <am-tools.jar> de.saar.coli.amtools.astar.Astar -s <scores.zip> -o <outdir>
+  java -cp $jar de.saar.coli.irtg.experimental.astar.Astar -s $scoreszip -o $output
+  # will produce a log_*.txt and a results_*.amconll
+  # rename results file to amconll prediction filename (COGS_pred.amconll)
+  resultsfile=$output"results_*.amconll"
+  mv $resultsfile $amconll_prediction
+  # todo speed up with typechache.dat and serialized score reader needed?
 fi
 
 echo "--> Done with predicting at time:"
