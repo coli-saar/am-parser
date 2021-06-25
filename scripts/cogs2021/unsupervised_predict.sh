@@ -43,6 +43,7 @@ Required arguments: \n
 
 #defaults:
 fast=false
+projective=false
 gpu="-1"
 # Gathering parameters:
 while getopts "m:i:o:T:g:fph" opt; do
@@ -81,9 +82,9 @@ else
 fi
 
 if [ -f "$jar" ]; then
-    printf "jar file found at $jar"
+    printf "jar file found at $jar\n"
 else
-    echo "jar file not found at $jar."
+    echo "jar file not found at $jar\n"
     exit 1
 fi
 
@@ -110,7 +111,7 @@ amconll_prediction=$output$type"_pred.amconll" # where the neural model writes i
 echo "--> Convert input file to AMConLL format ..."
 java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData -c $input -o $output -p $prefix
 
-if [ "$projective" = "false"]; then
+if [ "$projective" = "false" ]; then
   # run neural net + fixed-tree decoder to obtain AMConLL file. Pass the --give_up option if we want things to run faster.
   # (pw: opened a github issue that using one thread seems to be faster and idk why, therefore using --thread 1 here)
   echo "--> Predicting with fixed-tree decocer (fast? $fast)..."
