@@ -142,61 +142,61 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             #"activation" : "tanh",
             #"dropout": 0.0,
             "edge_label_namespace" : name+"_head_tags"
+    },
+     "supertagger" : {
+        "mlp" : {
+            "input_dim" : final_encoder_output_dim,
+            "num_layers" : 1,
+            "hidden_dims" : [hidden_dim_mlp],
+            "dropout" : [0.4], # [0.4]
+            "activations" : "tanh"
         },
-         "supertagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [hidden_dim_mlp],
-                "dropout" : [0.4], # [0.4]
-                "activations" : "tanh"
-            },
-            "label_namespace": name+"_supertag_labels"
+        "label_namespace": name+"_supertag_labels"
 
+    },
+    "lexlabeltagger" : {
+        "mlp" : {
+            "input_dim" : final_encoder_output_dim,
+            "num_layers" : 1,
+            "hidden_dims" : [hidden_dim_mlp],
+            "dropout" : [0.4], # [0.4]
+            "activations" : "tanh"
         },
-        "lexlabeltagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [hidden_dim_mlp],
-                "dropout" : [0.4], # [0.4]
-                "activations" : "tanh"
-            },
-            "label_namespace":name+"_lex_labels"
+        "label_namespace":name+"_lex_labels"
 
-        },
+    },
 
-        #LOSS:
-        "loss_mixing" : {  # note: whether all_automaton_loss is true has effect too
-            "edge_existence" : 1.0,
-            # "edge_label": 1.0,
-            "supertagging": 1.0,
-            "lexlabel": 1.0
-        },
-        "loss_function" : {
-            "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
-            "label_loss" : {"type" : "dm_label_loss" , "normalize_wrt_seq_len": false} #TODO: remove dirty hack
-        },
+    #LOSS:
+    "loss_mixing" : {  # note: whether all_automaton_loss is true has effect too
+        "edge_existence" : 1.0,
+        # "edge_label": 1.0,
+        "supertagging": 1.0,
+        "lexlabel": 1.0
+    },
+    "loss_function" : {
+        "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
+        "label_loss" : {"type" : "dm_label_loss" , "normalize_wrt_seq_len": false} #TODO: remove dirty hack
+    },
 
-        "supertagger_loss" : { "normalize_wrt_seq_len": false },
-        "lexlabel_loss" : { "normalize_wrt_seq_len": false },
+    "supertagger_loss" : { "normalize_wrt_seq_len": false },
+    "lexlabel_loss" : { "normalize_wrt_seq_len": false },
 
-        "validation_evaluator": {
-            "type": "standard_evaluator",
-            "formalism" : my_task,
-            "system_input" : dev_amconll_corpus_path, # only-token-amconll
-            "gold_file": dev_tsv_corpus_path, # gold file in COGS format (tsv)
-            "use_from_epoch" : formalism_eval_from_epoch,
-            "predictor" : {
-                "type" : "amconll_automata_predictor",
-                "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
-                "data_iterator" : data_iterator, #same bucket iterator also for validation.
-                "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
-                "threads" : 1,
-                "give_up": give_up_secs,  #15, time limit in seconds before retry parsing with k-1 supertags
-                "evaluation_command" : eval_commands['commands'][my_task]
-            }
-        },
+    "validation_evaluator": {
+        "type": "standard_evaluator",
+        "formalism" : my_task,
+        "system_input" : dev_amconll_corpus_path, # only-token-amconll
+        "gold_file": dev_tsv_corpus_path, # gold file in COGS format (tsv)
+        "use_from_epoch" : formalism_eval_from_epoch,
+        "predictor" : {
+            "type" : "amconll_automata_predictor",
+            "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
+            "data_iterator" : data_iterator, #same bucket iterator also for validation.
+            "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
+            "threads" : 1,
+            "give_up": give_up_secs,  #15, time limit in seconds before retry parsing with k-1 supertags
+            "evaluation_command" : eval_commands['commands'][my_task]
+        }
+    },
 };
 
 
