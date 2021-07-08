@@ -129,20 +129,21 @@ function (dataset_reader, data_iterator) {
 
      "MRP-AMR" :  mrp_test_evaluator(dataset_reader, data_iterator, "MRP-AMR","AMR/"+MRP_AMR_SUBPATH, 16, 900),
 
-     "COGS" : [
+     "COGS" : [ # not tested so far
         ["COGS",
             { #prefix used for evaluation metric
                 "type": "standard_evaluator",
                 "formalism" : "COGS",
-                "system_input" : "data/COGS/test/test.amconll", # todo what to insert here?
-                "gold_file": "data/COGS/test/test.tsv",  # todo what to insert here?
+                # todo test.amconll doesn't exist so far (would need to add it to get_train_dev.sh)
+                "system_input" : "/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train/test.amconll", # only-token-amconll # todo hard-coded data path
+                "gold_file": "/proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv", # gold file in COGS format (tsv) # todo hard-coded data path
                 "predictor" : {
-                    "type" : "amconll_predictor",
-                    "dataset_reader" : dataset_reader,
-                    "data_iterator" : data_iterator,
-                    "k" : k,
-                    "threads" : 1,
-                    "give_up": give_up,
+                    "type" : "amconll_automata_predictor",
+                    "dataset_reader" : dataset_reader, # should be of type: 'amconll_unannotated'
+                    "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                    "k" : k,  # number of supertags to be used during decoding
+                    "threads" : 1,  # had problem when using multi-threading (opened an GitHub issue)
+                    "give_up": give_up, # time limit in seconds before retry parsing with k-1 supertags
                     "evaluation_command" : eval_commands['commands']['COGS']
                 }
             }

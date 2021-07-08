@@ -150,19 +150,19 @@ function (dataset_reader, data_iterator) {
             }
         },
 
-        "COGS": {
+        "COGS": {  # not tested so far
             "type": "standard_evaluator",
             "formalism" : "COGS",
-            "system_input" : "data/COGS/dev/dev.amconll", # todo what to type here
-            "gold_file": "data/COGS/dev/dev.tsv", # todo what to type here
-            "use_from_epoch" : -1, # todo what to type here
+            "system_input" : "/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train/dp_dev.amconll", # only-token-amconll # todo hard-coded data path
+            "gold_file": "/proj/irtg/sempardata/cogs2021/data/COGS/data/dev.tsv", # gold file in COGS format (tsv) # todo hard-coded data path
+            "use_from_epoch" : 10, # when to start evaluating todo maybe adjust use_from_epoch
             "predictor" : {
-                "type" : "amconll_predictor",
-                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "type" : "amconll_automata_predictor",
+                "dataset_reader" : dataset_reader, # should be of type: 'amconll_unannotated'
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
-                "k" : k,
-                "threads" : threads,
-                "give_up": give_up,
+                "k" : k,  # number of supertags to be used during decoding
+                "threads" : 1,  # had problem when using multi-threading (opened an GitHub issue)
+                "give_up": give_up,  # time limit in seconds before retry parsing with k-1 supertags
                 "evaluation_command" : eval_commands['commands']['COGS']
             }
         },
