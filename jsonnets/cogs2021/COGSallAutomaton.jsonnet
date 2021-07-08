@@ -11,11 +11,12 @@
 # - cogs obviously
 # - excluded lemmas, pos, nes
 # - option to choose between bert and learning tokens from data only
+# - lr reduced (0.001 -> 0.0001), min count for vocab words set to 1 (was 7)
 # - todo so far no eval on test
 # - todo better set validation metric to edit distance than exact match mb?
 # a comment `# some-number` indicates that that's the number used in AMRallAutomaton.jsonnet
 
-local lr = 0.001; # 0.001
+local lr = 0.0001; # 0.001  # REDUCED!
 local num_epochs = 100; # 100
 local patience = 10000; # so with 10k actually we don't perform early stopping?
 # # we don't have PoS-tags, lemmas or Named Entities in COGS
@@ -29,6 +30,8 @@ local batch_size = 32; # 32
 local k_supertags_evaldecoder = 6;  # 6, number of supertags to be used during decoding
 local formalism_eval_from_epoch = 8;  # 8, (edit distance, exact match calculation)
 
+local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occurrence of the relevant word
+local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
 
 #============EMBEDDINGS=========
 local embedding_name = "tokens";  # "bert" or "tokens"  # main switch
@@ -98,11 +101,11 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 #============TASKS==============
 local my_task = "COGS";
-local path_prefix = "/proj/irtg/sempardata/cogs2021/first_experiments/auto3/";
-local train_zip_corpus_path = path_prefix + "training_input/train.zip";
-# local train_tsv_corpus_path = "/proj/irtg/sempardata/cogs2021/data/COGS/data/train_nonprim.tsv";  # not used
-local dev_zip_corpus_path = path_prefix + "training_input/dev.zip";
-local dev_amconll_corpus_path = path_prefix + "training_input/dp_dev.amconll";  # output of PrepareDevData.java
+local path_prefix = "/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/";
+local train_zip_corpus_path = path_prefix + "inputs/train/train.zip";
+# local train_tsv_corpus_path = "/proj/irtg/sempardata/cogs2021/data/COGS/data/train.tsv";  # not used
+local dev_zip_corpus_path = path_prefix + "inputs/train/dev.zip";
+local dev_amconll_corpus_path = path_prefix + "inputs/train/dp_dev.amconll";  # output of PrepareDevData.java
 local dev_tsv_corpus_path = "/proj/irtg/sempardata/cogs2021/data/COGS/data/dev.tsv";
 #===============================
 
@@ -190,7 +193,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
                 "data_iterator" : data_iterator, #same bucket iterator also for validation.
                 "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
                 "threads" : 1,
-                "give_up": 15,  #15, time limit in seconds before retry parsing with k-1 supertags todo change back
+                "give_up": give_up_secs,  #15, time limit in seconds before retry parsing with k-1 supertags
                 "evaluation_command" : eval_commands['commands'][my_task]
             }
         },
@@ -204,10 +207,10 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     #"validation_dataset_reader": amconll_dataset_reader,  # for prediction . breaks with utf-8 error (due to dev set being zip-folder?)
     "iterator": data_iterator,
      "vocabulary" : {
-            "min_count" : {
+         "min_count" : {
             # "lemmas" : 7, # cogs doesn't have lemma annotation
-            "words" : 7  # 7
-     }
+            "words" : min_count_words  # 7
+         }
      },
     "model": {
         "type": "graph_dependency_parser_automata",
