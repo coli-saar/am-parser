@@ -133,12 +133,13 @@ else
   python3 dump_scores.py $model $type $amconll_input $scoreszip --cuda-device $gpu
   echo " -> A* parsing..."
   # see https://github.com/coli-saar/am-parser/wiki/A*-Parser
-  # --outside-estimator static  (static, trivial, supertagonly,    root_aware, ignore_aware)
+  # java -cp <am-tools.jar> de.saar.coli.amtools.astar.Astar -s <scores.zip> -o <outdir>
+  # --outside-estimator static  (static, trivial, supertagonly, root_aware, ignore_aware)
   # --threads <N>
   # --statistics <statistics.csv>   #runtime stats
   # NOTE: in cogs branch am-tools.jar version: Astar is still in de.saar.coli.irtg.experimental.astar.Astar
-  # java -cp <am-tools.jar> de.saar.coli.amtools.astar.Astar -s <scores.zip> -o <outdir>
-  java -cp $jar de.saar.coli.irtg.experimental.astar.Astar -s $scoreszip -o $output
+  # java -cp master-am-tools.jar de.saar.coli.amtools.astar.Astar --outside-estimator ignore_aware -s $scoreszip -o $output
+  java -cp $jar de.saar.coli.irtg.experimental.astar.Astar  --outside-estimator ignore_aware -s $scoreszip -o $output
   # will produce a log_*.txt and a results_*.amconll
   # rename results file to amconll prediction filename (COGS_pred.amconll)
   resultsfile=$output"results_*.amconll"
