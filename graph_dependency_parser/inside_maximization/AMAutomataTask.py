@@ -410,7 +410,7 @@ class AMAutomataTask(Model):
                 amconll_attributes["predicted_weight"] = str(viterbi_rule_list_and_weight.right)
                 amconll_attributes["total_inside_weight"] = str(numpy.exp(total_inside))
                 amconll_sent = AMSentence(meta["words"], amconll_attributes)
-                outgoing_edge_positions = set()
+                supertag_positions = set()  # outgoing_edge_positions = set()
                 for rule in viterbi_rule_list_and_weight.left:
                     if meta["supertag_map"].containsKey(rule):
                         position_and_supertag = meta["supertag_map"].get(rule)
@@ -418,17 +418,21 @@ class AMAutomataTask(Model):
                         word = amconll_sent.words[position_and_supertag.left-1]
                         word = word.set_fragment(st_and_type[0])
                         word = word.set_typ(st_and_type[1])
+                        supertag_positions.add(position_and_supertag.left-1)
                         amconll_sent.words[position_and_supertag.left-1] = word
                     elif meta["edge_map"].containsKey(rule):
                         positions_and_edgelabel = meta["edge_map"].get(rule)
                         word = amconll_sent.words[positions_and_edgelabel.left.right-1]
                         #  word = word.set_head(positions_and_edgelabel.left.left)  # not actually necessary, already in the word
-                        outgoing_edge_positions.add(positions_and_edgelabel.left.left-1)
+                        # outgoing_edge_positions.add(positions_and_edgelabel.left.left-1)
                         word = word.set_edge_label(positions_and_edgelabel.right)
                         amconll_sent.words[positions_and_edgelabel.left.right-1] = word
                 for i, word in enumerate(amconll_sent.words):
-                    if word.head == 0:
-                        if i in outgoing_edge_positions:
+                    if word.head == 0:  # root or ignore?
+                        # instead of the presence of outgoing edges, we use the
+                        # supertag (non-null-supertags) to decide root/ignore
+                        # rationale: 1-word-sentences (e.g. COGS primitives)
+                        if i in supertag_positions:  # outgoing_edge_positions:
                             word = word.set_edge_label("ROOT")
                         else:
                             word = word.set_edge_label("IGNORE")
