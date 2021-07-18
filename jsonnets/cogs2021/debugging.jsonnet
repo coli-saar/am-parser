@@ -6,21 +6,23 @@
 # Evaluate on test?
 # Evaluate on the right test corpora?
 
-# todo: lots of 'change back' to dos for changed hyperparameters for debugging
-local lr = 0.01; # 0.001
+# hyperparameters marked with 'SPECIAL': changed value for debugging (e.g. no dropout)
+local lr = 0.01; # 0.001  SPECIAL
 local num_epochs = 100; # 100
-local patience = 20; # 10000
+local patience = 20; # 10000  SPECIAL
 # # we don't have PoS-tags, lemmas or Named Entities in COGS
 # local pos_dim = 32,
 # local lemma_dim = 64,
 # local ner_dim = 16,
-local hidden_dim = 32; # 256
-local hidden_dim_mlp = 64; # 1024
+local hidden_dim = 32; # 256  SPECIAL
+local hidden_dim_mlp = 64; # 1024  SPECIAL
 
-local batch_size = 1;  #32, todo change back
-local k_supertags_evaldecoder = 4;  # 6, number of supertags to be used during decoding todo change back
-local formalism_eval_from_epoch = 1;  # 6, (edit distance, exact match calculation) # todo change back to 6
+local batch_size = 1;  #32, SPECIAL
+local k_supertags_evaldecoder = 4;  # 6, number of supertags to be used during decoding SPECIAL
+local formalism_eval_from_epoch = 1;  # 6, (edit distance, exact match calculation) # SPECIAL
 
+local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occurrence of the relevant word
+local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
 
 #============EMBEDDINGS=========
 local embedding_name = "tokens";  # "bert" or "tokens"  # main switch
@@ -120,10 +122,10 @@ local data_iterator = {
 # copied from configs/task_models.libsonnet and adapted
 local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_model, edge_loss, label_loss) = {
     "name" : name,
-    "dropout": 0.0, #0.3 #todo change back
+    "dropout": 0.0, #0.3 SPECIAL
 
-    "output_null_lex_label" : true,  # todo what is this?
-    "all_automaton_loss": true,  # todo do this? or skip? right now doesn't learn lexlabel at all
+    "output_null_lex_label" : true,  # for debugging set to true, otherwise false like in AMRallAutomaton
+    "all_automaton_loss": true,  # losses calculated via automata, not separate # todo do this?
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",
@@ -133,61 +135,61 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             #"activation" : "tanh",
             #"dropout": 0.0,
             "edge_label_namespace" : name+"_head_tags"
+    },
+     "supertagger" : {
+        "mlp" : {
+            "input_dim" : final_encoder_output_dim,
+            "num_layers" : 1,
+            "hidden_dims" : [hidden_dim_mlp],
+            "dropout" : [0], # [0.4] SPECIAL
+            "activations" : "tanh"
         },
-         "supertagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [hidden_dim_mlp],
-                "dropout" : [0], # [0.4] todo change back
-                "activations" : "tanh"
-            },
-            "label_namespace": name+"_supertag_labels"
+        "label_namespace": name+"_supertag_labels"
 
+    },
+    "lexlabeltagger" : {
+        "mlp" : {
+            "input_dim" : final_encoder_output_dim,
+            "num_layers" : 1,
+            "hidden_dims" : [hidden_dim_mlp],
+            "dropout" : [0], # [0.4] SPECIAL
+            "activations" : "tanh"
         },
-        "lexlabeltagger" : {
-            "mlp" : {
-                "input_dim" : final_encoder_output_dim,
-                "num_layers" : 1,
-                "hidden_dims" : [hidden_dim_mlp],
-                "dropout" : [0], # [0.4] todo change back
-                "activations" : "tanh"
-            },
-            "label_namespace":name+"_lex_labels"
+        "label_namespace":name+"_lex_labels"
 
-        },
+    },
 
-        #LOSS:
-        "loss_mixing" : {
-            "edge_existence" : 1.0,
-            "edge_label": 1.0,  # not present in DMautomata?
-            "supertagging": 1.0,
-            "lexlabel": 1.0
-        },
-        "loss_function" : {
-            "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
-            "label_loss" : {"type" : "dm_label_loss" , "normalize_wrt_seq_len": false} #TODO: remove dirty hack
-        },
+    #LOSS:
+    "loss_mixing" : {
+        "edge_existence" : 1.0,
+        "edge_label": 1.0,  # not present in DMautomata?
+        "supertagging": 1.0,
+        "lexlabel": 1.0
+    },
+    "loss_function" : {
+        "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
+        "label_loss" : {"type" : "dm_label_loss" , "normalize_wrt_seq_len": false} #TODO: remove dirty hack
+    },
 
-        "supertagger_loss" : { "normalize_wrt_seq_len": false },
-        "lexlabel_loss" : { "normalize_wrt_seq_len": false },
+    "supertagger_loss" : { "normalize_wrt_seq_len": false },
+    "lexlabel_loss" : { "normalize_wrt_seq_len": false },
 
-        "validation_evaluator": {
-            "type": "standard_evaluator",
-            "formalism" : my_task,
-            "system_input" : dev_amconll_corpus_path, # only-token-amconll
-            "gold_file": dev_tsv_corpus_path, # gold file in COGS format (tsv)
-            "use_from_epoch" : formalism_eval_from_epoch,
-            "predictor" : {
-                "type" : "amconll_automata_predictor",
-                "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
-                "data_iterator" : data_iterator, #same bucket iterator also for validation.
-                "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
-                "threads" : 1,
-                "give_up": 15,  #15, time limit in seconds before retry parsing with k-1 supertags todo change back
-                "evaluation_command" : eval_commands['commands'][my_task]
-            }
-        },
+    "validation_evaluator": {
+        "type": "standard_evaluator",
+        "formalism" : my_task,
+        "system_input" : dev_amconll_corpus_path, # only-token-amconll
+        "gold_file": dev_tsv_corpus_path, # gold file in COGS format (tsv)
+        "use_from_epoch" : formalism_eval_from_epoch,
+        "predictor" : {
+            "type" : "amconll_automata_predictor",
+            "dataset_reader" : amconll_dataset_reader, #need to read amconll file here.
+            "data_iterator" : data_iterator, #same bucket iterator also for validation.
+            "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
+            "threads" : 1,
+            "give_up": give_up_secs,  #15, time limit in seconds before retry parsing with k-1 supertags
+            "evaluation_command" : eval_commands['commands'][my_task]
+        }
+    },
 };
 
 
@@ -198,17 +200,17 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     #"validation_dataset_reader": amconll_dataset_reader,  # for prediction . breaks with utf-8 error (due to dev set being zip-folder?)
     "iterator": data_iterator,
      "vocabulary" : {
-            "min_count" : {
+        "min_count" : {
             # "lemmas" : 7,
-            "words" : 1  # 7, todo change back?
-     }
+            "words" : min_count_words  # 7
+        }
      },
     "model": {
         "type": "graph_dependency_parser_automata",
 
         "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],
 
-        "input_dropout": 0.0, #0.3 todo change back
+        "input_dropout": 0.0, #0.3 SPECIAL
         "encoder": {
             "type" : if use_freda == 1 then "freda_split" else "shared_split_encoder",
             "formalisms" : [my_task],
@@ -217,8 +219,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "encoder": {
                 "type": "stacked_bidirectional_lstm",
                 "num_layers": 2, #TWO LAYERS, we don't use sesame street.
-                "recurrent_dropout_probability": 0,#0.4, todo change back later
-                "layer_dropout_probability": 0,#0.3 todo change back later
+                "recurrent_dropout_probability": 0,#0.4 SPECIAL
+                "layer_dropout_probability": 0,#0.3 SPECIAL
                 "use_highway": false,
                 "hidden_size": hidden_dim,
                 "input_size": getWordEmbeddingDim(embedding_name), # + pos_dim + lemma_dim + ner_dim   # embedding type relevant here
@@ -261,7 +263,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "type": "adam",
             "lr": lr,
         },
-        "validation_metric" : "-COGS_EditDistance",  # todo change "+ExactMatch" ?
+        "validation_metric" : "-COGS_EditDistance",  # SPECIAL todo change "+ExactMatch" ?
         # "validation_metric" : eval_commands['metric_names'][my_task],  # "+ExactMatch" ?
         "num_serialized_models_to_keep" : 1
     }
