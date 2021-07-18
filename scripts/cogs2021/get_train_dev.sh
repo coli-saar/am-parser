@@ -19,8 +19,10 @@
 ##
 # getting train and dev zip files for training the am-parser and also dev amconll file for evaluation
 # todo test command line parsing: especially for erroneous input
-# get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/
-# get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train20_nonprim.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/ -s 3 -p dp_dev
+# bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/
+# bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/ -s 3 -p dp_dev
+# and for preposition reification add the option  -r  at the end
+
 
 jar="am-tools.jar"
 # i.e. assumed to be in current directory, maybe cd to am-parser directory first
@@ -37,16 +39,18 @@ Required arguments: \n
 
 \n\t   -s  number of sources (default: 3).
 \n\t   -p  dev eval prefix (default: dp_dev).
+\n\t   -r flag to enable preposition reification (default: false)
 "
 
 #defaults:
 prefix="dp_dev"
 sources=3
+reifypreps=false
 
 # Gathering parameters:
 # note: although -t,-d,-o are basically mandatory, we don't use positional
 # arguments: hopefully easier to use and not confuse positions.
-while getopts "t:d:o:s:p:h" opt; do
+while getopts "t:d:o:s:p:rh" opt; do
     case $opt in
   h) echo -e $usage
      exit
@@ -60,6 +64,8 @@ while getopts "t:d:o:s:p:h" opt; do
   s) sources="$OPTARG"
      ;;
   p) prefix="$OPTARG"
+     ;;
+  r) reifypreps=true
      ;;
   \?) echo "Invalid option -$OPTARG" >&2
       ;;
@@ -105,10 +111,16 @@ if [ "$prefix" = "" ]; then
     exit 1
 fi
 
+echo "INFO: Preposition reification?: $reifypreps"
+
 ## Finally the interesting part:
 
 printf "\n--> Automata for train ($train) and dev ($dev) : will create zip files in $output: ...\n"
-java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata
+if [ "$reifypreps" = "false" ]; then
+    java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata
+else
+    java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata --reifyprep
+fi
 
 printf "\n--> Prepare dev data for evaluation ($prefix amconll file in $output will be created from $dev) ...\n"
 java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $dev --outPath $output --prefix $prefix
