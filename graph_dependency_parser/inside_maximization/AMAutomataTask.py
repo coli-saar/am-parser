@@ -181,7 +181,7 @@ class AMAutomataTask(Model):
         :return:
         """
 
-        print_time = True
+        print_time = False  # todo (pw): set to false for less verbose output now, but turn this into cmd/configfile param!
         print_diagnostics = False  # = self.training
 
         start_time = time()
