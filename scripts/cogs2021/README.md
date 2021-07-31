@@ -2,7 +2,7 @@
 Experiments on 
 the [COGS](https://github.com/najoungkim/COGS) dataset 
 of [Kim & Linzen (2020)](https://www.aclweb.org/anthology/2020.emnlp-main.731/).
-
+Using the 'unsupervised' parser ([Groschwitz et al. 2021](https://aclanthology.org/2021.spnlp-1.3/))
 **Note**: This README might get moved to the am-parser wiki at some point.
 
 ## Steps:
@@ -10,22 +10,28 @@ of [Kim & Linzen (2020)](https://www.aclweb.org/anthology/2020.emnlp-main.731/).
 ### prerequisites: am-parser, am-tools, COGS corpus
 
 #### (a) Set up the conda environment and am-parser install
-Use the conda environment `allennlp` as described in the [am-parser wiki](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers#first-time-setup).
-Clone the am-parser repository and make sure to checkout the ['cogs_unsupervised' branch](https://github.com/coli-saar/am-parser/tree/cogs_unsupervised)
-as this is the branch containing the relevant code.
-Install necessary packages and dependencies for the am-parser (see the main README).
-Note: we need a special `am_tools.jar`, see the next point.
+
+(1) Clone the am-parser repository and make sure to checkout the ['cogs_unsupervised' branch](https://github.com/coli-saar/am-parser/tree/cogs_unsupervised)
+as this is the branch containing the relevant code.  
+(2) Install necessary packages and dependencies for the am-parser (see the main README).
+On the coli-servers, you can use the conda environment `allennlp` as described in the [am-parser wiki](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers#first-time-setup).
+
+(3) Note: we need a special `am_tools.jar`, see the next point.
+
 We will use `AMPARSERDIR` to refer to directory path of the `am-parser`.
 - local (pw): use `am-parser` conda environment instead, am-parser at `~/HiwiAK/am-parser`
 - coli servers: the am-parser directory can be found at `/local/piaw/am-parser` on jones-2 (commit `x`) (**to do: location/commit on server**)
 
+
 #### (b) getting the right am-tools.jar file
+
 The code for COGS can be found in the ['cogs_new_decomp' branch of am-tools](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp).
 To get the jar file run the `shadowJar` task of gradle 
 (IntelliJ: `gradle >  am-tools > Tasks > shadow > shadowJar > Run`) 
 and the jar file will be generated at `am-tools/build/libs/am-tools.jar`.
 Copy this jar file into the am-parser folder.
-On the servers the am-tools.jar file was produced using commit `x` of am-tools. It can be found at `/proj/irtg/sempardata/cogs2021/jar/am-tools.jar` (**to do: location/commit on server**).
+On the servers the am-tools.jar file was produced using commit `x` of am-tools. 
+It can be found at `/proj/irtg/sempardata/cogs2021/jar/am-tools.jar` (**to do: location/commit on server**).
 So can copy it to local: `cp /proj/irtg/sempardata/cogs2021/jar/am-tools.jar /local/piaw/am-parser/am-tools.jar`
 Important: If the am-parser can't find an am-tools.jar file it might try to download it, but this won't be the version we need for the COGS experiments! 
 
@@ -68,7 +74,7 @@ but zip files containing tree automata.
 Remember we need the right am-tools.jar file (from the [cogs_new_decomp branch](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp))!
 In this step we will create files which we will put into a new directory.
 Create a new directory and let's call the directory path `AMCONLLDIR`.
-  - local (pw): `~/HiwiAK/cogs2021/amconll/`
+  - local (pw): `~/HiwiAK/cogs2021/toy_model_run/training_input/`
   - coli servers: **to do: location on coli servers**, e.g. `/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train/` for train.tsv and or `/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train100/` for `train_100.tsv`
 
 After you performed the two sub-steps (a,b) below, your `AMCONLLDIR` should contain 
@@ -82,9 +88,11 @@ bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train.tsv -d COGSDATADIR
 # actually `-s 3` (3 sources) and `-p dp_dev` (file dp_dev.amconll will be created) are defaults, so without them it's the same:
 # bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR
 ```
+Note: You can add the `-r` option for preposition reification.
+
 - pw debugging:
 ```bash
-bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/
+bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/
 ```
 - On the coli servers:
 ```bash
@@ -106,7 +114,7 @@ You have to provide
 cd AMPARSERDIR
 java -cp am-tools.jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS -t COGSDATADIR/train.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR --nrSources 3 --algorithm automata
 ```
-
+Note: You can add the ` --reifyprep` flag to enable preposition reification
 
 #### (b) Getting amconll files for validation: `PrepareDevData`
 the produced amconll file is used as `system_input` for the `validation_evaluator`.
@@ -126,16 +134,21 @@ e.g. `AMPARSERDIR/jsonnets/cogs2021/debugging.jsonnet` or `AMPARSERDIR/jsonnets/
 Make sure the file paths in the config file (and also imported libsonnet files) 
 work for you and contain the files you are interested in 
 (e.g. `COGSDATADIR` and `AMCONLLDIR` and corresponding filenames in the folders).
+Otherwise you might want to override the specific key-value pairs 
+(`train_data_path`, `validation_data_path`, `validation_evaluator : system_input`, `validation_evaluator : gold_file`) 
+in the config file when calling the train script.
 **to do** note on available config files: what do their names mean?
 - training on train or train100? (look at `path_prefix`, and the `*_corpus_path` variables)
 - number of sources? default is 3?
 - use BERT or learn embeddings from cogs data alone ('tokens')? (look at `embedding_name` variable)
 - other factors? (learning rate, number of epochs, patience, and so on)
+  - prep reification? (would affect folders for trainging input)
+  - supervised loss for edge existence and lex label (`all_automaton_loss : false`)
 
 #### (b) Actual training
 ([see also wiki of am-parser](https://github.com/coli-saar/am-parser/wiki/Training-the-Parser)).
 Let's assume its files (`metrics.json`, `model.tar.gz` among others) should 
-be written to some folder `MODELDIR` (e.g. `../cogs2021/temp`), 
+be written to some folder `MODELDIR` (e.g. `../cogs2021/toy_model_run/training_output`), 
 you have one GPU (cuda device 0),
 and log output should be written to LOGFILE.
 ```bash
@@ -189,7 +202,7 @@ cd AMPARSERDIR
 bash ./scripts/cogs2021/unsupervised_predict.sh -i COGSDATADIR/test.tsv -o OUTPUTDIR -m MODELDIR/model.tar.gz -g 0 &> EVALLOGFILE
 ```
 Note: you could add the `-f` option for fast (give up parameter set: when to back-off to usnig k-1 supertags)
-- local (pw): `bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log`
+- local (pw): `bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/toy_model_run/prediction_output -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -f &> ../cogs2021/toy_model_run/prediction.log`
 - coli severs, e.g. `bash ./scripts/cogs2021/unsupervised_predict.sh -i /proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/predictions/test/repeat/train100BertLrA -m /local/piaw/cogs2021/first_experiments/auto3/models/repeat/train100BertLrA_repeat1/model.tar.gz -g 0 -f &> /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/predictions/test/repeat/repeat1_test_train100BertLrA.log`
 (see also [the am-parser wiki on prediction and evaluation on test data](https://github.com/coli-saar/am-parser/wiki/Prediction-and-evaluation-on-test-data),
 but due to using the 'unsupervised' approach and a new formalism COGS might not be applicable).
@@ -199,7 +212,7 @@ You have to add the `-p` option to the bash script.
 Also **to do: which am-tools version**?
 ```bash
 cd AMPARSERDIR
-bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/temp/model.tar.gz -g 0 -p &> ../cogs2021/decoding/predict-sh.log
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -p &> ../cogs2021/decoding/prediction.log
 ```
 e.g. on the coli server`bash ./scripts/cogs2021/unsupervised_predict.sh -i /proj/irtg/sempardata/cogs2021/data/COGS/data/gen500.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/predictions/gen/astar/trainTokenLrA -m /local/piaw/cogs2021/first_experiments/auto3/models/trainTokenLrA/model.tar.gz -g 1 -p &> /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/predictions/gen/astar/firsttry_trainTokenLrAVocab.log`
 
@@ -218,34 +231,46 @@ As of now (May 2021) there doesn't seem to be a separate evaluation script.
 - don't forget to change the file paths in config files and bash scripts 
 (am-tools train-dev prepare, jsonnet files, command line arguments for train and predict)
 - also if you re-run the pipeline, make sure that errors are not hidden by accidentally using a file created in the last run.
+- options to play around with:
+  - for `get_train_dev.sh`: if you would like to enable *preposition reification*, add the `-r` option. Otherwise prepositions are only represented as edges.
+  - `unsupervised_predict.sh`: you can choose between two decoders
+    - the fixed-tree decoder (described in [Groschwitz et al. 2018](https://aclanthology.org/P18-1170/), section 6.1, p.6). That's the default. It is recommended to add the `-f` option for faster decoding (give up time limit set)
+    - the *projective Astar decoder* (described in [Lindemann et al. 2020](https://aclanthology.org/2020.emnlp-main.323/), section 4, p.4). You can enable it by using the `-p` option. Important note: you might want to use an additional am-tools jar build from the master branch when calling the Astar in `unsupervised_predict`: fixed punctuation-not-ignored bug.
 - commands:
 ```bash
 cd ~/HiwiAK/am-parser/
-bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train50.tsv -d ../cogs2021/small/dev10.tsv -o ../cogs2021/amconll/ -s 3 -p dp_dev
-bash ./scripts/cogs2021/debugging_train.sh  # tensorboard --logdir=../cogs2021/temp
-bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
-# bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/output -m ../cogs2021/temp/model.tar.gz -g 0 -f &> ../cogs2021/predict-sh.log
+# (1) get train and dev data. Option: add -r to use preposition reification
+bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train50.tsv -d ../cogs2021/small/dev10.tsv -o ../cogs2021/toy_model_run/training_input/ -s 3 -p dp_dev > ../cogs2021/toy_model_run/get_train_dev.log
+# (2) train
+# alternative: bash ./scripts/cogs2021/debugging_train.sh  
+export LC_ALL=en_US.UTF-8  # I had problems with lr being set to 0 (in file: "lr": 0.01) with my de_DE.UTF-8
+python -u train.py jsonnets/cogs2021/debugging.jsonnet -s ~/HiwiAK/cogs2021/toy_model_run/training_output/  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  0  } }' &> ~/HiwiAK/cogs2021/toy_model_run/debugging_train.log
+# tensorboard --logdir=../cogs2021/toy_model_run/training_output
+# (3) predict. Option: choose projective Astar decoder by using -p
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/toy_model_run/prediction_output -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -f &> ../cogs2021/toy_model_run/prediction.log
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/toy_model_run/prediction_output -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -p &> ../cogs2021/toy_model_run/prediction.log
+## bash ./scripts/predict.sh -i ../cogs2021/small/test5.tsv -T COGS -o ../cogs2021/toy_model_run/prediction_output -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -f &> ../cogs2021/toy_model_run/prediction.log
 ```
 
 
-**Astar parser/projective decoder**
+**Astar parser/projective decoder**  
 For the Astar parser we need a separate second am-tools jar file built from the [master branch](https://github.com/coli-saar/am-tools/tree/master) instead of the [cogs one](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp).
 This jar file will be called `master-am-tools.jar` to not confuse it with the other (`am-tools.jar` built from the cogs branch).  
 Important note (July 8): bug fix of off-by-one error resulting in wrong prediction for final word (punctuation mark couldn't be ignored): only on master!.  
 Second version: (ultimately added `-p` option to `unsupervised_predict.sh`, still model was trained with fixed-tree decoder)
 ```bash
-bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/temp/model.tar.gz -g 0 -p &> ../cogs2021/decoding/predict-sh.log
+bash ./scripts/cogs2021/unsupervised_predict.sh -i ../cogs2021/small/test5.tsv -o ../cogs2021/decoding/test -m ../cogs2021/toy_model_run/training_output/model.tar.gz -g 0 -p &> ../cogs2021/decoding/unsupervised_predict.log
 ```
 First version:
 ```bash
 # train
-bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/amconll/ -s 3 -p dp_dev
+bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -s 3 -p dp_dev
 bash ./scripts/cogs2021/debugging_train.sh
-tensorboard --logdir=../cogs2021/temp
+tensorboard --logdir=../cogs2021/toy_model_run/training_output
 
 # see  https://github.com/coli-saar/am-parser/wiki/Computing-scores
 # python dump_scores.py models/a_model <formalism> <input data.amconll> <output file.zip> --cuda-device 0
-python dump_scores.py ../cogs2021/temp COGS ../cogs2021/amconll/dp_dev.amconll ../cogs2021/decoding/scores/scores.zip --cuda-device 0
+python dump_scores.py ../cogs2021/toy_model_run/training_output COGS ../cogs2021/toy_model_run/training_input/dp_dev.amconll ../cogs2021/decoding/scores/scores.zip --cuda-device 0
 # see https://github.com/coli-saar/am-parser/wiki/A*-Parser
 # --outside-estimator OPTION
 # --threads <N>
@@ -263,11 +288,11 @@ java -cp am-tools.jar de.saar.coli.amrtagging.formalisms.cogs.tools.ToCOGSCorpus
 ```
 
 
-**experiment with preposition reification**
+**experiment with preposition reification**  
 flag to reify prepositions: (in java: `--reifyprep`): need to add `-r` flag to `get_train_dev.sh`-call
 ```bash
 cd ~/HiwiAK/am-parser/
-bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train50.tsv -d ../cogs2021/small/dev10.tsv -o ../cogs2021/amconll/ -s 3 -p dp_dev -r
+bash ./scripts/cogs2021/get_train_dev.sh -t ../cogs2021/small/train50.tsv -d ../cogs2021/small/dev10.tsv -o ../cogs2021/toy_model_run/training_input/ -s 3 -p dp_dev -r
 ```
 
 
@@ -293,6 +318,68 @@ which is implemented in [am-tools (branch `cogs_new_decomp`)](https://github.com
 otherwise the parser wouldn't know how to do the pre-/post-processing 
 (and also evaluation metrics are calculated during postprocessing).
 
-Note: currently, all this is based on the 'unsupervised' parser idea of JG 
+Note: currently, all this is based on the 'unsupervised' parser of [Groschwitz et al. 2021](https://aclanthology.org/2021.spnlp-1.3)
 (see also the respective branches in am-parser and am-tools): that is, source names are learnt!
 
+
+# References and links
+
+- The COGS dataset: Kim and Linzen (2020)
+  - paper: Kim and Linzen (2020)
+  [COGS: A Compositional Generalization Challenge Based on Semantic Interpretation](https://www.aclweb.org/anthology/2020.emnlp-main.731/).
+  In *Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)*
+  Online. Association for Computational Linguistics. pp. 9087-9105. doi: 10.18653/v1/2020.emnlp-main.731
+  - [github: COGS dataset and their models](https://github.com/najoungkim/COGS)
+of [Kim & Linzen (2020)](https://www.aclweb.org/anthology/2020.emnlp-main.731/).
+- The 'unsupervised parser' (for which we added COGS as a new formalism)
+  - paper: Groschwitz, Fowlie and Koller (2021): 
+    [Learning compositional structures for semantic graph parsing](https://aclanthology.org/2021.spnlp-1.3). 
+    In *Proceedings of the 5th Workshop on Structured Prediction for NLP (SPNLP 2021)*.
+    Online. Association for Computational Linguistics. pp. 22-36. doi: 10.18653/v1/2021.spnlp-1.3
+  - code: [`unsupervised2020` branch of `am-parser`](https://github.com/coli-saar/am-parser/tree/unsupervised2020)  (see specifically the markdown [files under `graph_dependency_parser/inside_maximization`](https://github.com/coli-saar/am-parser/tree/unsupervised2020/graph_dependency_parser/inside_maximization))
+- branches with COGS additions:
+  - [`cogs_unsupervised` branch of the `am-parser` repo](https://github.com/coli-saar/am-parser/tree/cogs_unsupervised)
+  - [`cogs_new_decomp` branch of the `am-tools` repo](https://github.com/coli-saar/am-tools/tree/cogs_new_decomp)
+- the [AM parser wiki](https://github.com/coli-saar/am-parser/wiki)
+- about different decoders
+  - fixed-tree decoder is described in [Groschwitz et al. 2018](https://aclanthology.org/P18-1170/), section 6.1, p.6
+  - projective Astar decoder is described in [Lindemann et al. 2020](https://aclanthology.org/2020.emnlp-main.323/), section 4, p.4
+
+
+## Environment used
+
+On the coli servers, used the `allennlp` conda environment (cf. the AM parser wiki).
+On my local computer:
+Conda environment
+```yaml
+channels:
+  - defaults
+dependencies:
+  - numpy=1.16.4
+  - pip=19.1.1
+  - python=3.7.3
+  - setuptools=41.0.1
+  - wheel=0.33.4
+  - pip:
+    - allennlp==0.8.4
+    - comet-ml==3.1.6
+    - conllu==0.11
+    - cython==0.29.7
+    - graphviz==0.14.1
+    - nltk==3.4.1
+    - overrides==1.9
+    - penman==0.12.0
+    - pyjnius==1.2.1
+    - scikit-learn==0.20.3
+    - scipy==1.2.1
+    - spacy==2.1.8
+    - tensorboard==1.13.1
+    - tensorboardx==1.6
+    - tensorflow==1.13.1
+    - torch==1.1.0
+```
+and a few additional installs:
+```bash
+pip install git+https://github.com/andersjo/dependency_decoding
+python -m spacy download en_core_web_md
+```
