@@ -32,6 +32,7 @@ local formalism_eval_from_epoch = 8;  # 8, (edit distance, exact match calculati
 
 local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occurrence of the relevant word
 local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
+local all_automaton_loss = true;  # true  # true = all loss flows through automata // false = supervised loss for edge existence and lex label
 
 #============EMBEDDINGS=========
 local embedding_name = "tokens";  # "bert" or "tokens"  # main switch
@@ -132,7 +133,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "dropout": 0.3, #0.3
 
     "output_null_lex_label" : true,  # for debugging set to true, otherwise false like in AMRallAutomaton
-    "all_automaton_loss": true,  # labelacc might not be calculated
+    "all_automaton_loss": all_automaton_loss,  # true = all loss flows through automata // false = supervised loss for edge existence and lex label
 
     "edge_model" : {
             "type" : edge_model, #e.g. "kg_edges",
@@ -168,10 +169,10 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
     #LOSS:
     "loss_mixing" : {  # note: whether all_automaton_loss is true has effect too
-        "edge_existence" : 1.0,
-        # "edge_label": 1.0,
+        "edge_existence" : 1.0,  # if 'all_automaton_loss' is true, not needed
+        "edge_label": 1.0,  # not present in DMautomata?
         "supertagging": 1.0,
-        "lexlabel": 1.0
+        "lexlabel": 1.0,   # if 'all_automaton_loss' is true, not needed
     },
     "loss_function" : {
         "existence_loss" : { "type" : edge_loss, "normalize_wrt_seq_len": false}, #e.g. kg_edge_loss
@@ -272,7 +273,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
         },
         #"validation_metric" : "-COGS_EditDistance",
         "validation_metric" : eval_commands['metric_names'][my_task],  # "+ExactMatch" ?
-        "num_serialized_models_to_keep" : 1
+        "num_serialized_models_to_keep" : 1,
+        "write_amconll_every_n_epoch": 10, # reduce memory footprint: don't write train/dev amconll for every epoch
     }
 }
 
