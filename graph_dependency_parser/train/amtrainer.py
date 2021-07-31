@@ -87,6 +87,7 @@ class AMTrainer(TrainerBase):
                  should_log_parameter_statistics: bool = True,
                  should_log_learning_rate: bool = False,
                  log_batch_size_period: Optional[int] = None,
+                 write_amconll_every_n_epoch: Optional[int] = None,
                  moving_average: Optional[MovingAverage] = None) -> None:
         """
         A trainer for doing supervised learning. It just takes a labeled dataset
@@ -191,6 +192,9 @@ class AMTrainer(TrainerBase):
             Whether to send parameter specific learning rate to tensorboard.
         log_batch_size_period : ``int``, optional, (default = ``None``)
             If defined, how often to log the average batch size.
+        write_amconll_every_n_epoch: ``int``, optional, (default= ``None``)
+            How often should amconll files be written during training?
+            Default None means every epoch.
         moving_average: ``MovingAverage``, optional, (default = None)
             If provided, we will maintain moving averages for all parameters. During training, we
             employ a shadow variable for each parameter, which maintains the moving average. During
@@ -264,6 +268,7 @@ class AMTrainer(TrainerBase):
                 should_log_learning_rate=should_log_learning_rate)
 
         self._log_batch_size_period = log_batch_size_period
+        self._write_amconll_every_n_epoch = write_amconll_every_n_epoch  # todo check if None or greater 0?
 
         self._last_log = 0.0  # time of last logging
 
@@ -419,7 +424,10 @@ class AMTrainer(TrainerBase):
                         '{0}.{1}'.format(epoch, training_util.time_to_str(int(last_save_time)))
                 )
         metrics = training_util.get_metrics(self.model, train_loss, batches_this_epoch, reset=True)
-        self.remove_amconll_list_from_metrics_and_write_to_file(metrics, False, "_train_epoch"+str(epoch)+".amconll")
+        file_suffix = None  # only if file suffix is not None will print to file
+        if self._write_amconll_every_n_epoch is None or epoch % self._write_amconll_every_n_epoch == 0:
+            file_suffix = "_train_epoch"+str(epoch)+".amconll"
+        self.remove_amconll_list_from_metrics_and_write_to_file(metrics, False, file_suffix=file_suffix)
         metrics['cpu_memory_MB'] = peak_cpu_usage
         for (gpu_num, memory) in gpu_usage:
             metrics['gpu_'+str(gpu_num)+'_memory_MB'] = memory
@@ -467,7 +475,7 @@ class AMTrainer(TrainerBase):
 
             # Update the description with the latest metrics
             val_metrics = training_util.get_metrics(self.model, val_loss, batches_this_epoch)
-            self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True)
+            self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True, file_suffix=None)
             description = training_util.description_from_metrics(val_metrics)
             val_generator_tqdm.set_description(description, refresh=False)
 
@@ -524,7 +532,10 @@ class AMTrainer(TrainerBase):
                     # We have a validation set, so compute all the metrics on it.
                     val_loss, num_batches = self._validation_loss()
                     val_metrics = self.model.get_metrics(reset=True, model_path = model_path)
-                    self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True, "_dev_epoch"+str(epoch)+".amconll")
+                    file_suffix = None  # only if file suffix is not None, will print to file
+                    if self._write_amconll_every_n_epoch is None or epoch % self._write_amconll_every_n_epoch == 0:
+                        file_suffix = "_dev_epoch"+str(epoch)+".amconll"
+                    self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True, file_suffix=file_suffix)
                     val_metrics["loss"] = float(val_loss / num_batches) if num_batches > 0 else 0.0
 
                     # Check validation metric for early stopping
@@ -762,6 +773,7 @@ class AMTrainer(TrainerBase):
         should_log_parameter_statistics = params.pop_bool("should_log_parameter_statistics", True)
         should_log_learning_rate = params.pop_bool("should_log_learning_rate", False)
         log_batch_size_period = params.pop_int("log_batch_size_period", None)
+        write_amconll_every_n_epoch = params.pop_int("write_amconll_every_n_epoch", None)
 
         #params.assert_empty(cls.__name__)
         return cls(model, optimizer, iterator,
@@ -784,6 +796,7 @@ class AMTrainer(TrainerBase):
                    should_log_parameter_statistics=should_log_parameter_statistics,
                    should_log_learning_rate=should_log_learning_rate,
                    log_batch_size_period=log_batch_size_period,
+                   write_amconll_every_n_epoch=write_amconll_every_n_epoch,
                    moving_average=moving_average)
 
 
