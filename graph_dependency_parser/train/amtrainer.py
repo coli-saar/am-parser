@@ -54,6 +54,8 @@ from allennlp.training.trainer_base import TrainerBase
 from allennlp.training import util as training_util
 from allennlp.training.moving_average import MovingAverage
 
+from graph_dependency_parser.components.dataset_readers import amconll_tools
+
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -382,6 +384,8 @@ class AMTrainer(TrainerBase):
 
             # Update the description with the latest metrics
             metrics = training_util.get_metrics(self.model, train_loss, batches_this_epoch)
+            self.remove_amconll_list_from_metrics_and_write_to_file(metrics, False)
+
             description = training_util.description_from_metrics(metrics)
 
             train_generator_tqdm.set_description(description, refresh=False)
@@ -415,6 +419,7 @@ class AMTrainer(TrainerBase):
                         '{0}.{1}'.format(epoch, training_util.time_to_str(int(last_save_time)))
                 )
         metrics = training_util.get_metrics(self.model, train_loss, batches_this_epoch, reset=True)
+        self.remove_amconll_list_from_metrics_and_write_to_file(metrics, False, "_train_epoch"+str(epoch)+".amconll")
         metrics['cpu_memory_MB'] = peak_cpu_usage
         for (gpu_num, memory) in gpu_usage:
             metrics['gpu_'+str(gpu_num)+'_memory_MB'] = memory
@@ -462,6 +467,7 @@ class AMTrainer(TrainerBase):
 
             # Update the description with the latest metrics
             val_metrics = training_util.get_metrics(self.model, val_loss, batches_this_epoch)
+            self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True)
             description = training_util.description_from_metrics(val_metrics)
             val_generator_tqdm.set_description(description, refresh=False)
 
@@ -501,7 +507,6 @@ class AMTrainer(TrainerBase):
         for epoch in range(epoch_counter, self._num_epochs):
             epoch_start_time = time.time()
             train_metrics = self._train_epoch(epoch)
-
             if experiment:
                 with experiment.train():
                     experiment.log_metrics(train_metrics, step=epoch)
@@ -519,6 +524,7 @@ class AMTrainer(TrainerBase):
                     # We have a validation set, so compute all the metrics on it.
                     val_loss, num_batches = self._validation_loss()
                     val_metrics = self.model.get_metrics(reset=True, model_path = model_path)
+                    self.remove_amconll_list_from_metrics_and_write_to_file(val_metrics, True, "_dev_epoch"+str(epoch)+".amconll")
                     val_metrics["loss"] = float(val_loss / num_batches) if num_batches > 0 else 0.0
 
                     # Check validation metric for early stopping
@@ -531,7 +537,6 @@ class AMTrainer(TrainerBase):
                     if self._metric_tracker.should_stop_early():
                         logger.info("Ran out of patience.  Stopping training.")
                         break
-
 
             self._tensorboard.log_metrics(train_metrics,
                                           val_metrics=val_metrics,
@@ -688,6 +693,7 @@ class AMTrainer(TrainerBase):
 
         return epoch_to_return
 
+
     # Requires custom from_params.
     @classmethod
     def from_params(cls,  # type: ignore
@@ -780,6 +786,18 @@ class AMTrainer(TrainerBase):
                    log_batch_size_period=log_batch_size_period,
                    moving_average=moving_average)
 
+
+    def remove_amconll_list_from_metrics_and_write_to_file(self, metrics: Dict, is_dev: bool, file_suffix: str = None):
+        found_amconnl_list = False
+        for key in list(metrics.keys()):
+            if key.endswith("amconll_list"):
+                found_amconll_list = True
+                amconll_list = metrics.pop(key)
+                if file_suffix is not None and self._serialization_dir is not None:
+                    amconll_tools.write_conll(os.path.join(self._serialization_dir, key + file_suffix), amconll_list)
+        # if not found_amconll_list:
+            # print("no amconll_list")
+            # print(is_dev)
 
 class TrainerPieces(NamedTuple):
     """

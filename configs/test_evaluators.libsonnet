@@ -89,18 +89,18 @@ function (dataset_reader, data_iterator) {
                 "dataset_reader" : dataset_reader,
                 "data_iterator" : data_iterator,
                 "k" : k,
-                "threads" : 8,
+                "threads" : 1,
                 "give_up": give_up,
                 "evaluation_command" : eval_commands['commands']['AMR-2017']
         }
 
   }]],
 
-    "DM" : SDP_evaluator(dataset_reader, data_iterator,"DM",6),
+    "DM" : SDP_evaluator(dataset_reader, data_iterator,"DM",1),
 
-    "PAS" : SDP_evaluator(dataset_reader, data_iterator,"PAS",6),
+    "PAS" : SDP_evaluator(dataset_reader, data_iterator,"PAS",1),
 
-    "PSD" : SDP_evaluator(dataset_reader, data_iterator,"PSD",6),
+    "PSD" : SDP_evaluator(dataset_reader, data_iterator,"PSD",1),
 
     "EDS" :  [
         ["EDS",{

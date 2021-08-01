@@ -1,0 +1,17 @@
+(l<root> / love-01 :ARG0 (p / person  :name (n / name  :op1 "John")) :ARG1 (p2 / person  :name (n2 / name  :op1 "Mary")))
+
+(l<root> / kiss-01 :ARG0 (p / person  :name (n / name  :op1 "John")) :ARG1 (f / frog))
+
+(l<root> / like-02 :ARG0 (c / cat) :ARG1 (d / dog))
+
+(l<root> / love-01 :ARG0 (c / snail) :ARG1 (d / cat))
+
+(l<root> / love-01 :ARG0 (c / dog) :ARG1 (d / frog))
+
+(l<root> / like-02 :ARG0 (c / snail) :ARG1 (p / person  :name (n / name  :op1 "John")))
+
+(l<root> / kiss-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 "Mary")))
+
+(l<root> / like-02 :ARG0 (s / snail) :ARG1 (d / dog))
+
+(l<root> / love-01 :ARG0 (c / cat) :ARG1 (p / person  :name (n / name  :op1 "John")))

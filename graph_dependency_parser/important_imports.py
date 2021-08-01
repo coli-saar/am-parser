@@ -18,7 +18,7 @@
 #
 
 import jnius_config
-jnius_config.add_options('-Xmx2G')
+jnius_config.add_options('-Xmx50G')
 jnius_config.set_classpath('am-tools.jar')
 import jnius
 

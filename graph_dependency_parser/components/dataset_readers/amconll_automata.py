@@ -18,8 +18,7 @@
 #
 import io
 
-
-
+from graph_dependency_parser.components.dataset_readers.adjecency_field import AdjacencyField
 from graph_dependency_parser.components.dataset_readers.rule_index_field import RuleIndexField
 
 from jnius import autoclass
@@ -61,11 +60,13 @@ class AMConllAutomataDatasetReader(DatasetReader):
     """
     def __init__(self,
                  token_indexers: Dict[str, TokenIndexer] = None,
-                 lazy: bool = False, fraction: float = 1.0, only_read_fraction_if_train_in_filename : bool = False) -> None:
+                 lazy: bool = False, fraction: float = 1.0, only_read_fraction_if_train_in_filename : bool = False,
+                 allow_copy_despite_sense: bool = False) -> None:
         super().__init__(lazy)
         self._token_indexers = token_indexers or {'tokens': SingleIdTokenIndexer()}
         self.fraction = fraction
         self.only_read_fraction_if_train_in_filename = only_read_fraction_if_train_in_filename
+        self.allow_copy_despite_sense = allow_copy_despite_sense
 
     def _read_one_file(self, formalism:str, file_path: str):
         # if `file_path` is a URL, redirect to the cache
@@ -76,7 +77,7 @@ class AMConllAutomataDatasetReader(DatasetReader):
             with zipfile.ZipFile(file_path) as z:
                 with io.TextIOWrapper(z.open("corpus.amconll")) as amconll_file:
                     logger.info("Reading a fraction of "+str(self.fraction)+" of the AM dependency trees from amconll dataset at: %s", file_path)
-                    sents = list(parse_amconll(amconll_file))
+                    sents = list(parse_amconll(amconll_file, validate=False))
                     for i, am_sentence in  enumerate(sents):
                         if i <= len(sents) * self.fraction:
                             yield self._read_one_sentence(formalism, automata_zip_reader, i, am_sentence)
@@ -84,7 +85,7 @@ class AMConllAutomataDatasetReader(DatasetReader):
             with zipfile.ZipFile(file_path) as z:
                 with io.TextIOWrapper(z.open("corpus.amconll")) as amconll_file:
                     logger.info("Reading AM dependency trees from amconll dataset at: %s", file_path)
-                    for i, am_sentence in enumerate(parse_amconll(amconll_file)):
+                    for i, am_sentence in enumerate(parse_amconll(amconll_file, validate=False)):
                         yield self._read_one_sentence(formalism, automata_zip_reader, i, am_sentence)
 
     def _read_one_sentence(self, formalism:str, automata_zip_reader, position_in_corpus:int, am_sentence: AMSentence):
@@ -127,7 +128,12 @@ class AMConllAutomataDatasetReader(DatasetReader):
         """
         fields: Dict[str, Field] = {}
 
-        rule_iterator = automaton.getRuleSet()
+        # fixing null lex labels that were wrong in some of the am-tools code. TODO fix it in am-tools instead
+        for i in range(len(am_sentence.words)):
+            if am_sentence.words[i].lexlabel == "NULL":
+                am_sentence.words[i] = am_sentence.words[i].set_lexlabel("_")
+
+        all_rules_in_bottom_up_order = automaton.getAllRulesInBottomUpOrder()
         # for rule in to_python(rule_iterator):
         #     print(rule.toString(automaton))
         #     if supertag_map.keySet().contains(rule):
@@ -141,16 +147,42 @@ class AMConllAutomataDatasetReader(DatasetReader):
         fields["lemmas"] = SequenceLabelField(am_sentence.get_lemmas(), tokens, label_namespace="lemmas")
         fields["lexlabels"] = SequenceLabelField(am_sentence.get_lexlabels(), tokens, label_namespace=formalism+"_lex_labels")
         fields["head_indices"] = SequenceLabelField(am_sentence.get_heads(),tokens,label_namespace="head_index_tags")
-        fields["rule_index"] = RuleIndexField(supertag_map, edge_map, rule_iterator, len(tokens) + 1, # +1 for artificial root
+        fields["rule_index"] = RuleIndexField(supertag_map, edge_map, all_rules_in_bottom_up_order, len(tokens) + 1, # +1 for artificial root
                                               supertag_namespace=formalism+"_supertag_labels",
                                               edge_namespace=formalism+"_head_tags")
-        fields["rule_mask"] = RuleMaskField(rule_iterator, supertag_map, len(tokens) + 1)
+        fields["rule_mask"] = RuleMaskField(all_rules_in_bottom_up_order, supertag_map, len(tokens) + 1)
+
+        lemma_copying_matrix = []
+        for i, lemma in enumerate(am_sentence.get_lemmas()):
+            for j, lexlabel in enumerate(am_sentence.get_lexlabels()):
+                if lemma == lexlabel:
+                    lemma_copying_matrix.append((i, j))
+                elif self.allow_copy_despite_sense and lemma + "-01" == lexlabel:
+                    lemma_copying_matrix.append((i, j))
+        lemma_copying_field = AdjacencyField(lemma_copying_matrix, tokens, padding_value=0)
+        fields["lemma_copying"] = lemma_copying_field
+
+        token_copying_matrix = []
+        for i, token in enumerate(am_sentence.get_tokens(shadow_art_root=True)):
+            for j, lexlabel in enumerate(am_sentence.get_lexlabels()):
+                if token == lexlabel:
+                    token_copying_matrix.append((i, j))
+                elif self.allow_copy_despite_sense and token + "-01" == lexlabel:
+                    token_copying_matrix.append((i, j))
+        token_copying_field = AdjacencyField(token_copying_matrix, tokens, padding_value=0)
+        fields["token_copying"] = token_copying_field
+
         fields["metadata"] = MetadataField({"words": am_sentence.words, "attributes": am_sentence.attributes,
                                             "formalism": formalism, "position_in_corpus" : position_in_corpus,
-                                            "token_ranges" : am_sentence.get_ranges(),
-                                            "is_annotated" : am_sentence.is_annotated(),
-                                            "automaton" : automaton,
-                                            "rule_iterator" : rule_iterator})
+                                            "token_ranges": am_sentence.get_ranges(),
+                                            "is_annotated": True,  # this dataset reader is only used for annotated data
+                                            "is_inherently_annotated": am_sentence.is_annotated(), # for debugging
+                                            "max_state_id_plus_one": automaton.getStateInterner().getNextIndex(),
+                                            "final_states": automaton.getFinalStates(),
+                                            "all_rules_in_bottom_up_order": all_rules_in_bottom_up_order,
+                                            "signature": automaton.getSignature(),
+                                            "supertag_map": supertag_map,
+                                            "edge_map": edge_map})
         # checking rule identity across maps and automaton
         # print("Rules in supertag_map:")
         # for rule in to_python(supertag_map.keySet()):

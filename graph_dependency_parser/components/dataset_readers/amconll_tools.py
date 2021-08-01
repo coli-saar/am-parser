@@ -46,6 +46,27 @@ class Entry:
         return iter([self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, self.lexlabel,
                      self.typ, self.head, self.label, self.aligned, self.range])
 
+    def set_head(self, head: int) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, self.lexlabel,
+                     self.typ, head, self.label, self.aligned, self.range)
+
+    def set_edge_label(self, edge_label: str) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, self.lexlabel,
+                     self.typ, self.head, edge_label, self.aligned, self.range)
+
+    def set_lexlabel(self, lexlabel: str) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, lexlabel,
+                     self.typ, self.head, self.label, self.aligned, self.range)
+
+    def set_fragment(self, fragment: str) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, fragment, self.lexlabel,
+                     self.typ, self.head, self.label, self.aligned, self.range)
+
+    def set_typ(self, typ: str) -> "Entry":
+        return Entry(self.token, self.replacement, self.lemma, self.pos_tag, self.ner_tag, self.fragment, self.lexlabel,
+                     typ, self.head, self.label, self.aligned, self.range)
+
+
 
 @dataclass
 class AMSentence:
@@ -391,3 +412,14 @@ def parse_amconll(fil, validate:bool = True) -> Iterable[AMSentence]:
                           int(fields[9]), fields[10], bool(fields[11]),fields[12]))
 
 
+def write_conll(file_name: str, sentences: Iterable[AMSentence]):
+    """
+    Takes a file object and an iterable of AMSentence and writes all the AM sentences to the file, in the .amconll format
+    :param file_name: where to write the file
+    :param sentences: the sentences to write into the amconll file.
+    :return:
+    """
+    with open(file_name, 'w') as f:
+        for sentence in sentences:
+            f.write(str(sentence))
+            f.write('\n\n')
