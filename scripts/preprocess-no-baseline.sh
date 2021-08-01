@@ -194,12 +194,16 @@ cp $testAltodata/raw.amr $testNNdata/goldAMR.txt
 #Create amconll file for training set
 devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $trainNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
 printf "\nGenerate amconll for training data\n"
+printf "\nGenerate amconll for training data\n"  >> $log
+echo $devamconllCMD >> $log
 eval $devamconllCMD
 mv $outputPath/corpus.amconll $outputPath/train.amconll
 
 #Create amconll file for dev set
 devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $devNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
 printf "\nGenerate amconll for (gold) dev data\n"
+printf "\nGenerate amconll for (gold) dev data\n" >> $log
+echo $devamconllCMD >> $log
 eval $devamconllCMD
 mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
 
@@ -207,11 +211,15 @@ mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
 #Create empty amconll for (actual) dev set, also called evalDev
 emptyDevAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $evalDevNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
 printf "\nGenerate empty amconll dev data\n"
+printf "\nGenerate empty amconll dev data\n"  >> $log
+echo $emptyDevAmconllCMD >> $log
 eval $emptyDevAmconllCMD
 
 #Create empty amconll for test set
 emptyTestAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $testNNdata -o $outputPath --prefix test --stanford-ner-model $nerTagger >>$log 2>&1"
 printf "\nGenerate empty amconll test data\n"
+printf "\nGenerate empty amconll test data\n" >> $log
+echo $emptyTestAmconllCMD >> $log
 eval $emptyTestAmconllCMD
 
 #create correct directory structure
