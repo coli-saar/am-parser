@@ -15,7 +15,7 @@ This is a quick guide on how to use our already trained models to make predictio
 - AllenNLP (tested with version 0.8.4 and Pytorch 1.1)
 - Cython
 - comet-ml
-- overrides (tested with version 1.9)
+- overrides (tested with versions 1.9 and 3.1.0; newer versions lead to errors, see https://github.com/allenai/allennlp/issues/5197)
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
 - The spacy core web md model: `python -m spacy download en_core_web_md`
 - You may require to set your version of sklearn (an AllenNLP requirement, usually automatically installed) manually to version 0.22 or lower, e.g. with `pip install scikit-learn==0.22.2`
