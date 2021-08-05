@@ -1,10 +1,20 @@
 # am-parser
-Modular implementation of the AM dependency parser used in [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450).
+The AM parser is a compositional semantic parser with high accuracy across a wide range of graphbanks. This repository is a modular implementation based on AllenNLP and Pytorch.
 
 ## Online Demo
 Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
 
-## Quick Guide to the Pretrained Models
+## Papers
+This repository (jointly with its sister-repository at [am-tools](github.com/coli-saar/am-tools)) contains the code for several papers:
+
+- [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450) (Lindemann et al. 2019) demonstrates the parsers accuracy across graphbanks. Most of the documentation in this readme and in the [wiki](https://github.com/coli-saar/am-parser/wiki) refers to this paper.
+- [Learning compositional structures for semantic graph parsing](https://aclanthology.org/2021.spnlp-1.3/) (Groschwitz et al. 2021) describes a method to learn the AM dependency trees as latent compositional structures. Its code documentation is currently being built in the wiki [here](https://github.com/coli-saar/am-parser/wiki/Learning-compositional-structures).
+- [Fast semantic parsing with well-typedness guarantees](https://aclanthology.org/2020.emnlp-main.323/) (Lindemann et al. 2020) presents AM parsing methods with faster inference. The top-down parser resides [in its own repo](https://github.com/coli-saar/am-transition-parser), but the A* parser lives here (see its [wiki page](https://github.com/coli-saar/am-parser/wiki/A*-Parser)).
+- [Normalizing Compositional Structures Across Graphbanks](https://aclanthology.org/2020.coling-main.267/) (Donatelli et al. 2020) discusses how compositional structures can be different across graphbanks, and how they can be normalized.
+- [Saarland at MRP 2019: Compositional parsing across all graphbanks](https://aclanthology.org/K19-2006/) describes our participation at the MRP 2019 shared task.
+- [AMR dependency parsing with a typed semantic algebra](https://aclanthology.org/P18-1170/) (Groschwitz et al. 2018) used an older, now deprecated codebase but describes the parser in most detail, and the general principles still apply in this repository.
+
+## Quick Guide to the Pretrained Models of Lindemann et al. (2019)
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
 **You can find documentation on how to train the parser on the [wiki pages](https://github.com/coli-saar/am-parser/wiki).**
