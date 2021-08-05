@@ -14,10 +14,7 @@ This repository (jointly with its sister-repository at [am-tools](github.com/col
 - [Saarland at MRP 2019: Compositional parsing across all graphbanks](https://aclanthology.org/K19-2006/) describes our participation at the MRP 2019 shared task.
 - [AMR dependency parsing with a typed semantic algebra](https://aclanthology.org/P18-1170/) (Groschwitz et al. 2018) used an older, now deprecated codebase but describes the parser in most detail, and the general principles still apply in this repository.
 
-## Quick Guide to the Pretrained Models of Lindemann et al. (2019)
-This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
-
-**You can find documentation on how to train the parser on the [wiki pages](https://github.com/coli-saar/am-parser/wiki).**
+## Setup
 
 ### Requirements
 - Python 3.7 up to version 3.7.3
@@ -36,6 +33,12 @@ This is a quick guide on how to use our already trained models to make predictio
 **If you still have problems running the parser** check the list of [third party packages](https://github.com/coli-saar/am-parser/wiki/Third-Party-Packages) in the Wiki. This list also contains packages necessary to run branches other than the Master branch.
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
+
+## Quick Guide to the Pretrained Models of Lindemann et al. (2019)
+This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
+
+**You can find documentation on how to train the parser on the [wiki pages](https://github.com/coli-saar/am-parser/wiki).**
+
 
 ### Reproducing our experiment results
 
