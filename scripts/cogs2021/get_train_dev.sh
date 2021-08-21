@@ -19,14 +19,20 @@
 ##
 # getting train and dev zip files for training the am-parser and also dev amconll file for evaluation
 # todo test command line parsing: especially for erroneous input
+# bash ./scripts/cogs2021/get_train_dev.sh -t TRAINFILE -d DEVFILE -o OUTDIR [ -s NUMBEROFSOURCES -p DEVAMCONLLPREFIX -e TESTFILE -r -h ]
 # bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/
 # bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -s 3 -p dp_dev
 # and for preposition reification add the option  -r  at the end
+# and for generation of a test.amconll in the output folder add  -e ~/HiwiAK/cogs2021/small/test50.tsv
+# you can redirect all output to a log file using  &> PATH/TO/get_train_dev.log
 
+set -e # tells Bash to exit the script immediately if any command returns a non-zero status.
+# set -x  (for debugging) Print commands and their arguments as they are executed.  (with set +x disabled), or globally as bash -x scriptname
 
 jar="am-tools.jar"
 # i.e. assumed to be in current directory, maybe cd to am-parser directory first
 
+## __Command line parameters: definition and parsing__
 # Documenting parameters:
 usage="Takes . \n\n
 
@@ -39,10 +45,12 @@ Required arguments: \n
 
 \n\t   -s  number of sources (default: 3).
 \n\t   -p  dev eval prefix (default: dp_dev).
+\n\t   -e  test file: Path to the test file in the TSV format of COGS (default: no file, so no test.amconll produced)
 \n\t   -r flag to enable preposition reification (default: false)
 "
 
 #defaults:
+testfile=""
 prefix="dp_dev"
 sources=3
 reifypreps=false
@@ -50,9 +58,9 @@ reifypreps=false
 # Gathering parameters:
 # note: although -t,-d,-o are basically mandatory, we don't use positional
 # arguments: hopefully easier to use and not confuse positions.
-while getopts "t:d:o:s:p:rh" opt; do
+while getopts "t:d:o:s:p:e:rh" opt; do
     case $opt in
-  h) echo -e $usage
+  h) echo -e "$usage"
      exit
      ;;
   t) train="$OPTARG"
@@ -67,62 +75,85 @@ while getopts "t:d:o:s:p:rh" opt; do
      ;;
   r) reifypreps=true
      ;;
+  e) testfile="$OPTARG"
+     ;;
   \?) echo "Invalid option -$OPTARG" >&2
       ;;
     esac
 done
 
-# input validation:
-if [ -f "$jar" ]; then
-    echo "jar file found at $jar."
+## __Helper functions__
+function echoinfo () { echo "INFO: $@"; }
+function echoerr () { 1>&2 printf "ERROR: %s\n" "$@"; }
+function exitOnFileNotFound () {  # FILEPATH FILEDESC ADDITIONALHELP=''
+    if [ -f "$1" ]; then  # check that exists and is regular file
+        echoinfo "$2 found at $1"
+    else
+        echoerr "$2 not found at $1 . $3"
+        exit 1
+    fi;
+}
+
+## __Start actual script__
+starttime=$(date +"%F %T %Z")
+echoinfo "$0 started at $starttime"  # get_train_dev.sh started at 2020-01-31 14:01:52 CEST
+echoinfo "$0 started with parameters $@"  # get_train_dev.sh started with parameters -t bla - d bla2 ...
+
+## __Input validation__
+exitOnFileNotFound $jar "am-tools.jar file"
+exitOnFileNotFound "$train" "train file" "Please check the -t parameter"
+exitOnFileNotFound "$dev" "dev file" "Please check the -d parameter"
+
+if [ -d "$output" ]; then
+    echoinfo "Output folder found at $output"
 else
-    echo "jar file not found at $jar."
+    echoerr "Output folder not found: $output . Please check the -o parameter"
     exit 1
 fi
 
-if [ -f "$train" ]; then
-    echo "train file found at $train"
-else
-    echo "train file not found at $train. Please check the -t parameter"
-    exit 1
-fi
-
-if [ -f "$dev" ]; then
-    echo "dev file found at $dev"
-else
-    echo "dev file not found at $dev. Please check the -d parameter"
-    exit 1
-fi
-
-if [ "$output" = "" ]; then
-    printf "\nERROR: No output folder path given. Please use -o option.\n"
-    exit 1
-fi
-
-echo "INFO: Number of sources: $sources"
+echoinfo "Number of sources: $sources"
 if [ $sources -lt 1 ]; then
-    prinf "\nERROR: source smaller 1 not allowed.\n"
+    echoerr "source smaller 1 not allowed."
     exit 1
 fi
 
-echo "INFO: Output prefix: $prefix"
+echoinfo "Output prefix: $prefix"
 if [ "$prefix" = "" ]; then
-    echo "Empty prefix not allowed."
+    echoerr "Empty prefix not allowed."
     exit 1
 fi
 
-echo "INFO: Preposition reification?: $reifypreps"
-
-## Finally the interesting part:
-
-printf "\n--> Automata for train ($train) and dev ($dev) : will create zip files in $output: ...\n"
-if [ "$reifypreps" = "false" ]; then
-    java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata
+if [ "$testfile" = "" ]; then
+    echoinfo "Test file? No test.amconll will be prepared"
 else
-    java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata --reifyprep
+    exitOnFileNotFound "$testfile" "test file" "Please check the optional -e parameter"
 fi
 
-printf "\n--> Prepare dev data for evaluation ($prefix amconll file in $output will be created from $dev) ...\n"
-java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $dev --outPath $output --prefix $prefix
+echoinfo "Preposition reification?: $reifypreps"
 
-printf "\nDone!\n"
+## __Finally the interesting part__
+
+# get train.zip and dev.zip
+echoinfo "Automata for train ($train) and dev ($dev) : will create zip files in $output: ..."
+currentCMD="java -cp $jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS --trainingCorpus $train --devCorpus $dev --outPath $output --nrSources $sources --algorithm automata"
+if [ "$reifypreps" == true ]; then
+    currentCMD+=" --reifyprep"
+fi
+echoinfo "Now executing:  $currentCMD"
+eval "$currentCMD"
+
+# get dp_dev.amconll (or whatever prefix used)
+echoinfo "Prepare dev data for evaluation ($prefix amconll file in $output will be created from $dev) ..."
+currentCMD="java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $dev --outPath $output --prefix $prefix"
+echo "INFO: Now executing:  $currentCMD"
+eval "$currentCMD"
+
+# optional: get test.amconll (if test file was provided as cmd arg)
+if [ "$testfile" != "" ]; then
+    echoinfo "Prepare test data for evaluation (test.amconll file in $output will be created from $testfile) ..."
+    currentCMD="java -cp $jar de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData --corpus $testfile --outPath $output --prefix test"
+    echoinfo "Now executing:  $currentCMD"
+    eval "$currentCMD"
+fi
+
+printf "\nDone!  (End time: %s)\n" "$(date  +'%F %T %Z')"
