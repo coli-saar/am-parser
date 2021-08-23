@@ -95,12 +95,13 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 local my_task = "COGS";
 local path_prefix = "/home/wurzel/HiwiAK/cogs2021/";
 # local path_prefix = "/proj/irtg/sempardata/cogs/";
-local train_zip_corpus_path = path_prefix + "toy_model_run/training_input/train.zip"; # amconll/Auto3/train.zip
-# local train_tsv_corpus_path = path_prefix + "COGS/data/train1k_noprim.tsv";  # not used
-local dev_zip_corpus_path = path_prefix + "toy_model_run/training_input/dev.zip";
+local train_zip_corpus_path = path_prefix + "toy_model_run/training_input/train.zip";  # output of SourceAutomataCLICOGS.java
+# local train_tsv_corpus_path = path_prefix + "small/train50.tsv";  # not used
+local dev_zip_corpus_path = path_prefix + "toy_model_run/training_input/dev.zip";  # output of SourceAutomataCLICOGS.java
 local dev_amconll_corpus_path = path_prefix + "toy_model_run/training_input/dp_dev.amconll";  # output of PrepareDevData.java
+local test_amconll_corpus_path = path_prefix + "toy_model_run/training_input/test.amconll";  # output of PrepareDevData.java  (todo -e option omus be present for call of get_train_dev.sh!!!)
 local dev_tsv_corpus_path = path_prefix + "small/dev10.tsv";
-# local dev_tsv_corpus_path = path_prefix + "COGS/data/dev.tsv";
+local test_tsv_corpus_path = path_prefix + "small/test50.tsv";
 #===============================
 
 local dataset_reader =  {
@@ -163,7 +164,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     #LOSS:
     "loss_mixing" : {
         "edge_existence" : 1.0,  # if 'all_automaton_loss' is true, not needed
-        "edge_label": 1.0,  # not present in DMautomata?
+        "edge_label": 1.0,
         "supertagging": 1.0,
         "lexlabel": 1.0,   # if 'all_automaton_loss' is true, not needed
     },
@@ -249,11 +250,34 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
 
     #=========================EVALUATE ON TEST=================================
-    #"evaluate_on_test" : false,  # todo do we want to evaluate on test?
-    #"test_evaluators" : [test_evaluators(amconll_dataset_reader, data_iterator)[my_task]], #when training is done, call evaluation on test sets with best model as described here.
-    # no eval on test:
-    "evaluate_on_test" : false,
-    "test_evaluators" : [],
+    # do you want to evaluate on test with best model after training is done?
+    # --> NO!
+    # "evaluate_on_test" : false,
+    # "test_evaluators" : [],
+    # --> YES!
+    "evaluate_on_test" : true,
+    "test_evaluators" : [  #when training is done, call evaluation on test sets with best model as described here.
+        [ # not tested so far
+            ["COGS",
+                { # compare to 'validation_evaluator'
+                    "type": "standard_evaluator",
+                    "formalism" : "COGS",
+                    # note: to create test.amconll, need to add -e argument to get_train_dev.sh call and provide correct paths below
+                    "system_input" : test_amconll_corpus_path, # only-token-amconll
+                    "gold_file": test_tsv_corpus_path, # gold file in COGS format (tsv)
+                    "predictor" : {
+                        "type" : "amconll_automata_predictor",
+                        "dataset_reader" : amconll_dataset_reader, # should be of type: 'amconll_unannotated'
+                        "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                        "k" : k_supertags_evaldecoder,  # number of supertags to be used during decoding
+                        "threads" : 1,  # had problem when using multi-threading (opened an GitHub issue)
+                        "give_up": give_up_secs, # time limit in seconds before retry parsing with k-1 supertags
+                        "evaluation_command" : eval_commands['commands']['COGS']
+                    }
+                }
+            ]
+        ]
+    ],
     #==========================================================================
 
     "trainer": {
@@ -264,8 +288,8 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "type": "adam",
             "lr": lr,
         },
-        "validation_metric" : "-COGS_EditDistance",  # SPECIAL todo change "+ExactMatch" ?
-        # "validation_metric" : eval_commands['metric_names'][my_task],  # "+ExactMatch" ?
+        "validation_metric" : "-COGS_EditDistance",  # Can also try "-COGS_EditDistance"
+        # "validation_metric" : eval_commands['metric_names'][my_task],  # "+COGS_ExactMatch"
         "num_serialized_models_to_keep" : 1,
         "write_amconll_every_n_epoch": 10, # default is None=1=every epoch, todo test this new option
     }

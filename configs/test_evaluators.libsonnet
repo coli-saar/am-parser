@@ -131,19 +131,19 @@ function (dataset_reader, data_iterator) {
 
      "COGS" : [ # not tested so far
         ["COGS",
-            { #prefix used for evaluation metric
+            { # compare to 'validation_evaluator' in jsonnet
                 "type": "standard_evaluator",
                 "formalism" : "COGS",
-                # todo test.amconll doesn't exist so far (would need to add it to get_train_dev.sh)
+                # todo test.amconll only created if get_train_dev.sh is called with valid -e TESTDATAPATH called.
                 "system_input" : "/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train/test.amconll", # only-token-amconll # todo hard-coded data path
                 "gold_file": "/proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv", # gold file in COGS format (tsv) # todo hard-coded data path
                 "predictor" : {
                     "type" : "amconll_automata_predictor",
                     "dataset_reader" : dataset_reader, # should be of type: 'amconll_unannotated'
                     "data_iterator" : data_iterator, #same bucket iterator also for validation.
-                    "k" : k,  # number of supertags to be used during decoding
+                    "k" : 6,  # number of supertags to be used during decoding
                     "threads" : 1,  # had problem when using multi-threading (opened an GitHub issue)
-                    "give_up": give_up, # time limit in seconds before retry parsing with k-1 supertags
+                    "give_up": 15, # time limit in seconds before retry parsing with k-1 supertags
                     "evaluation_command" : eval_commands['commands']['COGS']
                 }
             }

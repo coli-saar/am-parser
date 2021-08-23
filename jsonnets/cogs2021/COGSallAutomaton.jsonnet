@@ -12,8 +12,7 @@
 # - excluded lemmas, pos, nes
 # - option to choose between bert and learning tokens from data only
 # - lr reduced (0.001 -> 0.0001), min count for vocab words set to 1 (was 7)
-# - todo so far no eval on test
-# - todo better set validation metric to edit distance than exact match mb?
+# - todo never tried eval on test so far
 # a comment `# some-number` indicates that that's the number used in AMRallAutomaton.jsonnet
 
 local lr = 0.0001; # 0.001  # REDUCED!
@@ -170,7 +169,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     #LOSS:
     "loss_mixing" : {  # note: whether all_automaton_loss is true has effect too
         "edge_existence" : 1.0,  # if 'all_automaton_loss' is true, not needed
-        "edge_label": 1.0,  # not present in DMautomata?
+        "edge_label": 1.0,
         "supertagging": 1.0,
         "lexlabel": 1.0,   # if 'all_automaton_loss' is true, not needed
     },
@@ -256,11 +255,13 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
 
     #=========================EVALUATE ON TEST=================================
-    #"evaluate_on_test" : false,  # todo do we want to evaluate on test?
-    #"test_evaluators" : [test_evaluators(amconll_dataset_reader, data_iterator)[my_task]], #when training is done, call evaluation on test sets with best model as described here.
-    # no eval on test:
+    # do you want to evaluate on test with best model after training is done?
+    # --> NO!
     "evaluate_on_test" : false,
     "test_evaluators" : [],
+    # --> YES!
+    #"evaluate_on_test" : true,
+    #"test_evaluators" : [test_evaluators(amconll_dataset_reader, data_iterator)[my_task]], # todo not tested yet, check hard-coded file paths in libsonnet!
     #==========================================================================
 
     "trainer": {
@@ -271,8 +272,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "type": "adam",
             "lr": lr,
         },
-        #"validation_metric" : "-COGS_EditDistance",
-        "validation_metric" : eval_commands['metric_names'][my_task],  # "+ExactMatch" ?
+        "validation_metric" : eval_commands['metric_names'][my_task],  # currently "+COGS_ExactMatch" ?
         "num_serialized_models_to_keep" : 1,
         "write_amconll_every_n_epoch": 10, # reduce memory footprint: don't write train/dev amconll for every epoch
     }
