@@ -151,7 +151,7 @@ local sdp_regexes = {
         "LinES" : "+LinES_LAS",
         "ParTUT" : "+ParTUT_LAS",
 
-        "COGS": "+ExactMatch",
+        "COGS": "+COGS_ExactMatch",
 
     },
 
