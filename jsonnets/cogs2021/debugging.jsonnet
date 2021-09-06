@@ -25,6 +25,9 @@ local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occu
 local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
 local all_automaton_loss = true;  # true  # true = all loss flows through automata // false = supervised loss for edge existence and lex label
 
+local edge_model_kind = "kg_rel_edges";  # "kg_edges"  #
+local eval_on_test = true;  # whether to evaluate on test after training is done. Needs empty test.amconll !
+
 #============EMBEDDINGS=========
 local embedding_name = "tokens";  # "bert" or "tokens"  # main switch
 
@@ -99,7 +102,7 @@ local train_zip_corpus_path = path_prefix + "toy_model_run/training_input/train.
 # local train_tsv_corpus_path = path_prefix + "small/train50.tsv";  # not used
 local dev_zip_corpus_path = path_prefix + "toy_model_run/training_input/dev.zip";  # output of SourceAutomataCLICOGS.java
 local dev_amconll_corpus_path = path_prefix + "toy_model_run/training_input/dp_dev.amconll";  # output of PrepareDevData.java
-local test_amconll_corpus_path = path_prefix + "toy_model_run/training_input/test.amconll";  # output of PrepareDevData.java  (todo -e option omus be present for call of get_train_dev.sh!!!)
+local test_amconll_corpus_path = path_prefix + "toy_model_run/training_input/test.amconll";  # output of PrepareDevData.java  (todo -e option must be present for call of get_train_dev.sh!!!)
 local dev_tsv_corpus_path = path_prefix + "small/dev10.tsv";
 local test_tsv_corpus_path = path_prefix + "small/test50.tsv";
 #===============================
@@ -121,7 +124,7 @@ local data_iterator = {
     };
 
 
-# copied from configs/task_models.libsonnet and adapted
+# copied from configs/task_models.libsonnet and adapted todo label_loss not used, hard coded dm_label_loss due to some dirty hack?
 local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, edge_model, edge_loss, label_loss) = {
     "name" : name,
     "dropout": 0.0, #0.3 SPECIAL
@@ -136,6 +139,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "edge_dim": hidden_dim,
             #"activation" : "tanh",
             #"dropout": 0.0,
+            "dist_dim": 4,  # for kg_rel_edges model only
             "edge_label_namespace" : name+"_head_tags"
     },
      "supertagger" : {
@@ -210,7 +214,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "model": {
         "type": "graph_dependency_parser_automata",
 
-        "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],
+        "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, edge_model_kind,"kg_edge_loss","kg_label_loss")],
 
         "input_dropout": 0.0, #0.3 SPECIAL
         "encoder": {
@@ -251,11 +255,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
 
     #=========================EVALUATE ON TEST=================================
     # do you want to evaluate on test with best model after training is done?
-    # --> NO!
-    # "evaluate_on_test" : false,
-    # "test_evaluators" : [],
-    # --> YES!
-    "evaluate_on_test" : true,
+    "evaluate_on_test" : eval_on_test,  # below only takes effect if eval_on_test is true
     "test_evaluators" : [  #when training is done, call evaluation on test sets with best model as described here.
         [ # not tested so far
             ["COGS",
