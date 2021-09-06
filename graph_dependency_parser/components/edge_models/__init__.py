@@ -20,4 +20,5 @@ from graph_dependency_parser.components.edge_models.base import EdgeModel
 
 import graph_dependency_parser.components.edge_models.DM
 import graph_dependency_parser.components.edge_models.KG
+import graph_dependency_parser.components.edge_models.KGrel
 
