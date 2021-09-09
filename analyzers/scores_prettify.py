@@ -77,6 +77,8 @@ SCORES_CORPUS_FILENAME = "corpus.amconll"
 
 heatmaps_shown_count = 0
 
+def count_occurrences(tokens: list, keys: set) -> int:
+    return sum(1 for token in tokens if token in keys)
 
 # todo hard coding 'is interesting to plot'
 def which_sentence2plot(lineno: int, tokens: list):
@@ -88,22 +90,26 @@ def which_sentence2plot(lineno: int, tokens: list):
     :return: True if it should be plotted and False otherwise
     """
     global heatmaps_shown_count
-    if 2 <= heatmaps_shown_count:
+    if 10 <= heatmaps_shown_count:
         return False
     # if lineno > 290:
     #     return False
     preps = {"in", "on", "beside"}
 
-    count = 0
-    for token in tokens:
-        if token in preps:
-            count += 1
-    if 8 <= count <= 12:
+    # if len(tokens) > 3 and tokens[2] in preps:  # obj_pp_to_subj_pp ?
+    #     return True
+    #count = count_occurrences(tokens=tokens, keys={"that"})  # cp_recursion
+    count = count_occurrences(tokens=tokens, keys=preps)  # pp_recursion
+    if 5 <= count <= 12:  # if 3 <= count <= 5:
         return True
     return False
 
 
-def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int):
+# colormaps reference: https://matplotlib.org/stable/gallery/color/colormap_reference.html
+def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int,
+                                  nan_dummy: int = None, # -1
+                                  cmap="YlOrRd" # "YlOrRd", "RdYlGn" "RdYlBu" "coolwarm" # "viridis"
+                                  ):
     """
     Show heatmap of edge existence scores
 
@@ -111,6 +117,11 @@ def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int):
     (score is logarithm of softmax or None)
     :param tokens: list of tokens including ART-ROOT as 0
     :param sentno: sentence number
+    :param nan_dummy: how to plot NaN values? None means plot with same color
+    as background. You can set it to a specific number if you would like it to
+    show up on the color scale just like other 'normal' scores.
+    :param cmap: color map for the heat map
+    :
     >>> heatmap_edge_existence_scores(from_to_ex=[[None, -1.2, -0.1, -10], [None, None, -1.7, -8], [None, -0.2, None, -0.1], [None, -3, -1.7, None]], tokens=["ART-ROOT", "Ava", "slept", "tonight"], sentno=-1)
     """
     global heatmaps_shown_count
@@ -121,10 +132,10 @@ def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int):
     nar = np.exp(nar)  # convert log (assume torch uses natural log) to exp
 
     # some values are NaN. We will use a dummy value here, so it can receive a
-    # color. Chosen to be smaller than 0 (min value) to distinguish nan from 0
-    # (remember log can be -inf, after exp it is 0.
-    nan_dummy = -1
-    nar[np.isnan(nar)] = nan_dummy
+    # color.
+    #nan_dummy = -0.0  # -1
+    if nan_dummy is not None and type(nan_dummy) == int:
+        nar[np.isnan(nar)] = nan_dummy
 
     # from_to_df = pd.DataFrame(nar, columns=tokens, index=tokens)
     # sns.heatmap(from_to_df, cmap="viridis")  # , annot=True
@@ -132,26 +143,28 @@ def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int):
     from_to_df = pd.DataFrame(nar, columns=tokens, index=tokens)
     # in principle we don't want any edge to end in art-root: del from_to_df["ART-ROOT"]
 
-    cmap = "RdYlBu"  # "RdYlGn" "RdYlBu" "coolwarm" # "viridis"
     plt.imshow(from_to_df, cmap=cmap, vmin=nan_dummy, vmax=1.0)  # todo vmax softmax, so can't be beyond 1?
     plt.colorbar()
 
     def hide_some_tokens(ts: list) -> list:
         return ["" if x.lower() in {"a", "the"} else x for x in ts]
 
+    # todo space between ticks such that don't overlap: https://stackoverflow.com/questions/44863375/how-to-change-spacing-between-ticks-in-matplotlib
     plt.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
-    plt.xticks(range(len(from_to_df)), hide_some_tokens(from_to_df.columns), rotation=60)  # -1
-    plt.yticks(range(len(from_to_df)), hide_some_tokens(from_to_df.index))
+    plt.xticks(range(len(from_to_df)), hide_some_tokens(from_to_df.columns), rotation=80, fontsize=9)  # 60
+    plt.yticks(range(len(from_to_df)), hide_some_tokens(from_to_df.index), fontsize=9)
     plt.xlabel("To")
     plt.ylabel("From")
     plt.title(f"Heatmap for sentence {sentno}")
-    plt.grid(color="b", linewidth=.1)
+    plt.grid(color="k", linewidth=.5)
     plt.tight_layout()
     plt.show()
+    #plt.savefig(f"../../test_{sentno}.png")
+    #plt.close()
     return None
 
 
-def prettify_edges(zf: ZipFile, sents, outputfile):
+def prettify_edges(zf: ZipFile, sents: list, outputfile: str):
     """
     Write inputfile content into outputfile in a more human-readable format
 
@@ -218,7 +231,7 @@ def prettify_edges(zf: ZipFile, sents, outputfile):
     return
 
 
-def prettify_tags(zf, sents, outputfile):
+def prettify_tags(zf: ZipFile, sents: list, outputfile: str):
     """
     Write inputfile content into outputfile in a more human-readable format
 
@@ -310,8 +323,8 @@ def main(argv):
 
         # Prettify tags (supertags) and edges (operations)
         get_full_path = lambda x: os.path.join(outputdir, x)
-        prettify_tags(zf=zf, sents=sentences,
-                      outputfile=get_full_path("tagProbs_prettified.txt"))
+        # prettify_tags(zf=zf, sents=sentences,
+        #               outputfile=get_full_path("tagProbs_prettified.txt"))
         prettify_edges(zf=zf, sents=sentences,
                        outputfile=get_full_path("opProbs_prettified.txt"))
     print("--Done!")
