@@ -40,11 +40,11 @@ def get_positional_encodings(seqlen: int, dmodel: int) -> tuple:
     """
     Get positional encodings for all distances in a sentence (length seqlen)
 
-    Uses the formula of Vaswani et al.  "Attention is all you need paper"
+    Uses the formula of Vaswani et al. 2017 "Attention is all you need" paper
       PE_{pos,2i} = sin ( pos / 10000^{2i / dmodel} )
       PE_{pos,2i+1} = cos ( pos / 10000^{2i / dmodel} )
     where i is a concrete dimension in the position encoding,
-    pos is the position (0..seqlen-1),
+    pos is the position (bounded by seqlen),
     dmodel is the dimensionality of the position encoding
     Implementation based on https://github.com/pytorch/examples/blob/master/word_language_model/model.py#L65
     :param seqlen: length of the sequence: define possible relative distances
@@ -65,7 +65,7 @@ def get_positional_encodings(seqlen: int, dmodel: int) -> tuple:
     assert distances.size() == (2*seqlen-1,)
     positions = distances.float().unsqueeze(1)
     # shape: (seqlen, 1)
-    # todo do these encoding even/odd work wen full relative vec is entered?
+    # todo do these encoding even/odd work when full relative vec is entered?
     encodings = torch.zeros(2*seqlen-1, dmodel)  # shape: (seqlen, dmodel)
     encodings[:, 0::2] = torch.sin(positions * div_term)  # even dimensions of encoding: sinus
     encodings[:, 1::2] = torch.cos(positions * div_term)  # odd dimensions of encoding: cosinus
@@ -75,17 +75,28 @@ def get_positional_encodings(seqlen: int, dmodel: int) -> tuple:
 
 
 def get_distances_as_matrix(distance_vecs: torch.Tensor, seqlen: int) -> torch.Tensor:
-    # distance_vecs: (2*seqlen-1, d_dim)
-    # for seqlen==5 have vector for each of [-4, -3, -2, -1, 0, 1, 2, 3, 4]
-    assert(distance_vecs.size()[0] == distance_vecs.size()[0] == 2*seqlen-1)
+    """
+    Organize the vectors for the distances into a matrix
+
+    such that matrix[i][j] represents the distance between tokens i and j
+    :param distance_vecs: torch.Tensor of shape (2*sequence length-1, d_dim)
+    :param seqlen: length of the token sequence
+    :return: torch.Tensor of shape (sequence length, sequence length, d_dim)
+    """
+    # for seqlen==5 have vector repr for each of [-4, -3, -2, -1, 0, 1, 2, 3, 4]
     d_dim = distance_vecs.size()[1]
+    assert distance_vecs.shape == (2*seqlen-1, d_dim)
+
     m = torch.zeros(seqlen, seqlen, d_dim)
-    for i in range(1, seqlen+1):
+    for i in range(1, seqlen+1):  # todo is there a more efficient way than a for loop?
         # print(i)
         # print(m[i-1,:,:])
+        # e.g. for seq len 5 and ...
+        # .. i = 3 should have reprs for [-2, -1,  0,  1, 2]
+        # .. i = 5 should have reprs for [-4, -3, -2, -1, 0]
         m[i-1:,:,] = distance_vecs[seqlen-i:2*seqlen-i,:]
     # print(m)
-    assert(m.size()==(seqlen, seqlen, d_dim))
+    # assert m.shape == (seqlen, seqlen, d_dim)
     return m  # (seqlen, seqlen, d_dim)
 
 
@@ -137,21 +148,20 @@ class KGEdgesRel(KGEdges):  # inherits from EdgeModel
                                          activation=activation)
         self.dist_dim = dist_dim
         # assert self.dist_dim > 0
-        #edge existence:
-        #these two matrices together form the feed forward network which takes the vectors of the two words in question and makes predictions from that
-        #this is the trick described by Kiperwasser and Goldberg to make training faster.
-        ##self.head_arc_feedforward = torch.nn.Linear(encoder_dim, edge_dim)
-        ##self.child_arc_feedforward = torch.nn.Linear(encoder_dim, edge_dim, bias=False) #bias is already added by head_arc_feedforward
+        # edge existence:
+        # using separate feed forward networks for the head and the dependent
+        # (K&G speed improvement trick) from the input to the hidden layer.
+        # For adding the relative position encoding we have to define a third
+        # FFN for these encodings. Ultimately all three (head, dep, position)
+        # are combined before the activation at the hidden layer is computed.
         self.dist_arc_feedforward = torch.nn.Linear(dist_dim, edge_dim, bias=False)
-
-        ##self.arc_out_layer = torch.nn.Linear(edge_dim, 1, bias=False)  # K&G don't use a bias for the output layer
-        return
 
     # todo overrides annotation?
     def edge_existence(self, encoded_text: torch.Tensor, mask : torch.LongTensor) -> torch.Tensor:
         """
         Computes edge existence scores for a batch of sentences.
 
+        Using the computation trick mentioned in KG on page 10.
         Parameters
         ----------
         encoded_text : torch.Tensor, required
@@ -159,16 +169,17 @@ class KGEdgesRel(KGEdges):  # inherits from EdgeModel
             shape (batch_size, sequence length, encoding dim)
         mask : ``torch.LongTensor``
             A mask denoting the padded elements in the batch.
+            shape (batch_size, sequence length)
 
         Returns
         -------
         attended_arcs: torch.Tensor
             The edge existence scores in a tensor of shape (batch_size, sequence_length, sequence_length). The mask is taken into account.
         """
-        float_mask = mask.float()
-        # encoded_text: shape (batch_size, sequence length, encoding dim)
-        # mask: shape (batch_size, sequence length)
+        float_mask = mask.float()  # shape (batch_size, sequence_length)
+        # encoded_text: shape (batch_size, sequence_length, encoding_dim)
 
+        # Step 1: for each encoded token, run it through linear layer.
         # shape (batch_size, sequence_length, arc_representation_dim)
         head_arc_representation = self.head_arc_feedforward(encoded_text) #FF is from encoder_dim to edge_dim
         child_arc_representation = self.child_arc_feedforward(encoded_text)
@@ -176,40 +187,45 @@ class KGEdgesRel(KGEdges):  # inherits from EdgeModel
         bs, sl, arc_dim = head_arc_representation.size()  # batch size, sequence length, arc_dim
         # print(f"bs= {bs}, sl={sl}, arc_dim={arc_dim}")
 
-        # relative distance:
-        # (1) get distances and encode each distance as vector (PE)
-        encodings, dists = get_positional_encodings(seqlen=sl, dmodel=self.dist_dim)
-        encodings = encodings.to(get_device_of(encoded_text))
-        assert encodings.size() == (2*sl-1, self.dist_dim)
-        assert dists.size() == (2*sl-1,)
-        # (2) run FFN on these distance encodings todo batch size before or after?
+        # Step 2: now repeat the token representations to form a matrix:
+        # shape (batch_size, sequence_length, sequence_length, arc_representation_dim)
+        heads = head_arc_representation.repeat(1, sl, 1).reshape(bs, sl, sl, arc_dim)  # heads in one direction
+        deps = child_arc_representation.repeat(1, sl, 1).reshape(bs, sl, sl, arc_dim).transpose(1,2)  # deps in the other direction
+
+        # Step 3: get matrix of relative distance representations (similar to heads, deps)
+        # (i) get distances and encode each distance as vector ('relative position encoding')
+        encodings, dists = get_positional_encodings(seqlen=sl, dmodel=self.dist_dim)  # todo can I directly do that on GPU?
+        encodings = encodings.to(get_device_of(encoded_text))  # move to gpu if available
+        # assert encodings.shape == (2*sl-1, self.dist_dim)
+        # assert dists.shape == (2*sl-1,)
+        # (ii) run FFN on these distance encodings todo batch size before or after?
         distance_hc_representation = self.dist_arc_feedforward(encodings)
-        assert distance_hc_representation.size() == (2*sl-1, arc_dim)
-        # (3) organize representations into a matrix of shape (bs, sl, sl, arc_dim)
+        # assert distance_hc_representation.shape == (2*sl-1, arc_dim)
+        # (iii) organize representations into a matrix of shape (bs, sl, sl, arc_dim)
         # unlike heads, childs don't repeat along rows/columns, but along the diagonals
         distances = get_distances_as_matrix(distance_vecs=distance_hc_representation,
                                             seqlen=sl)
-        assert distances.size() == (sl, sl, arc_dim)
-        distances = distances.to(get_device_of(encoded_text))  # todo can I just do encoded_text.device ?
-        # shape: (sl, sl, arc_dim)
-        distances = distances.repeat(bs, 1, 1, 1)
-        # shape: (batch size, sl, sl, arc_dim)
+        # assert distances.shape == (sl, sl, arc_dim)
+        distances = distances.to(get_device_of(encoded_text))  # move to gpu if available # todo can I just do encoded_text.device ?
+        # distances.shape: (sl, sl, arc_dim)
+        distances = distances.repeat(bs, 1, 1, 1)  # distances are the same across sentences in the batch
+        # distances.shape: (batch_size, sl, sl, arc_dim)
 
-        #now repeat the token representations to form a matrix:
-        #shape (batch_size, sequence_length, sequence_length, arc_representation_dim)
-        heads = head_arc_representation.repeat(1, sl, 1).reshape(bs, sl, sl, arc_dim) #heads in one direction
-        deps = child_arc_representation.repeat(1, sl, 1).reshape(bs, sl, sl, arc_dim).transpose(1,2) #deps in the other direction
-
+        # Step 4: combine the linear-layer transformed representations of heads, children and distances
+        # now the feedforward layer that takes every pair of vectors for tokens and their relative distance is complete.
         # shape (batch_size, sequence_length, sequence_length, arc_representation_dim)
-        combined = self.activation(heads + deps + distances) #now the feedforward layer that takes every pair of vectors (and their relative distance) for tokens is complete.
-        #combined now represents the activations in the hidden layer of the MLP.
-        # now go from hidden (arc_dim) to output layer (1)
-        edge_scores = self.arc_out_layer(combined).squeeze(3) #last dimension is now 1, remove it
-        # (batch size, seq length, seq length)
+        combined = self.activation(heads + deps + distances)
+        # combined now represents the activations in the hidden layer of the MLP.
 
-        #mask out stuff for padded tokens:
+        # Step 5: another linear layer: from hidden (arc_dim) to output layer (1)
+        # for each pair of tokens in a sentence we would like to have one edge existence score
+        edge_scores = self.arc_out_layer(combined).squeeze(3) #last dimension is now 1, remove it
+        # (batch size, sequence_length, sequence_length)
+
+        # Step 6: mask out stuff for padded tokens:
         minus_inf = -1e8
         minus_mask = (1 - float_mask) * minus_inf
         edge_scores = edge_scores + minus_mask.unsqueeze(2) + minus_mask.unsqueeze(1)
-        return edge_scores # (batch size, seq length, seq length)
+
+        return edge_scores  # (batch_size, sequence_length, sequence_length)
 
