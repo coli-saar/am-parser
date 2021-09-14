@@ -45,10 +45,11 @@ Currently specialized for COGS.
 @author weissenh
 tested with Python 3.7
 """
-# python3 scores_prettify.py SCORESZIPFILE OUTPUTDIR  --prettify --showplot --maxshow 3
+# python3 scores_prettify.py SCORESZIPFILE OUTPUTDIR  --prettify --showplot --addlabels --maxshow 3
 # python3 scores_prettify.py /PATH/TO/scores.zip /PATH/TO/OUTPUTDIR
 
 # todo: test code
+import copy  # plot colormap copy before modify todo is there a cleaner way?
 import io
 import sys  # for argc,argv and exit
 import os
@@ -57,10 +58,11 @@ import zipfile  # to read scores zip file
 from io import TextIOWrapper  # utf-8 encoding for file in zip folder
 from collections import defaultdict
 
-# playing around with heat maps for edge existence scores
+# playing around with heatmaps for edge existence scores
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable  # heatmap colorbars...
 
 sys.path.append("..")  # Adds higher directory to python modules path.
 # needed for graph dependency parser imports:
@@ -103,12 +105,12 @@ def which_sentence2plot(tokens: list):
     return False
 
 
-# colormaps reference: https://matplotlib.org/stable/gallery/color/colormap_reference.html
+# colormaps: https://matplotlib.org/stable/gallery/color/colormap_reference.html
 # "YlOrRd", "RdYlGn" "RdYlBu" "coolwarm" "viridis"
 def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int,
                                   from_to_is_apply: list=None,
-                                  nan_dummy: int = None,  # 0, -1
-                                  cmap="RdYlBu"
+                                  cmap: str="YlOrRd",
+                                  outputdir: str=None
                                   ):
     """
     Show heatmap of edge existence scores
@@ -118,60 +120,96 @@ def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int,
     :param from_to_ex: list of lists  l[from][to] = score
     (score is logarithm of softmax or None)
     :param from_to_is_apply: matrix with True for APP, False for MOD, None else
-    :param nan_dummy: how to plot NaN values? None means plot with same color
-    as background. You can set it to a specific number if you would like it to
-    show up on the color scale just like other 'normal' scores.
     :param cmap: color map for the heat map
+    :param outputdir: output directory path for plots (if figures saved at all)
     :
     >>> heatmap_edge_existence_scores(from_to_ex=[[None, -1.2, -0.1, -10], [None, None, -1.7, -8], [None, -0.2, None, -0.1], [None, -3, -1.7, None]], tokens=["ART-ROOT", "Ava", "slept", "tonight"], sentno=-1)
     """
-    # from_to scores is a list of list
+    # ++ log prob to prob, list of list to pandas dataframe
     nar = np.array(from_to_ex, dtype=np.float)
     nar = np.exp(nar)  # convert log (assume torch uses natural log) to exp
-
-    # some values are NaN. do you want to make them appear on the color scale?
-    if nan_dummy is not None and type(nan_dummy) == int:
-        nar[np.isnan(nar)] = nan_dummy
-    if from_to_is_apply is not None:
-        # multiply all MODs with -1, all APPs with +1, IGNORE/ROOT are NaN
-        is_apply = np.array(from_to_is_apply, dtype=np.bool)
-        nar[is_apply == False] *= -1
-        nar[is_apply is None] = np.nan  # todo check that this works
-    vmin = -1 if from_to_is_apply is not None else nan_dummy  # todo used?
-
-    # from_to_df = pd.DataFrame(nar, columns=tokens, index=tokens)
-    # sns.heatmap(from_to_df, cmap="viridis")  # , annot=True
     # columns i = from token i || index j = to token j
     from_to_df = pd.DataFrame(nar, columns=tokens, index=tokens)
     # in principle we don't want any edge to end in art-root: del from_to_df["ART-ROOT"]
 
-    assert from_to_df.max(skipna=True).max() <= 1.0  # softmax not beyond 1
-    plt.imshow(from_to_df, cmap=cmap, vmin=vmin, vmax=1.0)
-    plt.colorbar()
+    # visually distinguish between APP/MOD/ROOT/IGNORE? have another dataframe
+    # todo do we care about all 4?
+    if from_to_is_apply is not None:
+        is_apply = np.array(from_to_is_apply)
+        is_apply = pd.DataFrame(is_apply, columns=tokens, index=tokens)
 
+    vmin, vmax = 0, 1
+    assert from_to_df.max(skipna=True).max() <= vmax  # softmax not beyond 1
+    assert from_to_df.min(skipna=True).min() >= vmin  # softmax not below 0
+
+    fig, ax = plt.subplots()
+
+    # ++ Formatting the ticks and their labels (the tokens) of the heatmap
     def hide_some_tokens(ts: list) -> list:
         return ["" if x.lower() in {"a", "the"} else x for x in ts]
+    ax.tick_params(axis='both', top=True, bottom=False, labeltop=True, labelbottom=False)  # where to draw the ticks and their labels
+    ax.set_xticks(range(len(from_to_df)))
+    ax.set_yticks(range(len(from_to_df)))
+    # for longer sentences we use smaller font size to prevent label overlapping
+    fontsize = 9 if len(tokens) < 15 else int(-1 * len(tokens) * 0.08 + 9)
+    ax.set_xticklabels(labels=hide_some_tokens(from_to_df.columns), rotation=80, fontsize=fontsize)
+    ax.set_yticklabels(labels=hide_some_tokens(from_to_df.index), fontsize=fontsize)
 
-    # todo space between ticks such that they don't overlap
-    plt.tick_params(top=True, bottom=False, labeltop=True, labelbottom=False)
-    plt.xticks(range(len(from_to_df)), hide_some_tokens(from_to_df.columns), rotation=80, fontsize=9)  # 60
-    plt.yticks(range(len(from_to_df)), hide_some_tokens(from_to_df.index), fontsize=9)
-    plt.xlabel("To")
-    plt.ylabel("From")
-    title = f"Heatmap for sentence {sentno}"
-    if from_to_is_apply is not None:
-        title += "\n>0 for APP, <0 for MOD, =0 ignore/root, white=NaN"
-    plt.title(title)
-    plt.grid(color="k", linewidth=.5)
+    # ax.xaxis.set_label_position('top')  # looks weird, like a subtitle, so
+    ax.set_xlabel("To")  # ..keep it at bottom (default)
+    ax.set_ylabel("From")
+    title = f"Edge existence heatmap for sentence {sentno}"
+    # if from_to_is_apply is not None:
+    #  title += "\nIntensity: unlabelled ex., Color: top1 label | diagonal NaN"
+    ax.set_title(title)
+    ax.grid(color="k", linewidth=.5)
+
+    # if you want to have NaNs (diagonal) display in a special color, use:
+    dummy_cmap = copy.copy(plt.cm.get_cmap(name='spring'))  # random cmap name
+    dummy_cmap.set_bad(color='#dddddd')  # NaN gets a light grey color
+    ax.imshow(from_to_df[np.isnan(nar)], cmap=dummy_cmap)  # plot NaNs
+
+    # ++Actual plotting commands: either with labels or just edge existence++
+    if from_to_is_apply is None:  # only edge existence, no edge labels
+        im = ax.imshow(from_to_df, cmap=cmap, vmin=vmin, vmax=vmax)
+        cb = fig.colorbar(im, label="Edge existence probability")
+        cb.minorticks_on()
+    else:  # with different colors for top edge label
+
+        divider = make_axes_locatable(plt.gca())
+        label_cmap_pairs = [("APP", cmap),  # cmap, "Reds", "YlOrRd"
+                            ("MOD", "Greens"),
+                            ("ROOT", "Blues"), ("IGNORE", "Purples")]
+        for i, (label, lbl_cmap) in enumerate(label_cmap_pairs):
+            im = ax.imshow(from_to_df[is_apply == label], cmap=lbl_cmap, vmin=vmin, vmax=vmax)
+            # on colorbar location: plt gallery axes_grid1/simple_colorbar
+            cax = divider.append_axes("right", size="5%", pad="3%")
+            cbar = fig.colorbar(im, cax=cax)  # , ticks=[] if i != 3 else None
+            cax.minorticks_on()
+            if i != 3:  # keep ticks, but delete tick labels except for last
+                cax.set_yticklabels([])
+            else:  # for rightmost bar add label about intensity meaning
+                cax.set_ylabel("Unlabelled edge existence probability")
+            cax.set_title(label, loc="center", rotation=0, fontsize=5, color='grey')
+            # y=1, pad=6, fontdict={'fontsize': 10, 'color':'grey'})
+
     plt.tight_layout()
     plt.show()
-    #plt.savefig(f"../../test_{sentno}.png")
+    #plt.savefig(f"{outputdir}/heatmap_{sentno}.png")
     #plt.close()
-    return None
+    return
 
 
-# todo add output dir to save hetamaps to?
-def plot_heatmaps(scoreszipfile: str, maxshow=None):  # outputdir: str,
+def plot_heatmaps(scoreszipfile: str, outputdir: str=None, maxshow: int=None, addlabels: bool=False):
+    """
+    Read scores and decide what to plot, finally calls real plotting function
+
+    :param scoreszipfile: file path of scores.zip
+    :param outputdir: output file path (can save heatmap figures there?)
+    :param maxshow: how many heatmaps to plot maximally
+    :param addlabels: do you care about edge existence or also edge labels?
+    :return: None
+    """
     print(f"Showing {maxshow} heatmaps...")  # todo neg value for max show to indicate: show all?
     shown_plots = 0
     for scores in get_next_sentence_scores(scoreszipfile=scoreszipfile):
@@ -197,27 +235,19 @@ def plot_heatmaps(scoreszipfile: str, maxshow=None):  # outputdir: str,
                 assert 0 <= toidx <= len(tokens)
                 from_to_existence[fromidx][toidx] = existence_score
 
-                # APP, MOD # todo make this distinction optional
+                # most likely label: APP, MOD, ROOT or IGNORE?
                 assert len(labelscore_pairs) > 0, "can't decide APP/MOD if no edge labels provided"
                 label, lbl_score = labelscore_pairs[0]  # highest ranked
-                if label.startswith("MOD"):
-                    from_to_is_apply[fromidx][toidx] = False
-                elif label.startswith("APP"):
-                    from_to_is_apply[fromidx][toidx] = True
-                elif label.startswith("ROOT") or label.startswith("IGNORE"):
-                    from_to_is_apply[fromidx][toidx] = None
-                    # todo is this for None really working?
-                else:
-                    print(label)
-                    assert False  # shouldn't happen, assume exhaustive case distincition above
+                from_to_is_apply[fromidx][toidx] = label.split("_")[0]  # strip off source name
         heatmap_edge_existence_scores(
             from_to_ex=from_to_existence,
-            from_to_is_apply=from_to_is_apply,
+            from_to_is_apply=from_to_is_apply if addlabels else None,
             tokens=["ART-ROOT"] + tokens,
-            sentno=sentno
+            sentno=sentno,
+            outputdir=outputdir
         )
         if shown_plots >= maxshow:
-            # there might be more to plot, but not fo
+            # there might be more to plot, but not for now
             print(f"INFO: Finished plotting after {shown_plots} heatmaps")
             break
     return
@@ -396,11 +426,13 @@ def main(argv):
                         help="file path of the scores.zip file")
     parser.add_argument("outputdir", type=str,
                         help="output directory path: where to write output")
-    # todo outputdir only needed when --prettify is given? or print heatmaps?
+    # todo outputdir only needed when --prettify is given? or save heatmaps?
 
     parser.add_argument("--maxshow", dest="maxshow", type=int, default=10,
                         help="maximum number of heatmaps to be shown "
                              "(default: %(default)d)")
+    parser.add_argument("--addlabels", dest="addlabels", action="store_true",
+                        help="add info on most likely operation (app,mod,...) to heatmap plot")
     parser.add_argument("--showplot", dest="showplot", action="store_true",
                         help="show edge existence heatmaps: up to maxshow ones")
     parser.add_argument("--prettify", dest="prettify", action="store_true",
@@ -439,10 +471,14 @@ def main(argv):
         sys.exit(2)
 
     if showplot:
-        plot_heatmaps(scoreszipfile=scoreszipfile, maxshow=maxshow)
+        plot_heatmaps(scoreszipfile=scoreszipfile,
+                      outputdir=outputdir,
+                      maxshow=maxshow,
+                      addlabels=args.addlabels)
 
     if prettify:
-        pretty_print_scores(scoreszipfile=scoreszipfile, outputdir=outputdir)
+        pretty_print_scores(scoreszipfile=scoreszipfile,
+                            outputdir=outputdir)
     print("--Done!")
     return
 
