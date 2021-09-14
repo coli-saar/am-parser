@@ -64,7 +64,7 @@ def get_positional_encodings(seqlen: int, dmodel: int) -> tuple:
     distances = torch.arange(start=-seqlen+1, end=seqlen, dtype=torch.float)  # e.g. tensor([-2., -1., 0., 1., 2.])
     assert distances.size() == (2*seqlen-1,)
     positions = distances.float().unsqueeze(1)
-    # shape: (seqlen, 1)
+    # shape: (2*seqlen-1, 1)
     # todo do these encoding even/odd work when full relative vec is entered?
     encodings = torch.zeros(2*seqlen-1, dmodel)  # shape: (seqlen, dmodel)
     encodings[:, 0::2] = torch.sin(positions * div_term)  # even dimensions of encoding: sinus
@@ -193,21 +193,21 @@ class KGEdgesRel(KGEdges):  # inherits from EdgeModel
         deps = child_arc_representation.repeat(1, sl, 1).reshape(bs, sl, sl, arc_dim).transpose(1,2)  # deps in the other direction
 
         # Step 3: get matrix of relative distance representations (similar to heads, deps)
+        device = get_device_of(encoded_text)  # todo can I just do encoded_text.device ?
         # (i) get distances and encode each distance as vector ('relative position encoding')
-        encodings, dists = get_positional_encodings(seqlen=sl, dmodel=self.dist_dim)  # todo can I directly do that on GPU?
-        encodings = encodings.to(get_device_of(encoded_text))  # move to gpu if available
+        encodings, dists = get_positional_encodings(seqlen=sl, dmodel=self.dist_dim)  # todo should I directly initialize it on GPU?
+        encodings = encodings.to(device)
         # assert encodings.shape == (2*sl-1, self.dist_dim)
         # assert dists.shape == (2*sl-1,)
         # (ii) run FFN on these distance encodings todo batch size before or after?
         distance_hc_representation = self.dist_arc_feedforward(encodings)
         # assert distance_hc_representation.shape == (2*sl-1, arc_dim)
         # (iii) organize representations into a matrix of shape (bs, sl, sl, arc_dim)
-        # unlike heads, childs don't repeat along rows/columns, but along the diagonals
+        # unlike heads+children, distances don't repeat along rows/columns, but along the diagonals
         distances = get_distances_as_matrix(distance_vecs=distance_hc_representation,
                                             seqlen=sl)
+        distances = distances.to(device)  # todo should I directly initialize it on GPU?
         # assert distances.shape == (sl, sl, arc_dim)
-        distances = distances.to(get_device_of(encoded_text))  # move to gpu if available # todo can I just do encoded_text.device ?
-        # distances.shape: (sl, sl, arc_dim)
         distances = distances.repeat(bs, 1, 1, 1)  # distances are the same across sentences in the batch
         # distances.shape: (batch_size, sl, sl, arc_dim)
 
