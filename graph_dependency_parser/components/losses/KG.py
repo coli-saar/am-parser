@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 from allennlp.nn.util import get_text_field_mask, get_range_vector
-from allennlp.nn.util import get_device_of, masked_log_softmax, get_lengths_from_binary_sequence_mask
+from allennlp.nn.util import get_device_of, get_lengths_from_binary_sequence_mask
 
 from typing import Dict, Optional, Tuple, Any, List
 import numpy as np
