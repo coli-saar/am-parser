@@ -12,6 +12,7 @@
 # - excluded lemmas, pos, nes
 # - option to choose between bert and learning tokens from data only
 # - lr reduced (0.001 -> 0.0001), min count for vocab words set to 1 (was 7)
+# (- relative distance encoding??)
 # - todo never tried eval on test so far
 # a comment `# some-number` indicates that that's the number used in AMRallAutomaton.jsonnet
 
@@ -32,6 +33,8 @@ local formalism_eval_from_epoch = 8;  # 8, (edit distance, exact match calculati
 local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occurrence of the relevant word
 local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
 local all_automaton_loss = true;  # true  # true = all loss flows through automata // false = supervised loss for edge existence and lex label
+
+# local dist_dim = 64;  # dimensionality of relative distance encoding (kg_rel_edges)
 
 #============EMBEDDINGS=========
 local embedding_name = "tokens";  # "bert" or "tokens"  # main switch
@@ -141,6 +144,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "edge_dim": hidden_dim,
             #"activation" : "tanh",
             #"dropout": 0.0,
+            # "dist_dim": dist_dim,  # for kg_rel_edges model only
             "edge_label_namespace" : name+"_head_tags"
     },
      "supertagger" : {
@@ -215,7 +219,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
     "model": {
         "type": "graph_dependency_parser_automata",
 
-        "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],
+        "tasks" : [task_model(my_task, dataset_reader, data_iterator, final_encoder_output_dim, "kg_edges","kg_edge_loss","kg_label_loss")],  # or kg_rel_edges
 
         "input_dropout": 0.3, #0.3
         "encoder": {

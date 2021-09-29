@@ -107,6 +107,7 @@ def which_sentence2plot(tokens: list):
 
 # colormaps: https://matplotlib.org/stable/gallery/color/colormap_reference.html
 # "YlOrRd", "RdYlGn" "RdYlBu" "coolwarm" "viridis"
+# todo the example in the docstring has weird color for some NaN values: why?
 def heatmap_edge_existence_scores(from_to_ex: list, tokens: list, sentno: int,
                                   from_to_is_apply: list=None,
                                   cmap: str="YlOrRd",

@@ -25,7 +25,7 @@ local min_count_words = 1;  # 7 # in train.tsv exposure example is the only occu
 local give_up_secs = 15;  # 15  # time limit in seconds before retry parsing with k-1 supertags
 local all_automaton_loss = true;  # true  # true = all loss flows through automata // false = supervised loss for edge existence and lex label
 
-local edge_model_kind = "kg_rel_edges";  # "kg_edges"  #
+local edge_model_kind = "kg_rel_edges";  # "kg_edges"  # note: need dist_dim for kg_rel_edges, but not for kg_edges
 local eval_on_test = true;  # whether to evaluate on test after training is done. Needs empty test.amconll !
 
 #============EMBEDDINGS=========
@@ -138,7 +138,7 @@ local task_model(name,dataset_reader, data_iterator, final_encoder_output_dim, e
             "label_dim": hidden_dim,
             "edge_dim": hidden_dim,
             #"activation" : "tanh",
-            #"dropout": 0.0,
+            #"dropout": 0.0,  # no effect for KG currently (just warning emitted)
             "dist_dim": 4,  # for kg_rel_edges model only
             "edge_label_namespace" : name+"_head_tags"
     },
