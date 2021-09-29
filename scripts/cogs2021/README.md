@@ -254,15 +254,31 @@ but if you don't trust this computation,
 you can use the the `COGS_pred.tsv` file in the output directory of the prediction script as input to whatever evaluation script you like.
 The format of the tsv file is the same as the gold files.
 
-## experiments:
+## experiments
 
-different factors:
-- training set (`train` or `train100`), relevant for the `train_data_path` for instance
+### jsonnet files
+in `jsonnets/cogs2021/`
+
+Toy model debugging on local computer: `debugging.jsonnet`
+Example configuration for a non-toy model: `COGSallAutomaton.jsonnet`, mostly based on `jsonnets/unsupervised2020/automata/AMRallAutomaton.jsonnet`
+
+You might be interested in tweaking different factors, for instance:
+- training set (`train` or `train100`), relevant for the `train_zip_corpus_path` for instance
 - embeddings: from BERT (`bert`), learnt from cogs alone (`tokens`)
-- number of sources: 3,4,5?? **todo**
+- number of sources: 3,4,5?? (that's implicitly done by selecting input zip data)
 - supervised loss for edge existence and lexical labels: `"all_automaton_loss": BOOLEAN`, setting it to true means all loss flows through automata, false means supervised loss for edge existence and lex label.
+- edge model: `kg_edges` or `kg_rel_edges` (relative distance encodings)
 
-Format of jsonnet filenames: **todo**
+Jsonnet files of the format `COGS_{train100,train}{Bert,Token}_{kg,kgrel}.jsonnet`
+- all have in common:
+  - supervised loss for edge existence and lex label scores and 60 epochs correspondingly
+  - lr reduced (0.0001) compared to AMR
+  - no early stopping but final parameters selected based on dev set exact match
+- `train` refers to `train.tsv` content as input, `train100`to `train_100.tsv` training data (see `train_zip_corpus_path` in jsonnet file)
+- `Bert` refers to using Bert embeddings, `Token` to using embeddings learnt from COGS data alone (see `embedding_name` in jsonnet file)
+- `kg` refers to using the KG dependency edge model, `kgrel` refers to using the KG model enhanced with relative distance encodings for edge existence scores
+  (implementation: `graph_dependency_parser/components/edge_models/` KG or KGrel)
+
 
 ## further notes
 
