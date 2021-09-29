@@ -26,7 +26,7 @@ import torch
 from graph_dependency_parser.components.losses.base import EdgeLoss, EdgeExistenceLoss, EdgeLabelLoss
 
 
-SMALL_FLOAT = 1e-45
+SMALL_FLOAT = 1e-13
 
 def masked_log_softmax(vector: torch.Tensor, mask: torch.Tensor, dim: int = -1) -> torch.Tensor:
     """
