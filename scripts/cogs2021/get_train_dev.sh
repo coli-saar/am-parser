@@ -163,16 +163,16 @@ doDecomposition
 printinfo "Prepare dev data for evaluation ($prefix amconll file in $output will be created from $dev) ..."
 prepareEmptyAmconll() {
   printAndCall java -cp "$jar" de.saar.coli.amrtagging.formalisms.cogs.tools.PrepareDevData \
-      --corpus "$dev" \
+      --corpus "$1" \
       --outPath "$output" \
-      --prefix "$1"
+      --prefix "$2"
 }
-prepareEmptyAmconll "$prefix"
+prepareEmptyAmconll "$dev" "$prefix"
 
 # optional: get test.amconll (if test file was provided as cmd arg)
 if [ "$testfile" != "" ]; then
     printinfo "Prepare test data for evaluation (test.amconll file in $output will be created from $testfile) ..."
-    prepareEmptyAmconll "test"
+    prepareEmptyAmconll "$testfile" "test"
 fi
 
 printf "\nDone!  (End time: %s)\n" "$(date  +'%F %T %Z')"
