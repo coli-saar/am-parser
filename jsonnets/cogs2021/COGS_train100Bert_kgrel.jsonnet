@@ -105,7 +105,7 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 #============TASKS==============
 local my_task = "COGS";
-local path_prefix = "/proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/";
+local path_prefix = "/proj/irtg/sempardata/cosg2021/earlyOctober/";
 local train_zip_corpus_path = path_prefix + "inputs/train100/train.zip";
 # local train_tsv_corpus_path = "/proj/irtg/sempardata/cogs2021/data/COGS/data/train_100.tsv";  # not used
 local dev_zip_corpus_path = path_prefix + "inputs/train100/dev.zip";
