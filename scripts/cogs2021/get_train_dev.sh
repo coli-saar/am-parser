@@ -38,6 +38,7 @@ testfile=""
 prefix="dp_dev"
 sources=3
 reifyprepositions=false
+uselexlabelrepl=false
 
 # Documenting parameters:
 showUsage() {
@@ -56,6 +57,7 @@ options:
    -p  dev eval prefix (default: $prefix).
    -e  test file: Path to the test file in the TSV format of COGS (default: no file, so no test.amconll produced)
    -r flag to enable preposition reification (default: no reification)
+   -l flag to enable copy mechanism for lexical labels (adds extra lex label with meaning 'copy word form')
 EOF
 # EOF is found above and hence cat command stops reading. This is equivalent to echo but much neater when printing out.
 }
@@ -63,7 +65,7 @@ EOF
 # Gathering parameters:
 # note: although -t,-d,-o are basically mandatory, we don't use positional
 # arguments: hopefully easier to use and not confuse positions.
-while getopts "t:d:o:s:p:e:rh" opt; do
+while getopts "t:d:o:s:p:e:rlh" opt; do
     case $opt in
   h) showUsage
      exit 0
@@ -79,6 +81,8 @@ while getopts "t:d:o:s:p:e:rh" opt; do
   p) prefix="$OPTARG"
      ;;
   r) reifyprepositions=true
+     ;;
+  l) uselexlabelrepl=true
      ;;
   e) testfile="$OPTARG"
      ;;
@@ -140,6 +144,7 @@ else
 fi
 
 printinfo "Preposition reification?: $reifyprepositions"
+printinfo "Use lex label replacement (copy mechanism)?: $uselexlabelrepl"
 
 ## __Finally the interesting part__
 
@@ -149,13 +154,17 @@ doDecomposition() {
   if [ "$reifyprepositions" = true ]; then  # todo this is an ugly hack
     addreify="dummy"  # variable only defined if reification enabled
   fi
+  if [ "$uselexlabelrepl" = true ]; then  # todo this is an ugly hack
+    addlexcopy="dummy"  # variable only defined if lex label replacement enabled
+  fi
   printAndCall java -cp "$jar" de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS \
       --trainingCorpus "$train" \
       --devCorpus "$dev" \
       --outPath "$output" \
       --nrSources "$sources" \
       --algorithm automata \
-      ${addreify:+--reifyprep}
+      ${addreify:+--reifyprep} \
+      ${addlexcopy:+--useLexLabelReplacement}
 }
 doDecomposition
 

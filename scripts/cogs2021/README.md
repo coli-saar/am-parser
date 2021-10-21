@@ -91,13 +91,14 @@ bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train.tsv -d COGSDATADIR
 # bash ./scripts/cogs2021/get_train_dev.sh -t COGSDATADIR/train.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR
 ```
 Note: You can add the `-r` option for preposition reification.
+Note: You can add the `-l` option for lex label replacement (copy mechanism)
 Note: You can add `-e COGSDATADIR/test.tsv` if you would like to evaluate a model on test directly after training (when jsonnet file contains `"evaluate_on_test" : true,` and a valid `test_evaluator`)
 
 - pw debugging:
 ```bash
-bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -e ~/HiwiAK/cogs2021/small/test50.tsv -r -s 3 -p dp_dev &> ../cogs2021/toy_model_run/get_train_dev.log
+bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -e ~/HiwiAK/cogs2021/small/test50.tsv -r -l -s 3 -p dp_dev &> ../cogs2021/toy_model_run/get_train_dev.log
 ```
-Note: this includes option `-r` for preposition reification and creating a `test.amconll` which can be used for test evaluation directly after training the model.
+Note: this includes option `-r` for preposition reification, `-l` for lex label replacement and creating a `test.amconll` which can be used for test evaluation directly after training the model.
 - On the coli servers:
 ```bash
 # with 3 sources and dp_dev.amconll created: For train.tsv or train_100.tsv respectively
@@ -105,7 +106,7 @@ cd AMPARSERDIR
 bash ./scripts/cogs2021/get_train_dev.sh -t /proj/irtg/sempardata/cogs2021/data/COGS/data/train.tsv -d /proj/irtg/sempardata/cogs2021/data/COGS/data/dev.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train/ -s 3 -p dp_dev
 bash ./scripts/cogs2021/get_train_dev.sh -t /proj/irtg/sempardata/cogs2021/data/COGS/data/train_100.tsv -d /proj/irtg/sempardata/cogs2021/data/COGS/data/dev.tsv -o /proj/irtg/sempardata/cogs2021/first_experiments/auto3prim/inputs/train100/ -s 3 -p dp_dev
 ```
-Note: add `-r` for preposition reification and `-e /proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv` for creating a `test.amconll` that can be used for test evaluation after training the model.
+Note: add `-r` for preposition reification, add `-l` for lex label replacement (copy mechanism), and `-e /proj/irtg/sempardata/cogs2021/data/COGS/data/test.tsv` for creating a `test.amconll` that can be used for test evaluation after training the model.
 
 #### (a) Getting zip files: `SourceAutomataCLICOGS`
 The input are the TSV files of COGS, output are zip files.
@@ -120,6 +121,7 @@ cd AMPARSERDIR
 java -cp am-tools.jar de.saar.coli.amtools.decomposition.SourceAutomataCLICOGS -t COGSDATADIR/train.tsv -d COGSDATADIR/dev.tsv -o AMCONLLDIR --nrSources 3 --algorithm automata
 ```
 Note: You can add the ` --reifyprep` flag to enable preposition reification
+Note: You can add the `--useLexLabelReplacement` flag to enable a copy mechanism for lexical labels (`$FORM$` as a lex label possible, which will be replaced with the word form)
 
 #### (b) Getting amconll files for validation: `PrepareDevData`
 the produced amconll file is used as `system_input` for the `validation_evaluator`.
@@ -336,6 +338,7 @@ These are my notes for debugging a small toy model on my local computer.
 - options to play around with:
   - `get_train_dev.sh`: 
     - if you would like to enable *preposition reification*, add the `-r` option. Otherwise prepositions are only represented as edges.
+    - if you would like to have a *copy mechanism for lexical labels*, add the `-l` option. 
     - how many sources? 3 are needed at least to deal with ditransitive verbs ("Ava gave Ben the cookie"), but more are possible too.
   - training (jsonnet file):
     - not for toy model, but can experiment with dropout
@@ -356,8 +359,8 @@ but results are not really good (0 exact match: label accuracy: is it OOV words 
 Prediction takes less than a minute for 50 test sentences.
 ```bash
 cd ~/HiwiAK/am-parser/
-# (1) get train and dev data. Option: add -r to use preposition reification, add -e TESTFILE for test.amconll s.t evaluate_on_test : true  works in the jsonnet file
-bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -e ~/HiwiAK/cogs2021/small/test50.tsv -r -s 3 -p dp_dev &> ../cogs2021/toy_model_run/get_train_dev.log
+# (1) get train and dev data. Option: add -r to use preposition reification, add -e TESTFILE for test.amconll s.t evaluate_on_test : true  works in the jsonnet file, add -l to add lex label replacement
+bash ./scripts/cogs2021/get_train_dev.sh -t ~/HiwiAK/cogs2021/small/train50.tsv -d ~/HiwiAK/cogs2021/small/dev10.tsv -o ~/HiwiAK/cogs2021/toy_model_run/training_input/ -e ~/HiwiAK/cogs2021/small/test50.tsv -r -l  -s 3 -p dp_dev &> ../cogs2021/toy_model_run/get_train_dev.log
 # (2) train
 # alternative: bash ./scripts/cogs2021/debugging_train.sh  
 export LC_ALL=en_US.UTF-8  # I had problems with lr being set to 0 (in file: "lr": 0.01) with my de_DE.UTF-8
