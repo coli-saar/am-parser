@@ -1,7 +1,7 @@
 
 #============TRAINING PARAMETERS==============
 local batch_size = 1; # adjust this to fit the memory capacity of your machine (mostly GPU memory is relevant)
-local num_epochs = 1; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
+local num_epochs = 100; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
 local patience = 1000; # this is per default set to 1000 to turn off early stopping.
 local evaluate_on_test = false; # Whether to evaluate on the test set.
 
