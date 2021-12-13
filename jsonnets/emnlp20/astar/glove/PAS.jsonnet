@@ -23,7 +23,7 @@ local test_evaluators = import '../../../../configs/am_parser/test_evaluators.li
 
 local data_paths = import '../../../../configs/data_paths.libsonnet';
 
-local eval_commands = import '../../../configs/eval_commands.libsonnet';
+local eval_commands = import '../../../../configs/eval_commands.libsonnet';
 
 local UD_banks = data_paths["UD_banks"];
 
