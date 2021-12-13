@@ -1,0 +1,12 @@
+(i_2<root> / --LEX--)--TYPE--()
+(ART-ROOT<root> / --LEX--  :art-snt1 (i_3<art-snt1>))--TYPE--(art-snt1())
+(i_1<root> / --LEX--  :compound (i_2<comp>))--TYPE--(comp())
+(i_9<root> / --LEX--  :BV (i_12<det>))--TYPE--(det())
+(i_12<root> / --LEX--  :appos (i_6<mod>))--TYPE--(mod())
+(i_16<root> / --LEX--  :of (i_17<mod>))--TYPE--(mod())
+(i_17<root> / --LEX--  :loc (i_9<mod>))--TYPE--(mod())
+(i_5<root> / --LEX--  :measure (i_6<mod>))--TYPE--(mod())
+(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))--TYPE--(o(), s())
+(i_1<root> / --LEX--  :poss (i_2<poss>))--TYPE--(poss())
+(i_10<root> / --LEX--  :ARG1 (i_12<s>))--TYPE--(s())
+_--TYPE--_

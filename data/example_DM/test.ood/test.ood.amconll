@@ -1,0 +1,57 @@
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#40504002
+1	So	_	so	RB	O	_	_	_	0	_	false
+2	wrote	_	write	VBD	O	_	_	_	0	_	false
+3	a	_	a	DT	O	_	_	_	0	_	false
+4	ten	_	ten	CD	DURATION	_	_	_	0	_	false
+5	year	_	year	NN	DURATION	_	_	_	0	_	false
+6	old	_	old	JJ	DURATION	_	_	_	0	_	false
+7	student	_	student	NN	TITLE	_	_	_	0	_	false
+8	in	_	in	IN	O	_	_	_	0	_	false
+9	a	_	a	DT	O	_	_	_	0	_	false
+10	letter	_	letter	NN	O	_	_	_	0	_	false
+11	to	_	to	TO	O	_	_	_	0	_	false
+12	his	_	his	PRP$	O	_	_	_	0	_	false
+13	parents	_	parent	NNS	O	_	_	_	0	_	false
+14	from	_	from	IN	O	_	_	_	0	_	false
+15	North	_	north	NNP	ORGANIZATION	_	_	_	0	_	false
+16	Country	_	country	NNP	ORGANIZATION	_	_	_	0	_	false
+17	School	_	school	NNP	ORGANIZATION	_	_	_	0	_	false
+18	,	_	_	,	O	_	_	_	0	_	false
+19	Lake	_	lake	NNP	LOCATION	_	_	_	0	_	false
+20	Placid	_	Placid	NNP	LOCATION	_	_	_	0	_	false
+21	,	_	_	,	O	_	_	_	0	_	false
+22	New	_	_generic_proper_ne_	NNP	STATE_OR_PROVINCE	_	_	_	0	_	false
+23	York	_	York	NNP	STATE_OR_PROVINCE	_	_	_	0	_	false
+24	.	_	_	.	O	_	_	_	0	_	false
+25	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	_	_	_	0	_	false
+
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#40504003
+1	In	_	in	IN	O	_	_	_	0	_	false
+2	this	_	this	DT	O	_	_	_	0	_	false
+3	one	_	one	CD	NUMBER	_	_	_	0	_	false
+4	sentence	_	sentence	NN	O	_	_	_	0	_	false
+5	,	_	_	,	O	_	_	_	0	_	false
+6	he	_	he	PRP	O	_	_	_	0	_	false
+7	unwittingly	_	_generic_rb_	RB	O	_	_	_	0	_	false
+8	revealed	_	reveal	VBD	O	_	_	_	0	_	false
+9	the	_	the	DT	O	_	_	_	0	_	false
+10	basic	_	basic	JJ	O	_	_	_	0	_	false
+11	philosophy	_	philosophy	NN	O	_	_	_	0	_	false
+12	of	_	of	IN	O	_	_	_	0	_	false
+13	the	_	the	DT	O	_	_	_	0	_	false
+14	nutrition	_	nutrition	NN	O	_	_	_	0	_	false
+15	and	_	and	CC	O	_	_	_	0	_	false
+16	psychological	_	psychological	JJ	O	_	_	_	0	_	false
+17	programs	_	program	NNS	O	_	_	_	0	_	false
+18	in	_	in	IN	O	_	_	_	0	_	false
+19	operation	_	operation	NN	O	_	_	_	0	_	false
+20	at	_	at	IN	O	_	_	_	0	_	false
+21	the	_	the	DT	O	_	_	_	0	_	false
+22	school	_	school	NN	O	_	_	_	0	_	false
+23	.	_	_	.	O	_	_	_	0	_	false
+24	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	_	_	_	0	_	false
+

@@ -1,0 +1,17 @@
+_
+~~a:e-p
+~~a:e-u
+~~card:i-i-c
+~~dofm:x-c
+$LEMMA$
+~~mofy:x-c
+~~named:x-c
+~~n_of:x
+~~n_of:x-i
+~~n:x
+~~p:e-u-i
+~~p:e-x-i
+~~q:i-h-h
+~~v_as:e-i-p
+~~v:e-i-p
+~~v_id:e-p-i

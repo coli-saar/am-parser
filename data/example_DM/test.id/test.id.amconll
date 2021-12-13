@@ -1,0 +1,20 @@
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#22100001
+1	Consumers	_	consumer	NNS	O	_	_	_	0	_	false
+2	may	_	may	MD	O	_	_	_	0	_	false
+3	want	_	want	VB	O	_	_	_	0	_	false
+4	to	_	to	TO	O	_	_	_	0	_	false
+5	move	_	move	VB	O	_	_	_	0	_	false
+6	their	_	their	PRP$	O	_	_	_	0	_	false
+7	telephones	_	telephone	NNS	O	_	_	_	0	_	false
+8	a	_	a+little	DT	O	_	_	_	0	_	false
+9	little	_	a+little	JJ	O	_	_	_	0	_	false
+10	closer	_	closer	RBR	O	_	_	_	0	_	false
+11	to	_	to	TO	O	_	_	_	0	_	false
+12	the	_	the	DT	O	_	_	_	0	_	false
+13	TV	_	tv	NN	O	_	_	_	0	_	false
+14	set	_	set	VBD	O	_	_	_	0	_	false
+15	.	_	_	.	O	_	_	_	0	_	false
+16	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	_	_	_	0	_	false
+

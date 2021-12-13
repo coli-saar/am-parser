@@ -1,0 +1,11 @@
+#SDP 2015
+#22041075
+1	His	his	PRP$	-	+	q:i-h-h	_	_	_
+2	recommendation	recommendation	NN	-	-	n:x	poss	ARG2	_
+3	was	was	VBD	-	-	_	_	_	_
+4	rejected	reject	VBN	+	+	v_as:e-i-p	_	_	_
+5	by	by	IN	-	-	_	_	_	_
+6	the	the	DT	-	+	q:i-h-h	_	_	_
+7	government	government	NN	-	-	n_of:x-i	_	ARG1	BV
+8	.	_	.	-	-	_	_	_	_
+

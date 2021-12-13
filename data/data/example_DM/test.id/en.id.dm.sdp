@@ -1,0 +1,18 @@
+#SDP 2015
+#22100001
+1	Consumers	consumer	NNS	-	-	n_of:x-i	_	ARG1	ARG1	_	_	_	_	_	_
+2	may	may	MD	+	+	v_modal:e-h	_	_	_	_	_	_	_	_	_
+3	want	want	VB	-	+	v:e-i-h	ARG1	_	_	_	_	_	_	_	_
+4	to	to	TO	-	-	_	_	_	_	_	_	_	_	_	_
+5	move	move	VB	-	+	v_cause:e-i-p	_	_	_	_	_	subord	_	_	_
+6	their	their	PRP$	-	+	q:i-h-h	_	_	_	_	_	_	_	_	_
+7	telephones	telephone	NNS	-	-	n:x	_	_	ARG2	poss	_	_	_	_	_
+8	a	a+little	DT	-	-	x:e-u	_	_	_	_	mwe	_	_	_	_
+9	little	a+little	RB	-	+	x:e-u	_	_	_	_	_	_	_	_	_
+10	closer	closer	RBR	-	+	a_to:e-i-i	_	ARG2	_	_	ARG1	_	ARG1	_	_
+11	to	to	TO	-	+	p:e-u-i	_	_	_	_	_	_	_	_	_
+12	the	the	DT	-	+	q:i-h-h	_	_	_	_	_	_	_	_	_
+13	TV	tv	NN	-	+	n:x	_	_	_	_	_	_	_	_	_
+14	set	set	NN	-	-	n_of:x	_	_	_	_	_	_	ARG2	BV	compound
+15	.	_	.	-	-	_	_	_	_	_	_	_	_	_	_
+

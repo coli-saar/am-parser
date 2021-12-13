@@ -1,0 +1,53 @@
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#20001002
+1	Mr.	_	Mr.	NNP	O	(i_1<root> / --LEX--  :compound (i_2<comp>))	~~n:x	(comp())	2	MOD_comp	true
+2	Vinken	_	_generic_proper_ne_	NNP	PERSON	(i_2<root> / --LEX--)	~~named:x-c	()	3	APP_s	true
+3	is	_	is	VBZ	O	(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))	~~v_id:e-p-i	(o(), s())	14	APP_art-snt1	true
+4	chairman	_	chairman	NN	TITLE	(i_2<root> / --LEX--)	~~n_of:x	()	3	APP_o	true
+5	of	_	of	IN	O	(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))	~~p:e-x-i	(o(), s())	4	MOD_s	true
+6	Elsevier	_	_generic_proper_ne_	NNP	ORGANIZATION	(i_2<root> / --LEX--)	~~named:x-c	()	5	APP_o	true
+7	N.V.	_	N.V.	NNP	ORGANIZATION	(i_1<root> / --LEX--  :compound (i_2<comp>))	~~n:x	(comp())	6	MOD_comp	true
+8	,	_	_	,	O	_	_	_	0	IGNORE	true
+9	the	_	the	DT	O	(i_9<root> / --LEX--  :BV (i_12<det>))	~~q:i-h-h	(det())	12	MOD_det	true
+10	Dutch	_	Dutch	JJ	NATIONALITY	(i_10<root> / --LEX--  :ARG1 (i_12<s>))	~~a:e-p	(s())	12	MOD_s	true
+11	publishing	_	publish	NN	O	(i_1<root> / --LEX--  :compound (i_2<comp>))	~~v:e-i-p	(comp())	12	MOD_comp	true
+12	group	_	group	NN	O	(i_12<root> / --LEX--  :appos (i_6<mod>))	~~n_of:x	(mod())	6	MOD_mod	true
+13	.	_	_	.	O	_	_	_	0	IGNORE	true
+14	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_3<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#20001001
+1	Pierre	_	Pierre	NNP	PERSON	(i_1<root> / --LEX--  :compound (i_2<comp>))	~~named:x-c	(comp())	2	MOD_comp	true
+2	Vinken	_	_generic_proper_ne_	NNP	PERSON	(i_2<root> / --LEX--)	~~named:x-c	()	9	APP_s	true
+3	,	_	_	,	O	_	_	_	0	IGNORE	true
+4	61	_	_generic_card_ne_	CD	DURATION	(i_10<root> / --LEX--  :ARG1 (i_12<s>))	~~card:i-i-c	(s())	5	MOD_s	true
+5	years	_	year	NNS	DURATION	(i_5<root> / --LEX--  :measure (i_6<mod>))	~~n:x	(mod())	6	MOD_mod	true
+6	old	_	old	JJ	DURATION	(i_10<root> / --LEX--  :ARG1 (i_12<s>))	~~a:e-p	(s())	2	MOD_s	true
+7	,	_	_	,	O	_	_	_	0	IGNORE	true
+8	will	_	will	MD	O	_	_	_	0	IGNORE	true
+9	join	_	join	VB	O	(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))	~~v:e-i-p	(o(), s())	19	APP_art-snt1	true
+10	the	_	the	DT	O	(i_9<root> / --LEX--  :BV (i_12<det>))	~~q:i-h-h	(det())	11	MOD_det	true
+11	board	_	board	NN	O	(i_2<root> / --LEX--)	~~n_of:x-i	()	9	APP_o	true
+12	as	_	as	IN	O	(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))	~~p:e-u-i	(o(), s())	9	MOD_s	true
+13	a	_	a	DT	O	(i_9<root> / --LEX--  :BV (i_12<det>))	~~q:i-h-h	(det())	15	MOD_det	true
+14	nonexecutive	_	_generic_jj_	JJ	O	(i_10<root> / --LEX--  :ARG1 (i_12<s>))	~~a:e-u	(s())	15	MOD_s	true
+15	director	_	director	NN	TITLE	(i_2<root> / --LEX--)	~~n_of:x-i	()	12	APP_o	true
+16	Nov.	_	Nov.	NNP	DATE	(i_16<root> / --LEX--  :of (i_17<mod>))	~~mofy:x-c	(mod())	17	MOD_mod	true
+17	29	_	_generic_dom_card_ne_	CD	DATE	(i_17<root> / --LEX--  :loc (i_9<mod>))	~~dofm:x-c	(mod())	9	MOD_mod	true
+18	.	_	_	.	O	_	_	_	0	IGNORE	true
+19	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_3<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+
+#framework:dm
+#id:#22041075
+1	His	_	his	PRP$	O	(i_1<root> / --LEX--  :poss (i_2<poss>))	~~q:i-h-h	(poss())	2	MOD_poss	true
+2	recommendation	_	recommendation	NN	O	(i_2<root> / --LEX--)	~~n:x	()	4	APP_o	true
+3	was	_	was	VBD	O	_	_	_	0	IGNORE	true
+4	rejected	_	reject	VBN	O	(i_3<root> / --LEX--  :ARG1 (i_2<s>)  :ARG2 (i_4<o>))	~~v_as:e-i-p	(o(), s())	9	APP_art-snt1	true
+5	by	_	by	IN	O	_	_	_	0	IGNORE	true
+6	the	_	the	DT	O	(i_9<root> / --LEX--  :BV (i_12<det>))	~~q:i-h-h	(det())	7	MOD_det	true
+7	government	_	government	NN	O	(i_2<root> / --LEX--)	~~n_of:x-i	()	4	APP_s	true
+8	.	_	_	.	O	_	_	_	0	IGNORE	true
+9	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	(ART-ROOT<root> / --LEX--  :art-snt1 (i_3<art-snt1>))	$LEMMA$	(art-snt1())	0	ROOT	true
+

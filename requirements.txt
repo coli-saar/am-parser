@@ -1,0 +1,5 @@
+torch == 1.4.0
+allennlp == 0.9.0
+cython
+comet-ml
+git+https://github.com/namednil/allenpipeline/@0.9

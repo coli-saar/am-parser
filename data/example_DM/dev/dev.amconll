@@ -1,0 +1,13 @@
+#git:2728b2748d7928b5f6fc6dc653a5e0dc9145802a
+#framework:dm
+#id:#22041075
+1	His	_	his	PRP$	O	_	_	_	0	_	false
+2	recommendation	_	recommendation	NN	O	_	_	_	0	_	false
+3	was	_	was	VBD	O	_	_	_	0	_	false
+4	rejected	_	reject	VBN	O	_	_	_	0	_	false
+5	by	_	by	IN	O	_	_	_	0	_	false
+6	the	_	the	DT	O	_	_	_	0	_	false
+7	government	_	government	NN	O	_	_	_	0	_	false
+8	.	_	_	.	O	_	_	_	0	_	false
+9	ART-ROOT	_	ART-ROOT	ART-ROOT	ART-ROOT	_	_	_	0	_	false
+

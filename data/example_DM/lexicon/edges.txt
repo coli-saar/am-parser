@@ -1,0 +1,10 @@
+APP_art-snt1
+APP_o
+APP_s
+IGNORE
+MOD_comp
+MOD_det
+MOD_mod
+MOD_poss
+MOD_s
+ROOT
