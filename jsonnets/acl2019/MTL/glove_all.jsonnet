@@ -14,7 +14,7 @@ local word_dim = 100;
 local ner_dim = 16;
 local glove_dim = 200;
 
-local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
+local test_evaluators = import '../../../configs/am_parser/test_evaluators.libsonnet';
 
 local data_paths = import '../../../configs/data_paths.libsonnet';
 
@@ -22,7 +22,7 @@ local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local UD_banks = data_paths["UD_banks"];
 
-local task_models = import '../../../configs/task_models.libsonnet';
+local task_models = import '../../../configs/am_parser/task_models.libsonnet';
 
 local glove_dir = data_paths["GLOVE_DIR"];
 

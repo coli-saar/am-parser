@@ -18,7 +18,7 @@ local pos_dim = 32;
 local ner_dim = 16;
 local glove_dim = 200;
 
-local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
+local test_evaluators = import '../../../configs/am_parser/test_evaluators.libsonnet';
 
 local data_paths = import '../../../configs/data_paths.libsonnet';
 
@@ -26,7 +26,7 @@ local eval_commands = import '../../../configs/eval_commands.libsonnet';
 
 local UD_banks = data_paths["UD_banks"];
 
-local task_models = import '../../../configs/uniformify_task_models.libsonnet';
+local task_models = import '../../../configs/am_parser/uniformify_task_models.libsonnet';
 
 local glove_dir = "/local/mlinde/glove/";
 

@@ -12,13 +12,13 @@ local pos_dim = 32;
 local lemma_dim = 64;
 local ner_dim = 16;
 
-local test_evaluators = import '../../configs/test_evaluators.libsonnet';
+local test_evaluators = import '../../configs/am_parser/test_evaluators.libsonnet';
 
 local data_paths = import '../../configs/data_paths.libsonnet';
 
 local eval_commands = import '../../configs/eval_commands.libsonnet';
 
-local task_models = import '../../configs/mrp_task_models.libsonnet';
+local task_models = import '../../configs/am_parser/mrp_task_models.libsonnet';
 
 local bert_model = "bert-large-uncased";
 local elmo_path = "/local/mlinde/elmo/";
