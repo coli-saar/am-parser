@@ -114,7 +114,7 @@ if [ "$output" = "" ]; then
 fi
 
 #Build fast_smatch
-pushd external_eval_tools/fast_smatch
+pushd evaluation_tools/fast_smatch
 echo "Building fast_smatch (for evaluation of EDS)"
 bash build.sh
 popd
@@ -162,10 +162,10 @@ elif [ "$type" = "PSD" ]; then
 elif [ "$type" = "EDS" ]; then
     java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c "$amconll_prediction" -o "$output$type"
     echo "EDM score:"
-    python2 external_eval_tools/edm/eval_edm.py "$output$type".edm "$output$prefix"-gold.edm
+    python2 evaluation_tools/edm/eval_edm.py "$output$type".edm "$output$prefix"-gold.edm
     amrinput=${input%".edm"}".amr.txt"
     echo "Smatch score:"
-    python2 external_eval_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
+    python2 evaluation_tools/fast_smatch/fast_smatch.py -f "$output$type".amr.txt "$output$prefix"-gold.amr.txt --pr
 elif [ "$type" = "AMR-2017" ]; then
     bash scripts/eval_AMR_new.sh $amconll_prediction $output $jar
     bash scripts/smatch_AMR.sh $output

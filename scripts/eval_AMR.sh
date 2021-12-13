@@ -37,4 +37,4 @@ sed -E 's/\(u_[0-9]+ \/ ([-+0-9]+)\)/\1/g' $dir/relabeled.txt | sed -E 's/\(expl
 # compute smatch score
 echo "smatching in $dir"
 
-python2 external_eval_tools/smatch/smatch.py -f $dir/relabeled_fixed.txt $dir/gold_orderedAsRelabeled.txt --significant 4 --pr | tee $dir/smatch.txt
+python2 evaluation_tools/smatch/smatch.py -f $dir/relabeled_fixed.txt $dir/gold_orderedAsRelabeled.txt --significant 4 --pr | tee $dir/smatch.txt

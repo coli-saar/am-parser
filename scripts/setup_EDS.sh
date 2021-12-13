@@ -16,7 +16,7 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ##
-pushd external_eval_tools/fast_smatch
+pushd evaluation_tools/fast_smatch
 echo "Building fast_smatch (for evaluation of EDS)"
 bash build.sh
 popd

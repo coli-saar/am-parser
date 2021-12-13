@@ -109,7 +109,7 @@ venv.bak/
 .mypy_cache/
 *.amconll
 analyzers/test2/detailed_f.txt
-external_eval_tools/fast_smatch/_smatch.cpp
+evaluation_tools/fast_smatch/_smatch.cpp
 example/nnData/test/sentences.txt
 example/nnData/test/pos.txt
 example/nnData/test/literal.txt
@@ -168,9 +168,9 @@ downloaded_models/lookup/lookupdata15/nameTypeLookup.txt
 downloaded_models/lookup/lookupdata15/nameLookup.txt
 downloaded_models/full_model.tar.gz
 am-tools-all.jar
-external_eval_tools/fast_smatch/_smatch.cpp
+evaluation_tools/fast_smatch/_smatch.cpp
 scripts/downloaded_models/full_model.tar.gz
-external_eval_tools/fast_smatch/_smatch.cpp
+evaluation_tools/fast_smatch/_smatch.cpp
 example/decomposition/dm/output/dev/dev.sdp
 example/decomposition/dm/output/preprocessLog.txt
 example/decomposition/dm/output/test.id/en.id.dm.sdp

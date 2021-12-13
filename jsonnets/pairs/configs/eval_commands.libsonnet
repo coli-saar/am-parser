@@ -2,7 +2,7 @@ local ALTO_PATH = "/local/mlinde/alto-2.3-SNAPSHOT-jar-with-dependencies.jar";
 
 local base_directory = "/local/mlinde/am-parser";
 
-local tool_dir = base_directory + "/external_eval_tools/";
+local tool_dir = base_directory + "/evaluation_tools/";
 
 local sdp_regexes = {
  "P" : [1, "Precision (?P<value>.+)"],
