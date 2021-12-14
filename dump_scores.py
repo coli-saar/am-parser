@@ -32,13 +32,13 @@ from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
-from graph_dependency_parser.components.dataset_readers import amconll_tools
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
-from graph_dependency_parser.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
-from graph_dependency_parser.components.evaluation.iterator import forward_on_instances
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor
-from graph_dependency_parser.components.supertagger import Supertagger
-from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
+from parsers.components.dataset_readers import amconll_tools
+from parsers.components.dataset_readers.amconll_tools import AMSentence
+from parsers.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
+from parsers.components.evaluation.iterator import forward_on_instances
+from parsers.components.evaluation.predictors import AMconllPredictor
+from parsers.components.supertagger import Supertagger
+from parsers.graph_dependency_parser import GraphDependencyParser
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

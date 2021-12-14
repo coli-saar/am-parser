@@ -16,8 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from graph_dependency_parser.components.edge_models.base import EdgeModel
+from parsers.components.edge_models.base import EdgeModel
 
-import graph_dependency_parser.components.edge_models.DM
-import graph_dependency_parser.components.edge_models.KG
+import parsers.components.edge_models.DM
+import parsers.components.edge_models.KG
 

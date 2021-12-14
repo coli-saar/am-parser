@@ -29,7 +29,7 @@ import random
 import os
 import shutil
 
-import graph_dependency_parser.components.dataset_readers.amconll_tools as amconll_tools
+import parsers.components.dataset_readers.amconll_tools as amconll_tools
 
 optparser = argparse.ArgumentParser(add_help=True, 
     description="Takes random subsets of sizes 100, 1000, 10_000")

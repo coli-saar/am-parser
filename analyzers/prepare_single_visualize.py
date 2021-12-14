@@ -24,7 +24,7 @@ import argparse
 import sys
 sys.path.append("..") # Adds higher directory to python modules path.
 
-import graph_dependency_parser.components.dataset_readers.amconll_tools as amconll_tools
+import parsers.components.dataset_readers.amconll_tools as amconll_tools
 
 optparser = argparse.ArgumentParser(add_help=True,
     description="reads an amconll file and produces a conllu file")

@@ -16,5 +16,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import graph_dependency_parser.components.evaluation.commands
-import graph_dependency_parser.components.evaluation.predictors
+import parsers.components.evaluation.commands
+import parsers.components.evaluation.predictors

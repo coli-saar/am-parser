@@ -16,8 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from graph_dependency_parser.components.dataset_readers.amconll_tools import from_raw_text
-from graph_dependency_parser.components.spacy_interface import spacy_tokenize
+from parsers.components.dataset_readers.amconll_tools import from_raw_text
+from parsers.components.spacy_interface import spacy_tokenize
 
 import argparse
 

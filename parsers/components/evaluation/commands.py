@@ -26,7 +26,7 @@ import subprocess
 import re
 import json
 
-from graph_dependency_parser.components.utils import flatten, merge_dicts
+from parsers.components.utils import flatten, merge_dicts
 
 
 class BaseEvaluationCommand(ABC, Registrable):

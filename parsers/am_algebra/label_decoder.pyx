@@ -23,18 +23,18 @@
 from operator import itemgetter
 from typing import Dict, Tuple
 
-import graph_dependency_parser.am_algebra.tree as tree
+import parsers.am_algebra.tree as tree
 import tqdm
-#from graph_dependency_parser.am_algebra.amconll import ConllEntry, ConllSent, write_conll
-from graph_dependency_parser.components.cle import get_head_dict
+#from parsers.am_algebra.amconll import ConllEntry, ConllSent, write_conll
+from parsers.components.cle import get_head_dict
 
 from time import time
 
 import pyximport; pyximport.install()
-#import graph_dependency_parser.am_algebra.amtypes as amtypes
-import graph_dependency_parser.am_algebra.new_amtypes as new_amtypes
+#import parsers.am_algebra.amtypes as amtypes
+import parsers.am_algebra.new_amtypes as new_amtypes
 
-#import graph_dependency_parser.am_algebra.evaluator as evaluator
+#import parsers.am_algebra.evaluator as evaluator
 import multiprocessing as mp
 import numpy as np
 

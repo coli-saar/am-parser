@@ -21,7 +21,7 @@
 
 from typing import Optional, Tuple, List, Dict, Set, Iterable
 
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence, Entry
+from parsers.components.dataset_readers.amconll_tools import AMSentence, Entry
 from .new_amtypes import AMType, ReadCache, NonAMTypeException
 from .tree import Tree
 

@@ -76,8 +76,8 @@ import _jsonnet
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-import graph_dependency_parser.graph_dependency_parser
-import graph_dependency_parser.important_imports
+import parsers.graph_dependency_parser
+import parsers.important_imports
 
 
 parser = argparse.ArgumentParser(description='Run the training of an am-parser.')
@@ -135,8 +135,8 @@ params["random_seed"] = random_seed
 params["numpy_seed"] = numpy_seed
 params["pytorch_seed"] = pytorch_seed
 prepare_environment(params)
-from graph_dependency_parser.components.evaluation.predictors import Evaluator, EmptyMRPEvaluator
-from graph_dependency_parser.train.amtrainer import AMTrainer, TrainerPieces
+from parsers.components.evaluation.predictors import Evaluator, EmptyMRPEvaluator
+from parsers.train.amtrainer import AMTrainer, TrainerPieces
 serialization_dir = args.serialization_dir
 create_serialization_dir(params,serialization_dir , args.recover, args.force)
 stdout_handler = prepare_global_logging(serialization_dir, args.file_friendly_logging)

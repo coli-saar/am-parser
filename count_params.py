@@ -28,13 +28,13 @@ from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
-from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll
-from graph_dependency_parser.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, Evaluator, StandardEvaluator
-from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
+from parsers.components.dataset_readers.amconll_tools import parse_amconll
+from parsers.components.dataset_readers.same_formalism_iterator import SameFormalismIterator
+from parsers.components.evaluation.predictors import AMconllPredictor, Evaluator, StandardEvaluator
+from parsers.graph_dependency_parser import GraphDependencyParser
 
-import graph_dependency_parser.graph_dependency_parser
-import graph_dependency_parser.important_imports
+import parsers.graph_dependency_parser
+import parsers.important_imports
 import argparse
 
 parser = argparse.ArgumentParser(description="Count parameters in trained model.")

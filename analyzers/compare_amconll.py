@@ -73,8 +73,8 @@ import sys
 sys.path.append("..")  # Adds higher directory to python modules path.
 # needed for graph dependency parser imports:
 
-from graph_dependency_parser.components.dataset_readers import amconll_tools
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
+from parsers.components.dataset_readers import amconll_tools
+from parsers.components.dataset_readers.amconll_tools import AMSentence
 
 
 def normalize_toks(tokens: list) -> list:

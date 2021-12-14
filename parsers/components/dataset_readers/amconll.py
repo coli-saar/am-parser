@@ -29,7 +29,7 @@ from allennlp.data.instance import Instance
 from allennlp.data.token_indexers import SingleIdTokenIndexer, TokenIndexer
 from allennlp.data.tokenizers import Token
 
-from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll, AMSentence
+from parsers.components.dataset_readers.amconll_tools import parse_amconll, AMSentence
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

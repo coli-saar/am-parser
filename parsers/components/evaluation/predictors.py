@@ -26,11 +26,11 @@ from allennlp.data.iterators import BasicIterator, BucketIterator
 from allennlp.models import Model
 from allennlp.common.util import lazy_groups_of
 
-from graph_dependency_parser.am_algebra.label_decoder import AMDecoder
-from graph_dependency_parser.components.dataset_readers.amconll import AMConllDatasetReader
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
-from graph_dependency_parser.components.evaluation.commands import BaseEvaluationCommand
-from graph_dependency_parser.components.evaluation.iterator import forward_on_instances
+from parsers.am_algebra.label_decoder import AMDecoder
+from parsers.components.dataset_readers.amconll import AMConllDatasetReader
+from parsers.components.dataset_readers.amconll_tools import AMSentence
+from parsers.components.evaluation.commands import BaseEvaluationCommand
+from parsers.components.evaluation.iterator import forward_on_instances
 
 import tempfile
 import socket

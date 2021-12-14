@@ -16,8 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from graph_dependency_parser.components.losses.base import EdgeLoss
+from parsers.components.losses.base import EdgeLoss
 
-import graph_dependency_parser.components.losses.DM
+import parsers.components.losses.DM
 
-import graph_dependency_parser.components.losses.KG
+import parsers.components.losses.KG

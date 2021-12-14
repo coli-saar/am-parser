@@ -29,16 +29,16 @@ from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
-from graph_dependency_parser.components.dataset_readers.amconll_tools import from_raw_text
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor
-from graph_dependency_parser.components.spacy_interface import spacy_tokenize
-from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
+from parsers.components.dataset_readers.amconll_tools import from_raw_text
+from parsers.components.evaluation.predictors import AMconllPredictor
+from parsers.components.spacy_interface import spacy_tokenize
+from parsers.graph_dependency_parser import GraphDependencyParser
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-import graph_dependency_parser.graph_dependency_parser
-import graph_dependency_parser.important_imports
+import parsers.graph_dependency_parser
+import parsers.important_imports
 import argparse
 
 parser = argparse.ArgumentParser(description="Run the am-parser on a text file in order to annotate it with parses"

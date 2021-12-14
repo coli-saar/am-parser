@@ -39,7 +39,7 @@ import torch.nn.functional as F
 from allennlp.nn.chu_liu_edmonds import decode_mst
 import numpy
 
-from graph_dependency_parser.components.edge_models.base import EdgeModel
+from parsers.components.edge_models.base import EdgeModel
 
 
 @EdgeModel.register("dm_edges")

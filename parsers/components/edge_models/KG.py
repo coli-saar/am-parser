@@ -28,7 +28,7 @@ from allennlp.modules import InputVariationalDropout
 from allennlp.nn.activations import Activation
 import numpy as np
 
-from graph_dependency_parser.components.edge_models.base import EdgeModel
+from parsers.components.edge_models.base import EdgeModel
 
 import logging
 

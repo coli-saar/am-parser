@@ -26,7 +26,7 @@ import random
 import os
 import shutil
 
-import graph_dependency_parser.components.dataset_readers.amconll_tools as amconll_tools
+import parsers.components.dataset_readers.amconll_tools as amconll_tools
 
 optparser = argparse.ArgumentParser(add_help=True, 
     description="Given an amconll file and a file with ids (one per line), extract the am dependency trees")

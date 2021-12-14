@@ -21,7 +21,7 @@ import logging
 import json
 
 
-from graph_dependency_parser.components.dataset_readers.amconll_tools import parse_amconll
+from parsers.components.dataset_readers.amconll_tools import parse_amconll
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

@@ -24,8 +24,8 @@ import numpy as np
 
 import torch
 
-from graph_dependency_parser.components.cle import cle_loss
-from graph_dependency_parser.components.losses.base import EdgeExistenceLoss, EdgeLabelLoss
+from parsers.components.cle import cle_loss
+from parsers.components.losses.base import EdgeExistenceLoss, EdgeLabelLoss
 
 
 @EdgeExistenceLoss.register("kg_edge_loss")

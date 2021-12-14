@@ -23,7 +23,7 @@ from typing import Dict, Optional, Tuple, Any, List
 
 import torch
 
-from graph_dependency_parser.components.losses.base import EdgeLoss, EdgeExistenceLoss, EdgeLabelLoss
+from parsers.components.losses.base import EdgeLoss, EdgeExistenceLoss, EdgeLabelLoss
 
 
 SMALL_FLOAT = 1e-13

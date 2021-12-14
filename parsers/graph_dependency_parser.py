@@ -31,9 +31,9 @@ from allennlp.models.model import Model
 from allennlp.nn import InitializerApplicator, RegularizerApplicator
 from allennlp.nn.util import get_text_field_mask
 
-from graph_dependency_parser.components.weight_sharer import MTLWeightSharer
-from graph_dependency_parser.components.AMTask import AMTask
-from graph_dependency_parser.components.spacy_token_embedder import TokenToVec
+from parsers.components.weight_sharer import MTLWeightSharer
+from parsers.components.AMTask import AMTask
+from parsers.components.spacy_token_embedder import TokenToVec
 
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name

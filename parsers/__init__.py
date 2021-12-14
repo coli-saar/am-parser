@@ -17,4 +17,4 @@
 # limitations under the License.
 #
 
-#import graph_dependency_parser.train.amtrainer
+#import parsers.train.amtrainer

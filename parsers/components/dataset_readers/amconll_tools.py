@@ -223,7 +223,7 @@ class AMSentence:
         return len(self.words)
 
     def to_dot(self):
-        from graph_dependency_parser.svg.dot_tools import penman_to_dot
+        from parsers.svg.dot_tools import penman_to_dot
         r = []
         index_to_node_name = dict()
         for i,word in enumerate(self.words):
@@ -242,7 +242,7 @@ class AMSentence:
         return "digraph { compound=true; \n" +"\n".join(r) +"}"
 
     def to_tex_svg(self, directory, prefix=""):
-        from graph_dependency_parser.svg.dot_tools import penman_to_dot, parse_penman, compile_dot
+        from parsers.svg.dot_tools import penman_to_dot, parse_penman, compile_dot
         def escape_chars(string: str) -> str:
             if string in "#$&%":
                 string = "\\" + string
@@ -363,7 +363,7 @@ def from_raw_text(rawstr: str, words: List[str], add_art_root: bool, attributes:
     """
     entries = []
     # use spacy lemmas and tags
-    from graph_dependency_parser.components.spacy_interface import run_spacy, lemma_postprocess, ne_postprocess, is_number
+    from parsers.components.spacy_interface import run_spacy, lemma_postprocess, ne_postprocess, is_number
 
     spacy_doc = run_spacy([words])
     ne = []

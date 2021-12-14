@@ -16,11 +16,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import graph_dependency_parser.components.dataset_readers.same_formalism_iterator
-import graph_dependency_parser.components.dataset_readers.amconll
+import parsers.components.dataset_readers.same_formalism_iterator
+import parsers.components.dataset_readers.amconll
 
-import graph_dependency_parser.components.evaluation
-import graph_dependency_parser.components.AMTask
-import graph_dependency_parser.am_algebra
-import graph_dependency_parser.components.losses
-import graph_dependency_parser.components.edge_models
+import parsers.components.evaluation
+import parsers.components.AMTask
+import parsers.am_algebra
+import parsers.components.losses
+import parsers.components.edge_models

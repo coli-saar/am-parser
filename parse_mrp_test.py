@@ -28,15 +28,15 @@ from allennlp.data.iterators import DataIterator
 from allennlp.models.archival import load_archive
 from allennlp.common import Params
 
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, Evaluator
-from graph_dependency_parser.graph_dependency_parser import GraphDependencyParser
+from parsers.components.evaluation.predictors import AMconllPredictor, Evaluator
+from parsers.graph_dependency_parser import GraphDependencyParser
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',level=logging.INFO) #turn on logging.
 
-import graph_dependency_parser.graph_dependency_parser
-import graph_dependency_parser.important_imports
+import parsers.graph_dependency_parser
+import parsers.important_imports
 import argparse
 
 parser = argparse.ArgumentParser(description="Run the am-parser on its amconll test file in order to annotate it, doesn't perform evaluation. Used to parse test set in MRP shared task.")

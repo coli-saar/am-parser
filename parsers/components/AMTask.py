@@ -32,13 +32,13 @@ from allennlp.training.metrics import CategoricalAccuracy, AttachmentScores
 from overrides import overrides
 from torch.nn import Module
 
-from graph_dependency_parser.components.cle import cle_decode, find_root
-from graph_dependency_parser.components.dataset_readers.amconll_tools import AMSentence
-from graph_dependency_parser.components.edge_models import EdgeModel
-from graph_dependency_parser.components.evaluation.predictors import AMconllPredictor, Evaluator
-from graph_dependency_parser.components.losses import EdgeLoss
-from graph_dependency_parser.components.losses.supertagging import SupertaggingLoss
-from graph_dependency_parser.components.supertagger import Supertagger
+from parsers.components.cle import cle_decode, find_root
+from parsers.components.dataset_readers.amconll_tools import AMSentence
+from parsers.components.edge_models import EdgeModel
+from parsers.components.evaluation.predictors import AMconllPredictor, Evaluator
+from parsers.components.losses import EdgeLoss
+from parsers.components.losses.supertagging import SupertaggingLoss
+from parsers.components.supertagger import Supertagger
 
 import torch.nn.functional as F
 

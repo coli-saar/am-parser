@@ -27,7 +27,7 @@ from allennlp.nn.util import get_device_of
 
 import spacy
 from spacy.tokens import Doc
-from graph_dependency_parser.components.spacy_interface import make_doc
+from parsers.components.spacy_interface import make_doc
 
 try:
     from spacy_pytorch_transformers import PyTT_Language, PyTT_WordPiecer, PyTT_TokenVectorEncoder
