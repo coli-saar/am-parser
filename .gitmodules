@@ -1,0 +1,3 @@
+[submodule "evaluation_tools/smatch"]
+	path = evaluation_tools/smatch
+	url = https://github.com/snowblink14/smatch
