@@ -5,10 +5,10 @@ import sys
 from typing import Dict, Set
 
 sys.path.append(".")
-from topdown_parser.dataset_readers.amconll_tools import parse_amconll, AMSentence
-from topdown_parser.am_algebra import ReadCache, NonAMTypeException, AMType
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.am_algebra.tools import get_term_types, is_welltyped
+from parsers.dataset_readers.amconll_tools import parse_amconll, AMSentence
+from parsers.am_algebra import ReadCache, NonAMTypeException, AMType
+from parsers.am_algebra.tree import Tree
+from parsers.am_algebra.tools import get_term_types, is_welltyped
 
 optparser = argparse.ArgumentParser(add_help=True,
                                     description="reads amconll file and produces two files with the possible graph constants and with the possible types. Ivents new constants where needed.")

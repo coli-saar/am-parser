@@ -12,23 +12,23 @@ from allennlp.modules import TextFieldEmbedder, Embedding, Seq2SeqEncoder, Input
 from allennlp.nn.util import get_text_field_mask, get_final_encoder_states, get_range_vector, batch_tensor_dicts, \
     get_device_of
 
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.am_algebra.tools import get_tree_type
-from topdown_parser.losses.losses import EdgeExistenceLoss
-from topdown_parser.nn.context_provider import ContextProvider
-from topdown_parser.nn.decoder_cell import DecoderCell
-from topdown_parser.nn.edge_label_model import EdgeLabelModel
-from topdown_parser.nn.edge_model import EdgeModel
-from topdown_parser.nn.supertagger import Supertagger
-from topdown_parser.nn.utils import get_device_id, index_tensor_dict, batch_and_pad_tensor_dict, expand_tensor_dict
-from topdown_parser.transition_systems.decision import Decision
-from topdown_parser.transition_systems.parsing_state import undo_one_batching, \
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.am_algebra.tools import get_tree_type
+from parsers.losses.losses import EdgeExistenceLoss
+from parsers.nn.context_provider import ContextProvider
+from parsers.nn.decoder_cell import DecoderCell
+from parsers.nn.edge_label_model import EdgeLabelModel
+from parsers.nn.edge_model import EdgeModel
+from parsers.nn.supertagger import Supertagger
+from parsers.nn.utils import get_device_id, index_tensor_dict, batch_and_pad_tensor_dict, expand_tensor_dict
+from parsers.transition_systems.decision import Decision
+from parsers.transition_systems.parsing_state import undo_one_batching, \
     undo_one_batching_eval, ParsingState
-from topdown_parser.transition_systems.batched_parsing_state import BatchedParsingState
+from parsers.transition_systems.batched_parsing_state import BatchedParsingState
 
 import heapq
 
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.transition_systems.transition_system import TransitionSystem
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 

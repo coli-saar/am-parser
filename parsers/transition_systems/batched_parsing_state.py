@@ -4,13 +4,13 @@ from typing import Dict, Any, List
 import torch
 from allennlp.nn.util import get_mask_from_sequence_lengths
 
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
 import torch.nn.functional as F
 
-from topdown_parser.transition_systems.gpu_parsing.datastructures.list_of_list import BatchedListofList
-from topdown_parser.transition_systems.gpu_parsing.datastructures.stack import BatchedStack
-from topdown_parser.nn.utils import get_device_id
+from parsers.transition_systems.gpu_parsing.datastructures.list_of_list import BatchedListofList
+from parsers.transition_systems.gpu_parsing.datastructures.stack import BatchedStack
+from parsers.nn.utils import get_device_id
 
 
 

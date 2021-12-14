@@ -14,7 +14,7 @@ from allenpipeline.callback import CallbackName
 
 if __name__ == "__main__":
     import_submodules("topdown_parser")
-    from topdown_parser.dataset_readers.amconll_tools import parse_amconll
+    from parsers.dataset_readers.amconll_tools import parse_amconll
 
     optparser = argparse.ArgumentParser(add_help=True,
                                         description="Extract parsing time from parsed amconll file.")

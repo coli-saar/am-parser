@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch import nn
 from torch.nn import Parameter
 
-from topdown_parser.nn.decoder_cell import DecoderCell
+from parsers.nn.decoder_cell import DecoderCell
 
 """
 This is based on code from Ma et al. (2018): 

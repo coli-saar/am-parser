@@ -7,19 +7,19 @@ from typing import List, Iterable, Optional, Tuple, Dict, Any, Set
 import torch
 from allennlp.common.checks import ConfigurationError
 
-from topdown_parser.am_algebra import AMType, NonAMTypeException, new_amtypes
-from topdown_parser.am_algebra.new_amtypes import CandidateLexType, ModCache, ReadCache
-from topdown_parser.am_algebra.tools import get_term_types
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.nn.edge_label_model import EdgeLabelModel
-from topdown_parser.nn.utils import get_device_id
-from topdown_parser.transition_systems import utils
-from topdown_parser.transition_systems.parsing_state import ParsingState
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.am_algebra import AMType, NonAMTypeException, new_amtypes
+from parsers.am_algebra.new_amtypes import CandidateLexType, ModCache, ReadCache
+from parsers.am_algebra.tools import get_term_types
+from parsers.am_algebra.tree import Tree
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.nn.edge_label_model import EdgeLabelModel
+from parsers.nn.utils import get_device_id
+from parsers.transition_systems import utils
+from parsers.transition_systems.parsing_state import ParsingState
+from parsers.transition_systems.transition_system import TransitionSystem
 from .decision import Decision
-from topdown_parser.transition_systems.utils import scores_to_selection, get_best_constant, single_score_to_selection, \
+from parsers.transition_systems.utils import scores_to_selection, get_best_constant, single_score_to_selection, \
     is_empty, get_top_k_choices, copy_optional_set
 
 import numpy as np

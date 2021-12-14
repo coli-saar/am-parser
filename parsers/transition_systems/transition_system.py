@@ -4,14 +4,14 @@ from typing import List, Iterable, Optional, Tuple, Dict, Any, Set
 import torch
 from allennlp.common import Registrable
 
-from topdown_parser.am_algebra import AMType
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon, Lexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.nn.edge_label_model import EdgeLabelModel
-from topdown_parser.nn.utils import get_device_id
-from topdown_parser.transition_systems.batched_parsing_state import BatchedParsingState
-from topdown_parser.transition_systems.decision import Decision, DecisionBatch
-from topdown_parser.transition_systems.parsing_state import ParsingState
+from parsers.am_algebra import AMType
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon, Lexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.nn.edge_label_model import EdgeLabelModel
+from parsers.nn.utils import get_device_id
+from parsers.transition_systems.batched_parsing_state import BatchedParsingState
+from parsers.transition_systems.decision import Decision, DecisionBatch
+from parsers.transition_systems.parsing_state import ParsingState
 
 
 

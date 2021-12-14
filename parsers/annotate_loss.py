@@ -12,7 +12,7 @@ import allennlp.nn.util as util
 
 if __name__ == "__main__":
     import_submodules("topdown_parser")
-    from topdown_parser.nn.parser import TopDownDependencyParser
+    from parsers.nn.parser import TopDownDependencyParser
 
     optparser = argparse.ArgumentParser(add_help=True,
                                         description="Annotates loss into an annotated amconll file. Was used to determine if beam search would help.")

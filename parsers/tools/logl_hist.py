@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sys.path.append(".")
-from topdown_parser.dataset_readers.amconll_tools import parse_amconll
+from parsers.dataset_readers.amconll_tools import parse_amconll
 
 optparser = argparse.ArgumentParser(add_help=True,
                                     description="reads two amconll files annotated with (negative) log likelihoods and shows histogram of difference.")

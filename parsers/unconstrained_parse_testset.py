@@ -15,14 +15,14 @@ from allenpipeline.callback import CallbackName
 
 if __name__ == "__main__":
     import_submodules("topdown_parser")
-    from topdown_parser.dataset_readers.same_formalism_iterator import SameFormalismIterator
-    from topdown_parser.callbacks.parse_test import ParseTest
-    from topdown_parser.dataset_readers.amconll_tools import parse_amconll
-    from topdown_parser.am_algebra.tools import is_welltyped
-    from topdown_parser.transition_systems.ltl import LTL
-    from topdown_parser.transition_systems.ltf import LTF
-    from topdown_parser.transition_systems.dfs import DFS
-    from topdown_parser.transition_systems.dfs_children_first import DFSChildrenFirst
+    from parsers.dataset_readers.same_formalism_iterator import SameFormalismIterator
+    from parsers.callbacks.parse_test import ParseTest
+    from parsers.dataset_readers.amconll_tools import parse_amconll
+    from parsers.am_algebra.tools import is_welltyped
+    from parsers.transition_systems.ltl import LTL
+    from parsers.transition_systems.ltf import LTF
+    from parsers.transition_systems.dfs import DFS
+    from parsers.transition_systems.dfs_children_first import DFSChildrenFirst
 
     optparser = argparse.ArgumentParser(add_help=True,
                                         description="Parse an amconll file (no annotions) with beam search.")

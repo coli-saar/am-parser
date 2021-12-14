@@ -11,8 +11,8 @@ from allennlp.nn.util import get_range_vector, get_device_of
 from torch.nn import Parameter, Module
 import torch.nn.functional as F
 
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.nn.utils import get_device_id
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.nn.utils import get_device_id
 
 
 class EdgeLabelModel(Registrable, Module):

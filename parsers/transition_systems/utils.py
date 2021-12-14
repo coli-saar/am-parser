@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Set, Tuple, Iterable, Any
 import torch
 import torch.nn.functional as F
 
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
 import numpy as np
 
 

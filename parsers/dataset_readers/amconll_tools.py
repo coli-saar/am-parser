@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import os
 import multiprocessing as mp
 
-from topdown_parser.am_algebra import AMType
+from parsers.am_algebra import AMType
 
 
 @dataclass(frozen=True)

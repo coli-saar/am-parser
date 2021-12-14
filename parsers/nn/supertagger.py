@@ -7,8 +7,8 @@ from allennlp.nn.util import get_range_vector, get_device_of
 from torch import nn
 from torch.nn import Module
 
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.nn.utils import get_device_id
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.nn.utils import get_device_id
 
 
 class Supertagger(Model):

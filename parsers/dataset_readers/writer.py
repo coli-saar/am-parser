@@ -3,7 +3,7 @@ from typing import TextIO, Iterable, Dict, Any
 from allennlp.data import Vocabulary
 from allenpipeline import DatasetWriter
 
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
+from parsers.dataset_readers.amconll_tools import AMSentence
 
 
 @DatasetWriter.register("amconll_writer")

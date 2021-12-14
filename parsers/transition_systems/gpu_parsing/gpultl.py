@@ -3,21 +3,21 @@ from typing import List, Iterable, Optional, Any, Dict, Set, Tuple
 import numpy as np
 import torch
 
-from topdown_parser.am_algebra import AMType
-from topdown_parser.am_algebra.new_amtypes import ModCache
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.transition_systems.decision import DecisionBatch
-from topdown_parser.transition_systems.gpu_parsing.datastructures.list_of_list import BatchedListofList
-from topdown_parser.transition_systems.gpu_parsing.datastructures.stack import BatchedStack
-from topdown_parser.nn.utils import get_device_id
-from topdown_parser.transition_systems.gpu_parsing.dfs_children_first import GPUDFSChildrenFirst
-from topdown_parser.transition_systems.gpu_parsing.logic_torch import index_or, \
+from parsers.am_algebra import AMType
+from parsers.am_algebra.new_amtypes import ModCache
+from parsers.am_algebra.tree import Tree
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.transition_systems.decision import DecisionBatch
+from parsers.transition_systems.gpu_parsing.datastructures.list_of_list import BatchedListofList
+from parsers.transition_systems.gpu_parsing.datastructures.stack import BatchedStack
+from parsers.nn.utils import get_device_id
+from parsers.transition_systems.gpu_parsing.dfs_children_first import GPUDFSChildrenFirst
+from parsers.transition_systems.gpu_parsing.logic_torch import index_or, \
     make_bool_multipliable, are_eq
-from topdown_parser.transition_systems.batched_parsing_state import BatchedParsingState
-from topdown_parser.transition_systems.ltl import LTL
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.transition_systems.batched_parsing_state import BatchedParsingState
+from parsers.transition_systems.ltl import LTL
+from parsers.transition_systems.transition_system import TransitionSystem
 
 
 class GPULTLState(BatchedParsingState):

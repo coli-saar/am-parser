@@ -3,8 +3,8 @@ from typing import Optional, Tuple
 
 from dataclasses import dataclass
 
-from topdown_parser.am_algebra import AMType
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.am_algebra import AMType
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
 
 
 # A parsing decision always selects a position (pop is encoded as selecting 0 or the position currently on of the stack)

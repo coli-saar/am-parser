@@ -8,7 +8,7 @@ from allennlp.modules import Attention, FeedForward
 from allennlp.nn import Activation
 from allennlp.nn.util import masked_log_softmax
 
-from topdown_parser.nn.biaffine import BiaffineAttention
+from parsers.nn.biaffine import BiaffineAttention
 
 
 class EdgeModel(Model):

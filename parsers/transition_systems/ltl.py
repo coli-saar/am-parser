@@ -4,17 +4,17 @@ from typing import List, Iterable, Optional, Tuple, Dict, Any, Set
 
 import torch
 
-from topdown_parser.am_algebra import AMType, new_amtypes
-from topdown_parser.am_algebra.new_amtypes import ByApplySet, ModCache, ReadCache
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.transition_systems.ltf import typ2supertag, typ2i, collect_sources
-from topdown_parser.transition_systems.parsing_state import ParsingState
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.am_algebra import AMType, new_amtypes
+from parsers.am_algebra.new_amtypes import ByApplySet, ModCache, ReadCache
+from parsers.am_algebra.tree import Tree
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.transition_systems.ltf import typ2supertag, typ2i, collect_sources
+from parsers.transition_systems.parsing_state import ParsingState
+from parsers.transition_systems.transition_system import TransitionSystem
 from .decision import Decision
 
-from topdown_parser.transition_systems.utils import scores_to_selection, get_and_convert_to_numpy, get_best_constant, \
+from parsers.transition_systems.utils import scores_to_selection, get_and_convert_to_numpy, get_best_constant, \
     single_score_to_selection, get_top_k_choices, copy_optional_set
 
 import heapq

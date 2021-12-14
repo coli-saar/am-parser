@@ -4,13 +4,13 @@ from typing import List, Iterable, Optional, Tuple, Dict, Any, Set
 
 import torch
 
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.transition_systems.parsing_state import ParsingState
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.am_algebra.tree import Tree
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.transition_systems.parsing_state import ParsingState
+from parsers.transition_systems.transition_system import TransitionSystem
 from .decision import Decision
-from topdown_parser.transition_systems.unconstrained_system import UnconstrainedTransitionSystem
+from parsers.transition_systems.unconstrained_system import UnconstrainedTransitionSystem
 
 
 class DFSState(ParsingState):

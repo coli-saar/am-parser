@@ -14,7 +14,7 @@ import allennlp.nn.util as util
 
 if __name__ == "__main__":
     import_submodules("topdown_parser")
-    from topdown_parser.dataset_readers.same_formalism_iterator import SameFormalismIterator
+    from parsers.dataset_readers.same_formalism_iterator import SameFormalismIterator
 
     optparser = argparse.ArgumentParser(add_help=True,
                                         description="Count trainable parameters.")

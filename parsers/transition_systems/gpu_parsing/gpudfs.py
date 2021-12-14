@@ -2,14 +2,14 @@ from typing import List, Iterable, Optional, Tuple, Dict, Any
 
 import torch
 
-from topdown_parser.am_algebra.tree import Tree
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.transition_systems.batched_parsing_state import BatchedParsingState, BatchedStack, \
+from parsers.am_algebra.tree import Tree
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.transition_systems.batched_parsing_state import BatchedParsingState, BatchedStack, \
     BatchedListofList
-from topdown_parser.transition_systems.decision import DecisionBatch
-from topdown_parser.transition_systems.dfs import DFS
-from topdown_parser.transition_systems.transition_system import TransitionSystem
+from parsers.transition_systems.decision import DecisionBatch
+from parsers.transition_systems.dfs import DFS
+from parsers.transition_systems.transition_system import TransitionSystem
 
 
 class GPUDFSState(BatchedParsingState):

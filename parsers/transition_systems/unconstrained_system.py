@@ -2,12 +2,12 @@ from typing import Dict, Union, List, Set
 
 import torch
 
-from topdown_parser.dataset_readers.additional_lexicon import AdditionalLexicon
-from topdown_parser.dataset_readers.amconll_tools import AMSentence
-from topdown_parser.nn.edge_label_model import EdgeLabelModel
-from topdown_parser.transition_systems.parsing_state import ParsingState
-from topdown_parser.transition_systems.transition_system import Decision, TransitionSystem
-from topdown_parser.transition_systems.utils import single_score_to_selection
+from parsers.dataset_readers.additional_lexicon import AdditionalLexicon
+from parsers.dataset_readers.amconll_tools import AMSentence
+from parsers.nn.edge_label_model import EdgeLabelModel
+from parsers.transition_systems.parsing_state import ParsingState
+from parsers.transition_systems.transition_system import Decision, TransitionSystem
+from parsers.transition_systems.utils import single_score_to_selection
 
 
 class UnconstrainedTransitionSystem(TransitionSystem):
