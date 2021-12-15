@@ -65,19 +65,19 @@ local dm_pas_evaluator(name) = {
     "am-tools" : ALTO_PATH,
 
     "extra_dependencies" : {
-    "AMR-2015" : [WORDNET],
-    "AMR-2017" : [WORDNET],
-    "MRP-DM" : [MTOOL],
-    "MRP-PSD" : [MTOOL],
-    "MRP-EDS" : [MTOOL],
-    "MRP-AMR" : [CONCEPTNET, MTOOL],
-    "MRP-UCCA" : [MTOOL]
+        "AMR-2015" : [WORDNET],
+        "AMR-2017" : [WORDNET],
+        "MRP-DM" : [MTOOL],
+        "MRP-PSD" : [MTOOL],
+        "MRP-EDS" : [MTOOL],
+        "MRP-AMR" : [CONCEPTNET, MTOOL],
+        "MRP-UCCA" : [MTOOL]
     },
 
     #commands to evaluate the different formalisms
-      "DM" : dm_pas_evaluator("DM"),
-      "PAS" : dm_pas_evaluator("PAS"),
-      "PSD" : {
+    "DM" : dm_pas_evaluator("DM"),
+    "PAS" : dm_pas_evaluator("PAS"),
+    "PSD" : {
         "type" : "bash_evaluation_command",
         "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
         "result_regexes" : sdp_regexes,
@@ -86,172 +86,168 @@ local dm_pas_evaluator(name) = {
                     "type" : "parse-dev",
                     "system_input" : SDP_prefix+"PSD/dev/dev.amconll",
                     "prefix": "PSD_",
-                     "eval_command" : {
-                         "type" : "bash_evaluation_command",
-                         "gold_file": SDP_prefix+"PSD/dev/dev.sdp",
-                          "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
-                          "result_regexes" : sdp_regexes
-                 }
+                    "eval_command" : {
+                        "type" : "bash_evaluation_command",
+                        "gold_file": SDP_prefix+"PSD/dev/dev.sdp",
+                        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
+                        "result_regexes" : sdp_regexes
+                    }
             },
             "after_training" : {
                 "type" : "parse-test",
                 "system_inputs" : [SDP_prefix+"PSD/test.id/test.id.amconll", SDP_prefix+"PSD/test.ood/test.ood.amconll"],
-                 "names" : ["PSD_id", "PSD_ood"],
-                 "active" : parse_test,
-                 "test_commands" : [
-                     {
-                     "type" : "bash_evaluation_command",
-                     "gold_file": SDP_prefix+"PSD/test.id/en.id.psd.sdp",
-                      "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
-                      "result_regexes" : sdp_regexes
-                      },
-                      {
-                      "type" : "bash_evaluation_command",
-                      "gold_file": SDP_prefix+"PSD/test.ood/en.ood.psd.sdp",
-                       "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
-                       "result_regexes" : sdp_regexes
-                      }
-             ]
+                "names" : ["PSD_id", "PSD_ood"],
+                "active" : parse_test,
+                "test_commands" : [
+                    {
+                    "type" : "bash_evaluation_command",
+                    "gold_file": SDP_prefix+"PSD/test.id/en.id.psd.sdp",
+                    "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
+                    "result_regexes" : sdp_regexes
+                    },
+                    {
+                    "type" : "bash_evaluation_command",
+                    "gold_file": SDP_prefix+"PSD/test.ood/en.ood.psd.sdp",
+                     "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
+                     "result_regexes" : sdp_regexes
+                    }
+                ]
             }
+        },
     },
-        },
 
-        "EDS" : { #don't use file extension for gold_file: use e.g. data/EDS/dev/dev-gold
-            "type" : "bash_evaluation_command",
-            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds'+
-            '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt'+
-            '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-            "result_regexes" : {"Smatch_P" : [0, "Precision: (?P<value>.+)"],
-                                "Smatch_R" : [1, "Recall: (?P<value>.+)"],
-                                "Smatch_F" : [2, "F-score: (?P<value>.+)"],
-                                "EDM_F" : [4,"F1-score: (?P<value>.+)"]},
-            "callbacks" : {
-        "after_validation" : {
-                     "type" : "parse-dev",
-                     "system_input" : "data/EDS/dev/dev.amconll",
-                     "eval_command" : {
-                        "type" : "bash_evaluation_command",
-                        "gold_file": "data/EDS/dev/dev-gold",
-                        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds'+
-                        '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt'+
-                        '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                        "result_regexes" : {"Smatch_P" : [0, "Precision: (?P<value>.+)"],
-                                            "Smatch_R" : [1, "Recall: (?P<value>.+)"],
-                                            "Smatch_F" : [2, "F-score: (?P<value>.+)"],
-                                            "EDM_F" : [4,"F1-score: (?P<value>.+)"]}
-                     }
-         },
-      "after_training" : {
-               "type" : "parse-test",
-               "system_inputs" : ["data/EDS/test/test.amconll"],
-               "names" : ["EDS"],
-               "active" : parse_test,
-               "test_commands" : [
-                  {
-                        "type" : "bash_evaluation_command",
-                        "gold_file": "data/EDS/test/test-gold",
-                        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds'+
-                        '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt'+
-                        '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                        "result_regexes" : {"Smatch_P" : [0, "Precision: (?P<value>.+)"],
-                                            "Smatch_R" : [1, "Recall: (?P<value>.+)"],
-                                            "Smatch_F" : [2, "F-score: (?P<value>.+)"],
-                                            "EDM_F" : [4,"F1-score: (?P<value>.+)"]}
-                     }
-               ]
-          }
-    }
-        },
-
-        "AMR-2015" : {
-            "type" : "bash_evaluation_command",
-            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                ' --lookup data/AMR/2015/lookup/ --th 10' +
-            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                "R" : [1, "Recall: (?P<value>.+)"],
-                                "F" : [2, "F-score: (?P<value>.+)"]},
-            "callbacks" : {
-        "after_validation" : {
-            "type" : "parse-dev",
-            "system_input" : "data/AMR/2015/dev/dev.amconll",
-            "prefix": "AMR-2015_",
-            "eval_command" : {
-                "type" : "bash_evaluation_command",
-                "gold_file" : "data/AMR/2015/dev/goldAMR.txt",
-                "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                            ' --lookup data/AMR/2015/lookup/ --th 10' +
-                            '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                    "R" : [1, "Recall: (?P<value>.+)"],
-                                    "F" : [2, "F-score: (?P<value>.+)"]}
-            }
-        },
-        "after_training" : {
-            "type" : "parse-test",
-            "system_inputs" : ["data/AMR/2015/test/test.amconll"],
-            "names" : ["AMR-2015"],
-            "active" : parse_test,
-            "test_commands" : [
-                {
-                "type" : "bash_evaluation_command",
-                "gold_file" : "data/AMR/2015/test/goldAMR.txt",
-                "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                      ' --lookup data/AMR/2015/lookup/ --th 10' +
-                      '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                      "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                    "R" : [1, "Recall: (?P<value>.+)"],
-                                    "F" : [2, "F-score: (?P<value>.+)"]}
+    "EDS" : { #don't use file extension for gold_file: use e.g. data/EDS/dev/dev-gold
+        "type" : "bash_evaluation_command",
+        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds' +
+        '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt' +
+        '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+        "result_regexes" : {"Smatch_P" : [0, 'Precision: (?P<value>.+)'],
+                            "Smatch_R" : [1, 'Recall: (?P<value>.+)'],
+                            "Smatch_F" : [2, 'F-score: (?P<value>.+)'],
+                            "EDM_F" : [4,'F1-score: (?P<value>.+)']},
+        "callbacks" : {
+            "after_validation" : {
+                "type" : "parse-dev",
+                "system_input" : "data/EDS/dev/dev.amconll",
+                "eval_command" : {
+                   "type" : "bash_evaluation_command",
+                   "gold_file": "data/EDS/dev/dev-gold",
+                   "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds'+
+                   '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt'+
+                   '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                   "result_regexes" : {"Smatch_P" : [0, 'Precision: (?P<value>.+)'],
+                                       "Smatch_R" : [1, 'Recall: (?P<value>.+)'],
+                                       "Smatch_F" : [2, 'F-score: (?P<value>.+)'],
+                                       "EDM_F" : [4,'F1-score: (?P<value>.+)']},
                 }
-            ]
+            },
+            "after_training" : {
+                    "type" : "parse-test",
+                    "system_inputs" : ["data/EDS/test/test.amconll"],
+                    "names" : ["EDS"],
+                    "active" : parse_test,
+                    "test_commands" : [
+                        {
+                            "type" : "bash_evaluation_command",
+                            "gold_file": "data/EDS/test/test-gold",
+                            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus --corpus {system_output} --outFile {tmp}/output.eds'+
+                            '&& python2 '+tool_dir+'/fast_smatch/fast_smatch.py -f {tmp}/output.eds.amr.txt {gold_file}.amr.txt --pr > {tmp}/metrics.txt'+
+                            '&& python2 '+tool_dir+'/edm/eval_edm.py {tmp}/output.eds.edm {gold_file}.edm >> {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                            "result_regexes" : {"Smatch_P" : [0, 'Precision: (?P<value>.+)'],
+                                                "Smatch_R" : [1, 'Recall: (?P<value>.+)'],
+                                                "Smatch_F" : [2, 'F-score: (?P<value>.+)'],
+                                                "EDM_F" : [4,'F1-score: (?P<value>.+)']},
+                        }
+                    ]
+            }
         }
+    },
 
-  }
-        },
+    "AMR-2015" : {
+        "type" : "bash_evaluation_command",
+        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+' --lookup data/AMR/2015/lookup/ --th 10' +
+        '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+        "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                            "R" : [1, 'Recall: (?P<value>.+)'],
+                            "F" : [2, 'F-score: (?P<value>.+)']},
+        "callbacks" : {
+            "after_validation" : {
+                "type" : "parse-dev",
+                "system_input" : "data/AMR/2015/dev/dev.amconll",
+                "prefix": "AMR-2015_",
+                "eval_command" : {
+                    "type" : "bash_evaluation_command",
+                    "gold_file" : "data/AMR/2015/dev/goldAMR.txt",
+                    "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+' --lookup data/AMR/2015/lookup/ --th 10' +
+                                '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                    "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                        "R" : [1, 'Recall: (?P<value>.+)'],
+                                        "F" : [2, 'F-score: (?P<value>.+)']},
+                }
+            },
+            "after_training" : {
+                "type" : "parse-test",
+                "system_inputs" : ["data/AMR/2015/test/test.amconll"],
+                "names" : ["AMR-2015"],
+                "active" : parse_test,
+                "test_commands" : [
+                    {
+                    "type" : "bash_evaluation_command",
+                    "gold_file" : "data/AMR/2015/test/goldAMR.txt",
+                    "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+' --lookup data/AMR/2015/lookup/ --th 10' +
+                          '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                    "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                        "R" : [1, 'Recall: (?P<value>.+)'],
+                                        "F" : [2, 'F-score: (?P<value>.+)']},
+                    }
+                ]
+            }
+        }
+    },
 
-        "AMR-2017" : {
-            "type" : "bash_evaluation_command",
-            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                ' --lookup data/AMR/2017/lookup/ --th 10' +
-            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                "R" : [1, "Recall: (?P<value>.+)"],
-                                "F" : [2, "F-score: (?P<value>.+)"]},
-            "callbacks" : {
-    "after_validation" : {
-                 "type" : "parse-dev",
-                 "system_input" : "data/AMR/2017/dev/dev.amconll",
-                 "prefix": "AMR-2017_",
-                 "eval_command" : {
+    "AMR-2017" : {
+        "type" : "bash_evaluation_command",
+        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+            ' --lookup data/AMR/2017/lookup/ --th 10' +
+        '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+        "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                            "R" : [1, 'Recall: (?P<value>.+)'],
+                            "F" : [2, 'F-score: (?P<value>.+)']},
+        "callbacks" : {
+            "after_validation" : {
+                "type" : "parse-dev",
+                "system_input" : "data/AMR/2017/dev/dev.amconll",
+                "prefix": "AMR-2017_",
+                "eval_command" : {
+                    "type" : "bash_evaluation_command",
+                    "gold_file" : "data/AMR/2017/dev/goldAMR.txt",
+                    "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                        ' --lookup data/AMR/2017/lookup/ --th 10' +
+                    '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                    "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                        "R" : [1, 'Recall: (?P<value>.+)'],
+                                        "F" : [2, 'F-score: (?P<value>.+)']},
+                }
+            },
+            "after_training" : {
+                "type" : "parse-test",
+                "system_inputs" : ["data/AMR/2017/test/test.amconll"],
+                "names" : ["AMR-2017"],
+                "active" : parse_test,
+                "test_commands" : [
+                    {
                      "type" : "bash_evaluation_command",
-                     "gold_file" : "data/AMR/2017/dev/goldAMR.txt",
-                     "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                         ' --lookup data/AMR/2017/lookup/ --th 10' +
-                     '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                     "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                         "R" : [1, "Recall: (?P<value>.+)"],
-                                         "F" : [2, "F-score: (?P<value>.+)"]}
+                     "gold_file" : "data/AMR/2017/test/goldAMR.txt",
+                      "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                          ' --lookup data/AMR/2017/lookup/ --th 10' +
+                      '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+                      "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                          "R" : [1, 'Recall: (?P<value>.+)'],
+                                          "F" : [2, 'F-score: (?P<value>.+)']},
+                    }
+                ]
              }
-  },
-     "after_training" : {
-          "type" : "parse-test",
-          "system_inputs" : ["data/AMR/2017/test/test.amconll"],
-          "names" : ["AMR-2017"],
-          "active" : parse_test,
-          "test_commands" : [
-              {
-               "type" : "bash_evaluation_command",
-               "gold_file" : "data/AMR/2017/test/goldAMR.txt",
-                "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
-                    ' --lookup data/AMR/2017/lookup/ --th 10' +
-                '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                    "R" : [1, "Recall: (?P<value>.+)"],
-                                    "F" : [2, "F-score: (?P<value>.+)"]}
-              }
-          ]
-     }
-  }
+          }
         },
 
         "AMR-2020" : {
@@ -259,9 +255,9 @@ local dm_pas_evaluator(name) = {
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
                 ' --lookup data/AMR/2020/lookup/ --th 10' +
             '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                "R" : [1, "Recall: (?P<value>.+)"],
-                                "F" : [2, "F-score: (?P<value>.+)"]},
+            "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                "R" : [1, 'Recall: (?P<value>.+)'],
+                                "F" : [2, 'F-score: (?P<value>.+)']},
             "callbacks" : {
     "after_validation" : {
                  "type" : "parse-dev",
@@ -273,9 +269,9 @@ local dm_pas_evaluator(name) = {
                      "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
                          ' --lookup data/AMR/2020/lookup/ --th 10' +
                      '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                     "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                         "R" : [1, "Recall: (?P<value>.+)"],
-                                         "F" : [2, "F-score: (?P<value>.+)"]}
+                     "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                         "R" : [1, 'Recall: (?P<value>.+)'],
+                                         "F" : [2, 'F-score: (?P<value>.+)']},
              }
   },
      "after_training" : {
@@ -290,9 +286,9 @@ local dm_pas_evaluator(name) = {
                 "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
                     ' --lookup data/AMR/2020/lookup/ --th 10' +
                 '&& python '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
-                "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
-                                    "R" : [1, "Recall: (?P<value>.+)"],
-                                    "F" : [2, "F-score: (?P<value>.+)"]}
+                "result_regexes" : {"P" : [0, 'Precision: (?P<value>.+)'],
+                                    "R" : [1, 'Recall: (?P<value>.+)'],
+                                    "F" : [2, 'F-score: (?P<value>.+)']},
               }
           ]
      }
@@ -343,11 +339,11 @@ local dm_pas_evaluator(name) = {
    "type" : "bash_evaluation_command",
    "command" : "python3 topdown_parser/evaluation/am_dep_las.py {gold_file} {system_output}",
    "result_regexes" : {
-       "Constant_Acc" : [4, "Supertagging acc % (?P<value>[0-9.]+)"],
-       "Lex_Acc" : [5, "Lexical label acc % (?P<value>[0-9.]+)"],
-       "UAS" : [6, "UAS.* % (?P<value>[0-9.]+)"],
-       "LAS" : [7, "LAS.* % (?P<value>[0-9.]+)"],
-       "Content_recall" : [8, "Content recall % (?P<value>[0-9.]+)"]
+       "Constant_Acc" : [4, 'Supertagging acc % (?P<value>[0-9.]+)'],
+       "Lex_Acc" : [5, 'Lexical label acc % (?P<value>[0-9.]+)'],
+       "UAS" : [6, 'UAS.* % (?P<value>[0-9.]+)'],
+       "LAS" : [7, 'LAS.* % (?P<value>[0-9.]+)'],
+       "Content_recall" : [8, 'Content recall % (?P<value>[0-9.]+)']
     }
     },
 
@@ -380,8 +376,8 @@ local dm_pas_evaluator(name) = {
         "MRP-PSD" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
         "MRP-EDS" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
         "MRP-UCCA" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp',
-                       "python3 ucca/decompress_mrp.py {system_output}.mrp {system_output}.post.mrp",
-                       "python3 ucca/remove_labels.py {system_output}.post.mrp {system_output}.post.nolabels.mrp"],
+                       'python3 ucca/decompress_mrp.py {system_output}.mrp {system_output}.post.mrp',
+                       'python3 ucca/remove_labels.py {system_output}.post.mrp {system_output}.post.nolabels.mrp'],
         "MRP-AMR" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET +' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/'+MRP_AMR_SUBPATH+'/lookup/ --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp']
 
     }
