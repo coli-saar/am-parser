@@ -1,8 +1,8 @@
 local k = 6;
-local eval_commands = import 'eval_commands.libsonnet';
+local eval_commands = import '../eval_commands.libsonnet';
 local give_up = 15; #15 seconds
 
-local data_paths = import 'data_paths.libsonnet';
+local data_paths = import '../data_paths.libsonnet';
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
 local MRP_UCCA_SUBPATH = data_paths["MRP_UCCA_SUBPATH"];
 local SDP_prefix = data_paths["SDP_prefix"];
