@@ -20,7 +20,7 @@ local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
                     "k" : k,
                     "threads" : threads,
                     "give_up": give_up,
-                    "evaluation_command" : eval_commands['commands'][name]
+                    "evaluation_command" : eval_commands[name]
             }
         }],[name+"_ood",{ #prefix used for evaluation metric
                 "type": "standard_evaluator",
@@ -34,7 +34,7 @@ local SDP_evaluator(dataset_reader, data_iterator, name, threads) = [
                         "k" : k,
                         "threads" : threads,
                         "give_up": give_up,
-                        "evaluation_command" : eval_commands['commands'][name]
+                        "evaluation_command" : eval_commands[name]
                 }
         }]
 
@@ -75,7 +75,7 @@ function (dataset_reader, data_iterator) {
                 "k" : k,
                 "threads" : 8,
                 "give_up": give_up,
-                "evaluation_command" : eval_commands['commands']['AMR-2015']
+                "evaluation_command" : eval_commands['AMR-2015']
         }
 
   }]],
@@ -91,7 +91,7 @@ function (dataset_reader, data_iterator) {
                 "k" : k,
                 "threads" : 8,
                 "give_up": give_up,
-                "evaluation_command" : eval_commands['commands']['AMR-2017']
+                "evaluation_command" : eval_commands['AMR-2017']
         }
 
   }]],
@@ -108,7 +108,7 @@ function (dataset_reader, data_iterator) {
                   "k" : k,
                   "threads" : 8,
                   "give_up": give_up,
-                  "evaluation_command" : eval_commands['commands']['AMR-2020']
+                  "evaluation_command" : eval_commands['AMR-2020']
           }
 
     }]],
@@ -133,7 +133,7 @@ function (dataset_reader, data_iterator) {
                 "k" : k,
                 "threads" : 6,
                 "give_up": give_up, #try parsing only for 1 second, then retry with smaller k
-                "evaluation_command" : eval_commands['commands']['EDS']
+                "evaluation_command" : eval_commands['EDS']
         }}]
      ],
 

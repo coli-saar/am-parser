@@ -126,7 +126,7 @@ local dev_iterator = data_iterator(64);
         "optimizer": {
             "type": "adam",
         },
-        "validation_metric" : eval_commands["metric_names"][main_task],
+        "validation_metric" : eval_commands["validation_metric"][main_task],
         "num_serialized_models_to_keep" : 1
     }
 }

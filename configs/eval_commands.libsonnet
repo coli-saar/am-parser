@@ -1,33 +1,36 @@
-local ALTO_PATH = "am-tools.jar";
-
-local WORDNET = "downloaded_models/wordnet3.0/dict/";
-
-local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
-
-
-local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
-local base_directory = "/local/mlinde/am-parser";
+local data_paths = import 'data_paths.libsonnet';
+local base_directory = data_paths["base_directory"];
 
 local tool_dir = base_directory + "/evaluation_tools/";
 
-local data_paths = import 'data_paths.libsonnet';
+local ALTO_PATH = data_paths["ALTO_PATH"];
+local WORDNET = data_paths["WORDNET"];
+local CONCEPTNET = data_paths["CONCEPTNET"];
+local MTOOL = data_paths["MTOOL"];
 local MRP_AMR_SUBPATH = data_paths["MRP_AMR_SUBPATH"];
+local SDP_prefix = data_paths["SDP_prefix"];
+
+local parse_test = true;
 
 local sdp_regexes = {
  "P" : [1, "Precision (?P<value>.+)"],
  "R" : [2, "Recall (?P<value>.+)"],
  "F" : [3, "F (?P<value>.+)"] #says: on line 3 (0-based), fetch the F-Score with the given regex.
-
 };
 
-{
+local sdp_evaluator(name) = {
+    "type" : "bash_evaluation_command",
+    "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
+    "result_regexes" : sdp_regexes
+};
 
-/*
- This allows us to check if the dependencies seem to be met at start of training.
-*/
-  "am-tools" : ALTO_PATH,
+{ 
+    /*
+    This allows us to check if the dependencies seem to be met at start of training.
+    */
+    "am-tools" : ALTO_PATH,
 
-  "extra_dependencies" : {
+    "extra_dependencies" : {
     "AMR-2015" : [WORDNET],
     "AMR-2017" : [WORDNET],
     "MRP-DM" : [MTOOL],
@@ -35,15 +38,11 @@ local sdp_regexes = {
     "MRP-EDS" : [MTOOL],
     "MRP-AMR" : [CONCEPTNET, MTOOL],
     "MRP-UCCA" : [MTOOL]
-  },
+    },
 
- "commands" : { #commands to evaluate the different formalisms
-     "DM" : {
-        "type" : "bash_evaluation_command",
-        "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
-        "result_regexes" : sdp_regexes
-        },
-      "PAS" : self.DM,
+    #commands to evaluate the different formalisms
+      "DM" : sdp_evaluator("DM"),
+      "PAS" : sdp_evaluator("PAS"),
       "PSD" : {
         "type" : "bash_evaluation_command",
         "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
@@ -134,14 +133,14 @@ local sdp_regexes = {
 
     },
 
-    "metric_names": { #the name and direction of each validation metric for each formalism, + means "higher is better"
+    "validation_metric" : { #the name and direction of each validation metric for each formalism, + means "higher is better"
         "DM" : "+DM_F",
-        "PAS": "+PAS_F",
-        "PSD": "+PSD_F",
-        "EDS": "+EDS_Smatch_F",
-        "AMR-2015": "+AMR-2015_F",
-        "AMR-2017": "+AMR-2017_F",
-        "AMR-2020": "+AMR-2020_F",
+        "PAS" : "+PAS_F",
+        "PSD" : "+PSD_F",
+        "EDS" : "+EDS_Smatch_F",
+        "AMR-2015" : "+AMR-2015_F",
+        "AMR-2017" : "+AMR-2017_F",
+        "AMR-2020" : "+AMR-2020_F",
 
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",
@@ -169,7 +168,4 @@ local sdp_regexes = {
 
     }
 
-
-
 }
-

@@ -20,7 +20,7 @@ local sdp_evaluator(dataset_reader, data_iterator, name, threads, from_epoch) = 
                 "k" : k,
                 "threads" : threads,
                 "give_up": give_up,
-                "evaluation_command" : eval_commands['commands'][name]
+                "evaluation_command" : eval_commands[name]
         }
 
 };

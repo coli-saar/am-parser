@@ -1,16 +1,32 @@
 local ud_prefix = "data/UD/corenlp/";
 
+local base_directory = "/local/mlinde/am-parser";
+
+local ALTO_PATH = "am-tools.jar";
+
 local MRP_AMR_SUBPATH = "clean_decomp";
 local MRP_UCCA_SUBPATH = "very_first";
 
 local SDP_prefix = "data/SemEval/2015/";
 
+local WORDNET = "downloaded_models/wordnet3.0/dict/";
+local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
+local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
+
 {
+    "base_directory" : base_directory,
+
+    "ALTO_PATH" : ALTO_PATH,
+
     "GLOVE_DIR" : "/local/mlinde/glove/",
 
     "MRP_AMR_SUBPATH" : MRP_AMR_SUBPATH,
     "MRP_UCCA_SUBPATH" : MRP_UCCA_SUBPATH,
     "SDP_prefix" : SDP_prefix,
+
+    "WORDNET" : WORDNET,
+    "CONCEPTNET" : CONCEPTNET,
+    "MTOOL" : MTOOL,
 
     "UD_banks": ["EWT","GUM","LinES","ParTUT"],
     "train_data" : {
