@@ -13,20 +13,20 @@ local SDP_prefix = data_paths["SDP_prefix"];
 local parse_test = true;
 
 local sdp_regexes = {
- "P" : [1, "Precision (?P<value>.+)"],
- "R" : [2, "Recall (?P<value>.+)"],
- "F" : [3, "F (?P<value>.+)"] #says: on line 3 (0-based), fetch the F-Score with the given regex.
+ "P" : [1, 'Precision (?P<value>.+)'],
+ "R" : [2, 'Recall (?P<value>.+)'],
+ "F" : [3, 'F (?P<value>.+)'] #says: on line 3 (0-based), fetch the F-Score with the given regex.
 };
 
 local dm_pas_evaluator(name) = {
-    "type" : "bash_evaluation_command",
+    "type" : 'bash_evaluation_command',
     "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus --corpus {system_output} --gold {gold_file} --outFile {tmp}/BLABLA',
     "result_regexes" : sdp_regexes,
     "callbacks" : {
-        after_validation" : {
-        "type" : "parse-dev",
-        "system_input" : SDP_prefix+name+"/dev/dev.amconll",
-        "prefix": name+"_",
+        "after_validation" : {
+        "type" : 'parse-dev',
+        "system_input" : SDP_prefix+name+'/dev/dev.amconll',
+        "prefix": name+'_',
         "eval_command" : {
             # these three are identical. can they be merged?
             "type" : "bash_evaluation_command",
@@ -378,8 +378,7 @@ local dm_pas_evaluator(name) = {
         "MRP-UCCA" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp',
                        'python3 ucca/decompress_mrp.py {system_output}.mrp {system_output}.post.mrp',
                        'python3 ucca/remove_labels.py {system_output}.post.mrp {system_output}.post.nolabels.mrp'],
-        "MRP-AMR" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET +' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/'+MRP_AMR_SUBPATH+'/lookup/ --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp']
-
+        "MRP-AMR" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateAMR --conceptnet '+CONCEPTNET+' --wn external_eval_tools/2019rerun/metadata/wordnet/3.0/dict/ --lookup data/MRP/AMR/'+MRP_AMR_SUBPATH+'/lookup/ --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp']
     }
 
 }
