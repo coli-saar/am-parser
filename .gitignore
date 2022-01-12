@@ -5,6 +5,7 @@ example/minimalDMoutput/*
 example/toyAMRoutput/*
 example/toyAMRAlignmentsoutput/*
 example/toyAMRAutomataoutput/*
+example/toyDMAutomataOutput/*
 example/toyAMR/nn/*
 example/minimalDMautomata/*
 example/smallDMoutput/*

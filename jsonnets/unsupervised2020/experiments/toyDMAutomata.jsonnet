@@ -1,22 +1,22 @@
 
 #============TRAINING PARAMETERS==============
 local batch_size = 1; # adjust this to fit the memory capacity of your machine (mostly GPU memory is relevant)
-local num_epochs = 100; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
+local num_epochs = 150; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
 local patience = 1000; # this is per default set to 1000 to turn off early stopping.
 local evaluate_on_test = false; # Whether to evaluate on the test set.
 
 
 #============FILEPATHS==============
-local train_zip_path = "example/minimalAMRAutomata/train.zip";  
-local dev_zip_path = "example/minimalAMRAutomata/dev.zip";
-local validation_amconll_path = "example/minimalAMRAutomata/corpus.amconll";
-local validation_gold_path = "example/minimalAMRAutomata/gold.txt";
+local train_zip_path = "example/minimalDMAutomata/train.zip";  
+local dev_zip_path = "example/minimalDMAutomata/dev.zip";
+local validation_amconll_path = "example/minimalDMAutomata/corpus.amconll";
+local validation_gold_path = "example/minimalDMAutomata/gold.dm.sdp";
 local test_amconll_path = "";
 local test_gold_path = "";
 
 
 #=============IMPORTING MODEL AND FORMALISM CONFIGS==================
-local formalism_config = import '../formalisms/AMR.libsonnet';
+local formalism_config = import '../formalisms/DM.libsonnet';
 
 local raw_model_config = import '../models/toy.libsonnet';
 
