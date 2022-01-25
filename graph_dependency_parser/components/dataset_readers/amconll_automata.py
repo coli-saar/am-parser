@@ -72,7 +72,8 @@ class AMConllAutomataDatasetReader(DatasetReader):
         # if `file_path` is a URL, redirect to the cache
         file_path = cached_path(file_path)
         AutomataZipReader = autoclass('de.saar.coli.amtools.decomposition.AutomataZipReader')
-        automata_zip_reader = AutomataZipReader(file_path)
+        String = autoclass('java.lang.String')
+        automata_zip_reader = AutomataZipReader(String(file_path))
         if self.fraction < 0.9999 and (not self.only_read_fraction_if_train_in_filename or (self.only_read_fraction_if_train_in_filename and "train" in file_path)):
             with zipfile.ZipFile(file_path) as z:
                 with io.TextIOWrapper(z.open("corpus.amconll")) as amconll_file:
