@@ -9,6 +9,7 @@ example/toyAMR/nn/*
 example/minimalDMautomata/*
 example/smallDMoutput/*
 example/smallDMautomata/*
+example/DMAutomataTest/training_output/*
 temp/*
 
 .idea/
@@ -217,3 +218,9 @@ scripts/setupLSWJonasLocal.txt
 example/smallDM.sdp
 example/minimalDM.sdp
 example/toyAMR/train.zip
+example/DM.sdp
+downloaded_models/raw_text_model.tar.gz
+tmp/stanford-ner-2018-10-16.zip
+tmp/stanford-postagger-2018-10-16.zip
+example/DMAutomataTest/log.txt
+example/parserOut.txt

@@ -1,0 +1,1 @@
+the zip files are as created by de.saar.coli.amtools.decomposition.SourceAutomatonTest. In particular, they are both identical and based off of the file examples/decomposition_input/mini.dm.sdp in am-tools (branch new-decomposition), which is also given here.
