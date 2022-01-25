@@ -1,15 +1,6 @@
 # Byte-compiled / optimized / DLL files
 models/*
 data/*
-example/minimalDMoutput/*
-example/toyAMRoutput/*
-example/toyAMRAlignmentsoutput/*
-example/toyAMRAutomataoutput/*
-example/toyAMR/nn/*
-example/minimalDMautomata/*
-example/smallDMoutput/*
-example/smallDMautomata/*
-example/DMAutomataTest/training_output/*
 temp/*
 
 .idea/
@@ -141,6 +132,16 @@ example/alto/test/graphIDs.txt
 example/alto/test/finalAMRstrings.corpus
 example/alto/test/finalAlto.corpus
 example/alto/test/ENSQ.corpus
+example/minimalDMoutput/*
+example/toyAMRoutput/*
+example/toyAMRAlignmentsoutput/*
+example/toyAMRAutomataoutput/*
+example/toyDMAutomataOutput/*
+example/toyAMR/nn/*
+example/minimalDMautomata/*
+example/smallDMoutput/*
+example/smallDMautomata/*
+example/DMAutomataTest/training_output/*
 downloaded_models/wordnet3.0/dict/verb.Framestext
 downloaded_models/wordnet3.0/dict/verb.exc
 downloaded_models/wordnet3.0/dict/sents.vrb
