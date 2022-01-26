@@ -16,7 +16,7 @@ local test_gold_path = "";
 
 
 #=============IMPORTING MODEL AND FORMALISM CONFIGS==================
-local formalism_config = import '../formalisms/AMR.libsonnet';
+local formalism_config = import '../formalisms/AMR_toy.libsonnet';
 
 local raw_model_config = import '../models/toy.libsonnet';
 
@@ -25,7 +25,7 @@ local raw_model_config = import '../models/toy.libsonnet';
 
 
 #==================PUTTING IT ALL TOGETHER (DO NOT MODIFY) ===================
-# This puts everyting above together. You should not need to modify anything below this line
+# This puts everything above together. You should not need to modify anything below this line
 
 # Putting the parameters of this file and the formalism config into the model config file (this is necessary due to how the jsonnet structures are organized/nested)
 local model_config = raw_model_config(batch_size, num_epochs, patience, formalism_config['task'], formalism_config['evaluation_command'], formalism_config['validation_metric'], validation_amconll_path, validation_gold_path, test_amconll_path, test_gold_path);

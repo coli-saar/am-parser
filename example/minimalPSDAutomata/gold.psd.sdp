@@ -1,0 +1,9 @@
+#SDP 2015
+#20000001
+1	The	The	DT	-	-	_	_	_	_
+2	little	little	JJ	-	-	_	RSTR	_	_
+3	dragon	dragon	NN	-	+	_	_	CONJ.member	_
+4	and	and	CC	-	+	_	_	_	ACT-arg
+5	the	the	DT	-	-	_	_	_	_
+6	pelican	pelican	NN	-	-	_	_	CONJ.member	_
+7	flew	fly	V	+	+	_	_	_	_

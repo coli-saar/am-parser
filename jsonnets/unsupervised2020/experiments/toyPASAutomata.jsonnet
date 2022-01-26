@@ -7,16 +7,16 @@ local evaluate_on_test = false; # Whether to evaluate on the test set.
 
 
 #============FILEPATHS==============
-local train_zip_path = "example/minimalDMAutomata/train.zip";  
-local dev_zip_path = "example/minimalDMAutomata/dev.zip";
-local validation_amconll_path = "example/minimalDMAutomata/corpus.amconll";
-local validation_gold_path = "example/minimalDMAutomata/gold.dm.sdp";
+local train_zip_path = "example/minimalPASAutomata/train.zip";  
+local dev_zip_path = "example/minimalPASAutomata/dev.zip";
+local validation_amconll_path = "example/minimalPASAutomata/corpus.amconll";
+local validation_gold_path = "example/minimalPASAutomata/gold.pas.sdp";
 local test_amconll_path = "";
 local test_gold_path = "";
 
 
 #=============IMPORTING MODEL AND FORMALISM CONFIGS==================
-local formalism_config = import '../formalisms/DM.libsonnet';
+local formalism_config = import '../formalisms/PAS.libsonnet';
 
 local raw_model_config = import '../models/toy.libsonnet';
 
