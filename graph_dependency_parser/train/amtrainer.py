@@ -530,7 +530,11 @@ class AMTrainer(TrainerBase):
                     # Check validation metric for early stopping
                     if self._validation_metric in val_metrics:
                         this_epoch_val_metric = val_metrics[self._validation_metric]
-                        self._metric_tracker.add_metric(this_epoch_val_metric)
+                        if math.isnan(this_epoch_val_metric):
+                            logger.warning(f"Validation metric {self._validation_metric} was NaN; will not take this "
+                                           f"epoch into account when determining the best epoch.")
+                        else:
+                            self._metric_tracker.add_metric(this_epoch_val_metric)
                     else:
                         logger.warning(f"Validation metric {self._validation_metric} not found (yet)")
 
