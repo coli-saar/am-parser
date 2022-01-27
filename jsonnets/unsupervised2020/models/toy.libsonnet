@@ -97,7 +97,7 @@ local task_model(task,dataset_reader, iterator, final_encoder_output_dim, edge_m
 			"formalism" : task,
 			"system_input" : validation_amconll_path,
 			"gold_file": validation_gold_path,
-			"use_from_epoch" : 0,
+			"use_from_epoch" : 10,
 			"predictor" : {
                 "type" : "amconll_automata_predictor",
                 "dataset_reader" : amconll_dataset_reader, #need to read the amconll file here, not the zip.

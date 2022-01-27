@@ -2,6 +2,7 @@
 models/*
 data/*
 temp/*
+tmp/*
 
 .idea/
 
@@ -136,7 +137,14 @@ example/minimalDMoutput/*
 example/toyAMRoutput/*
 example/toyAMRAlignmentsoutput/*
 example/toyAMRAutomataoutput/*
+example/toyAMRAutomataOutput/*
 example/toyDMAutomataOutput/*
+example/toyPASAutomataOutput/*
+example/toyPSDAutomataOutput/*
+example/toyAMRAutomataOut/*
+example/toyDMAutomataOut/*
+example/toyPASAutomataOut/*
+example/toyPSDAutomataOut/*
 example/toyAMR/nn/*
 example/minimalDMautomata/*
 example/smallDMoutput/*
@@ -225,3 +233,5 @@ tmp/stanford-ner-2018-10-16.zip
 tmp/stanford-postagger-2018-10-16.zip
 example/DMAutomataTest/log.txt
 example/parserOut.txt
+example/toyDMAutomatalog.txt
+example/toyPASAutomatalog.txt
