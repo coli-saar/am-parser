@@ -1,0 +1,11 @@
+#flavor:2
+#git:c81775f675a03c133f357debb4ef9dc1a72308a9
+#framework:amr
+#id:1
+1	The	_	_	_	_	_	NULL	_	0	_	false
+2	little	_	_	_	_	_	$FORM$	_	3	_	false
+3	dragon	_	_	_	_	_	$FORM$	_	4	_	false
+4	yearns	_	_	_	_	_	yearn-01	_	0	_	false
+5	to	_	_	_	_	_	NULL	_	0	_	false
+6	fly	_	_	_	_	_	$FORM$-01	_	4	_	false
+

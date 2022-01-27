@@ -1,0 +1,8 @@
+#SDP 2015
+#20000001
+1	The	The	DT	-	-	_	_	_	_
+2	little	little	JJ	-	-	_	RSTR	_	_
+3	dragon	dragon	NN	-	+	_	_	ACT-arg	ACT-arg
+4	yearns	yearn	V	+	+	_	_	_	_
+5	to	to	TO	-	-	_	_	_	_
+6	fly	fly	V	-	+	_	_	PAT-arg	_

@@ -1,0 +1,11 @@
+#git:fe0572dc3d9292cd01fe833384308023ee1c140c
+#framework:psd
+#id:#20000001
+1	The	_	The	DT	_	_	_	_	3	IGNORE	true
+2	little	_	little	JJ	_	_	_	_	3	IGNORE	true
+3	dragon	_	dragon	NN	_	_	_	_	4	IGNORE	true
+4	yearns	_	yearn	V	_	_	_	_	7	IGNORE	true
+5	to	_	to	TO	_	_	_	_	0	IGNORE	true
+6	fly	_	fly	V	_	_	_	_	4	IGNORE	true
+7	ART-ROOT	_	ART-ROOT	ART-ROOT	_	_	$LEMMA$	_	0	ROOT	true
+

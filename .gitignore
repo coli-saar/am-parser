@@ -109,7 +109,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-*.amconll
 analyzers/test2/detailed_f.txt
 external_eval_tools/fast_smatch/_smatch.cpp
 example/nnData/test/sentences.txt
@@ -235,3 +234,4 @@ example/DMAutomataTest/log.txt
 example/parserOut.txt
 example/toyDMAutomatalog.txt
 example/toyPASAutomatalog.txt
+example/DM.amconll
