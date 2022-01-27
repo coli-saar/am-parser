@@ -113,7 +113,26 @@ local task_model(task,dataset_reader, iterator, final_encoder_output_dim, edge_m
 		},
 };
 
-function(batch_size, num_epochs, patience, task, evaluation_command, validation_metric, validation_amconll_path, validation_gold_path, test_amconll_path, test_gold_path) {
+local make_test_evaluator(task, evaluation_command, batch_size, test_triple_amconll_gold_suffix) = {
+	"result" : [task+test_triple_amconll_gold_suffix[2],{ #prefix used for evaluation metric
+        "type": "standard_evaluator",
+        "formalism" : task,
+        "system_input" : test_triple_amconll_gold_suffix[0],
+        "gold_file": test_triple_amconll_gold_suffix[1],
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : amconll_dataset_reader,
+                "data_iterator" : iterator(batch_size, task),
+                "k" : k,
+                "threads" : eval_threads,
+                "give_up": eval_timeout,
+                "evaluation_command" : evaluation_command,
+        }
+  }]
+};
+
+
+function(batch_size, num_epochs, patience, task, evaluation_command, validation_metric, validation_amconll_path, validation_gold_path, test_triples_amconll_gold_suffix) {
 	
 	"dataset_reader": dataset_reader,
 	"amconll_dataset_reader": amconll_dataset_reader,
@@ -187,20 +206,5 @@ function(batch_size, num_epochs, patience, task, evaluation_command, validation_
 		"num_serialized_models_to_keep" : 1
 		},
 	
-	"test_evaluators": [[ [task,{ #prefix used for evaluation metric
-        "type": "standard_evaluator",
-        "formalism" : task,
-        "system_input" : test_amconll_path,
-        "gold_file": test_gold_path,
-        "predictor" : {
-                "type" : "amconll_predictor",
-                "dataset_reader" : amconll_dataset_reader,
-                "data_iterator" : iterator(batch_size, task),
-                "k" : k,
-                "threads" : eval_threads,
-                "give_up": eval_timeout,
-                "evaluation_command" : evaluation_command,
-        }
-
-  }]]],
+	"test_evaluators": [std.map(function(x) make_test_evaluator(task, evaluation_command, batch_size, x)['result'], test_triples_amconll_gold_suffix)],
 }

@@ -1,9 +1,9 @@
 
 #============TRAINING PARAMETERS==============
 local batch_size = 1; # adjust this to fit the memory capacity of your machine (mostly GPU memory is relevant)
-local num_epochs = 150; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
+local num_epochs = 50; # we recommend 40-100 epochs on real datasets and 200 epochs for toy datasets, but your optimal parameters may differ
 local patience = 1000; # this is per default set to 1000 to turn off early stopping.
-local evaluate_on_test = false; # Whether to evaluate on the test set.
+local evaluate_on_test = true; # Whether to evaluate on the test set.
 
 
 #============FILEPATHS==============
@@ -11,8 +11,9 @@ local train_zip_path = "example/minimalPSDAutomata/train.zip";
 local dev_zip_path = "example/minimalPSDAutomata/dev.zip";
 local validation_amconll_path = "example/minimalPSDAutomata/corpus.amconll";
 local validation_gold_path = "example/minimalPSDAutomata/gold.psd.sdp";
-local test_amconll_path = "";
-local test_gold_path = "";
+
+local test_triples_amconll_gold_suffix = [["example/minimalPSDAutomata/corpus.amconll", "example/minimalPSDAutomata/gold.psd.sdp", "_id"],
+	["example/minimalPSDAutomata/ood.amconll", "example/minimalPSDAutomata/gold_ood.psd.sdp", "_ood"]];  # each triple consists of (a) path to amconll input for test set; (b) path to gold output for test set; (c) a suffix to be attached to the names of the evaluation metrics. Use multiple triples to evaluate on multiple test sets. In the regular case of just using one test set, use just one triple and the suffix can be the empty string.
 
 
 #=============IMPORTING MODEL AND FORMALISM CONFIGS==================
@@ -28,7 +29,7 @@ local raw_model_config = import '../models/toy.libsonnet';
 # This puts everything above together. You should not need to modify anything below this line
 
 # Putting the parameters of this file and the formalism config into the model config file (this is necessary due to how the jsonnet structures are organized/nested)
-local model_config = raw_model_config(batch_size, num_epochs, patience, formalism_config['task'], formalism_config['evaluation_command'], formalism_config['validation_metric'], validation_amconll_path, validation_gold_path, test_amconll_path, test_gold_path);
+local model_config = raw_model_config(batch_size, num_epochs, patience, formalism_config['task'], formalism_config['evaluation_command'], formalism_config['validation_metric'], validation_amconll_path, validation_gold_path, test_triples_amconll_gold_suffix );
 
 # Now we can write down all of the actual config entries
 {
