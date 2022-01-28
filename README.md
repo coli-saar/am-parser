@@ -34,6 +34,9 @@ This repository (jointly with its sister-repository at [am-tools](github.com/col
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 
+## Training our parser on new graphbanks and graph formalisms
+Have a look [here](https://github.com/coli-saar/am-parser/wiki#applying-the-am-parser-to-new-graphbanks-and-new-graph-formalisms)
+
 ## Quick Guide to the Pretrained Models of Lindemann et al. (2019)
 This is a quick guide on how to use our already trained models to make predictions, either for official test data to reproduce our results, or on arbitrary sentences.
 
