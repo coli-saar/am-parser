@@ -5,7 +5,7 @@ The AM parser is a compositional semantic parser with high accuracy across a wid
 Try out the [online demo](http://amparser.coli.uni-saarland.de:8080/) of our parser!
 
 ## Papers
-This repository (jointly with its sister-repository at [am-tools](github.com/coli-saar/am-tools)) contains the code for several papers:
+This repository (jointly with its sister-repository at [am-tools](https://www.github.com/coli-saar/am-tools)) contains the code for several papers:
 
 - [Compositional Semantic Parsing Across Graphbanks](https://www.aclweb.org/anthology/P19-1450) (Lindemann et al. 2019) demonstrates the parsers accuracy across graphbanks. Most of the documentation in this readme and in the [wiki](https://github.com/coli-saar/am-parser/wiki) refers to this paper.
 - [Learning compositional structures for semantic graph parsing](https://aclanthology.org/2021.spnlp-1.3/) (Groschwitz et al. 2021) describes a method to learn the AM dependency trees as latent compositional structures. Its code documentation is currently being built in the wiki [here](https://github.com/coli-saar/am-parser/wiki/Learning-compositional-structures).
