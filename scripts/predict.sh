@@ -102,7 +102,7 @@ if [ "$input" = "" ]; then
 fi
 
 if [ "$type" = "" ]; then
-    printf "\n No graphbank type given. Please use -T option.\n"
+    printf "\n No graphbank type given. Please use -T option. Valid options are DM, PAS, PSD, EDS and AMR.\n"
     exit 1
 elif [ "$type" = "AMR" ]; then
     type="AMR-2017" # to make it compatible with how we referred to this in the python code
@@ -118,6 +118,8 @@ pushd external_eval_tools/fast_smatch
 echo "Building fast_smatch (for evaluation of EDS)"
 bash build.sh
 popd
+
+mkdir -p "$output"
 
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing input file $input with model $model to $type graphs, output in $output"
@@ -151,7 +153,7 @@ else
     python3 parse_file.py $model $type $amconll_input $amconll_prediction --cuda-device $gpu --give_up 5
 fi
 
-# convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
+# convert AMConLL file (consisting of AM dependency trees) to final output file (containing graphs in the representation-specific format)
 # and evaluate
 echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
