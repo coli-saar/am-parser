@@ -17,6 +17,7 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ##
+output=$1
 
 #run smatch:
 # add newlines to goldAMR.txt

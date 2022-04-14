@@ -24,22 +24,25 @@
 usage="Preprocess the corpus.\n\n
 
 Arguments: \n
-\n\t     -d  main directory where corpus lives
+\n\t     -i  directory in which the original AMR test files are, e.g. in *YOUR_PATH_TO_AMR_CORPUS*/data/amrs/split/test/
 \n\t	 -m  memory limit to be used for the task (default: 6G)
 \n\t	 -o  directory where output files will be put (default: new 'output'folder in main directory)
+\n\t	 -j  path to am-tools jar file
 \n\t	 -t  number of threads (default: 1)
 "
 
-while getopts "d:m:o:t:h" opt; do
+while getopts "i:m:o:j:t:h" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
 	   ;;
-	d) maindir="$OPTARG"
+	i) inputdir="$OPTARG"
 	   ;;
 	m) memLimit="$OPTARG"
 	   ;;
 	o) outputPath="$OPTARG"
+	   ;;
+	j) jar="$OPTARG"
 	   ;;
 	t) threads="$OPTARG"
 	   ;;
@@ -48,17 +51,17 @@ while getopts "d:m:o:t:h" opt; do
     esac
 done
 
-if [ "$maindir" = "" ]; then
-    printf "\n No main directory given. Please use -d option."
+if [ "$inputdir" = "" ]; then
+    printf "\n No main directory given. Please use -i option."
     exit 1
 else
-    printf "Processing files in main directory $maindir\n"
+    printf "Processing files in input directory $inputdir\n"
 fi
 
 
 if [ "$outputPath" = "" ]; then
-    outputPath="$maindir/output"
-    printf "\n No output directory given. Using default: 'output' folder inside main directory.\n"
+    printf "\n No output directory given. Please use -o option.\n"
+    exit 1
 fi
 printf "Placing output in $outputPath\n"
 
@@ -69,13 +72,16 @@ if [ -f "$log" ]; then
     rm "$log"
 fi
 
-alto="am-tools.jar"
-
-if [ -f "$alto" ]; then
-    echo "jar file found at $jar"
+if [ "$jar" = "" ]; then
+    printf "\n No jar file given. Please use -j option.\n"
+    exit 1
 else
-    echo "jar file not found at $jar, downloading it!"
-    wget -O "$alto" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
+    if [ -f "$jar" ]; then
+        echo "jar file found at $jar"
+    else
+        echo "jar file not found at $jar, please check your -j option!"
+        exit 1
+    fi
 fi
 
 testNNdata=$outputPath/
@@ -113,7 +119,7 @@ conceptnet=""
 # Raw dev and test to Alto format
 
 # test set
-testRawCMD="java -Xmx$memLimit -cp $jar $datascriptPrefix.FullProcess --amrcorpus $input --output $testAltodata  >>$log 2>&1"
+testRawCMD="java -Xmx$memLimit -cp $jar $datascriptPrefix.FullProcess --amrcorpus $inputdir --output $testAltodata  >>$log 2>&1"
 printf "\nconverting test set to Alto format for evaluation\n"
 printf "\nconverting test set to Alto format for evaluation\n" >> $log
 echo $testRawCMD >> $log

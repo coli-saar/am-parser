@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 models/*
 data/*
+debugging/*
 
 .idea/
 
