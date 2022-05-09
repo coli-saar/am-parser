@@ -31,7 +31,6 @@ usage="Takes . \n\n
 Required arguments: \n
 \n\t     -i  input file: text file with one sentence per line. By default, assumes the file is already tokenized with spaces as delimiters.
 \n\t     -o  output folder: where the results will be stored.
-\n\t     -T  desired type of output formalism. Possible options: DM, PAS, PSD, EDS and AMR-2017.
 
 \noptions:
 
@@ -46,7 +45,7 @@ fast=false
 gpu="-1"
 tokenize=false
 # Gathering parameters:
-while getopts "m:i:o:T:g:fth" opt; do
+while getopts "m:i:o:g:fth" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
@@ -56,8 +55,6 @@ while getopts "m:i:o:T:g:fth" opt; do
 	i) input="$OPTARG"
 	   ;;
 	o) output="$OPTARG"
-	   ;;
-	T) type="$OPTARG"
 	   ;;
 	g) gpu="$OPTARG"
 	   ;;
@@ -103,18 +100,13 @@ if [ "$input" = "" ]; then
     exit 1
 fi
 
-if [ "$type" = "" ]; then
-    printf "\n No output graphbank type given. Please use -T option.\n"
-    exit 1
-elif [ "$type" = "AMR" ]; then
-    type="AMR-2017" # to make it compatible with how we referred to this in the python code
-fi
 
 if [ "$output" = "" ]; then
     printf "\n No output file path. Please use -o option.\n"
     exit 1
 fi
 
+type="AMR-2017"
 
 # Finished gathering parameters. We are now guaranteed to have the necessary arguments stored in the right place.
 echo "Parsing raw text file $input with model $model to $type graphs, output in $output"
@@ -143,13 +135,5 @@ fi
 # convert AMConLL file (consisting of AM depenendcy trees) to final output file (containing graphs in the representation-specific format)
 echo "converting AMConLL to final output file .."
 # TODO possibly clean up the if-then-else
-if [ "$type" = "DM" ] || [ "$type" = "PAS" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus -c $amconll -o $output$type
-elif [ "$type" = "PSD" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus -c $amconll -o $output$type
-elif [ "$type" = "EDS" ]; then
-    java -cp $jar de.saar.coli.amrtagging.formalisms.eds.tools.EvaluateCorpus -c $amconll -o "$output"$type
-elif [ "$type" = "AMR-2017" ]; then
-    bash scripts/setup_AMR.sh
-    bash scripts/eval_AMR_new.sh $amconll $output $jar
-fi
+bash scripts/setup_AMR.sh
+java -cp $jar de.saar.coli.amtools.analysis.VisualizeFromAmconll -c $amconll -o $output -et AMREvaluationToolset -e '--wn downloaded_models/wordnet3.0/dict/ --lookup downloaded_models/lookup/lookupdata17/ --th 10 --add-sense-to-nn-label'

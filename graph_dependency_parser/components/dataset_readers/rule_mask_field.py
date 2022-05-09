@@ -16,7 +16,6 @@ class RuleMaskField(Field):
 
     def __init__(self, rule_iterator, supertag_map, sentence_length):
         """
-
         :param supertag_map: a java HashMap<Rule, Pair<Integer, String>> that maps rules to word positions and supertags
         """
         # we just need to count how many rules there are (including 'fake rules' for not covered words and ROOT)
