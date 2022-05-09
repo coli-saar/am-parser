@@ -207,7 +207,7 @@ mv $outputPath/corpus.amconll $outputPath/train.amconll
 devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $devNNdata -o $outputPath $dev_companion >>$log 2>&1"
 printf "\nGenerate amconll for (gold) dev data\n"
 eval $devamconllCMD
-mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
+mv $outputPath/corpus.amconll $outputPath/gold-corpus.amconll
 
 #Create empty amconll for (actual) dev set, also called evalDev
 emptyDevAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $evalDevNNdata -o $outputPath --prefix dev $dev_companion >>$log 2>&1"
@@ -227,8 +227,8 @@ mkdir -p $outputPath/output/gold-dev
 mkdir -p $outputPath/output/test
 
 mv $outputPath/train.amconll "$outputPath/output/train/"
-mv $outputPath/gold-dev.amconll "$outputPath/output/gold-dev/"
-mv $outputPath/dev.amconll "$outputPath/output/dev/"
+mv $outputPath/gold-corpus.amconll "$outputPath/output/gold-dev/"
+mv $outputPath/corpus.amconll "$outputPath/output/dev/"
 mv $outputPath/test.amconll "$outputPath/output/test/"
 
 #gold AMRs, create an empty line after each graph

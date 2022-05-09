@@ -50,7 +50,7 @@ tested using Ubuntu 18.04 , Python 3.7.4 , pyqt 5.9.2 , graphviz version 2.40.1,
 pdfTeX 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian), ImageMagick 6.9.7-4
 """
 # --viz --maxshow 10
-# ../similarity2020/corpora/AMR/2017/gold-dev/gold-dev.amconll
+# ../similarity2020/corpora/AMR/2017/gold-dev/gold-corpus.amconll
 # ../similarity2020/corpora/SemEval/2015/PSD/train/train.amconll
 
 # todo: better comparison based on sentence as key (special chars...)
