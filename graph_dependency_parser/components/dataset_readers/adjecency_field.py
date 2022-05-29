@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 ###   Note that this is simply a copy taken from https://github.com/allenai/allennlp/blob/main/allennlp/data/fields/adjacency_field.py,
-### since this is not available in AllenNLP 0.8.4 -- JG, January 20201
+### since this is not available in AllenNLP 0.8.4 -- JG, January 2021
 
 class AdjacencyField(Field[torch.Tensor]):
     """
