@@ -16,7 +16,7 @@
 
 # training AMR with the EM method, all edges, 3 sources
 echo "starting AMR EM, all edges, with 3 sources on GPU 0"
-python -u train.py jsonnets/acl2019/single/bert/AMR-2017.jsonnet -s /local/jonasg/unsupervised2020/temp/AMREM3-allEdges-jan18/ -f --file-friendly-logging -o ' {"trainer" : {"cuda_device" :  0 }, "train_data_path": [["AMR-2017", "/proj/irtg/sempardata/unsupervised2020/amconll/EM3/AMRAllEdges/train.amconll"]], "validation_data_path": [["AMR-2017", "/proj/irtg/sempardata/unsupervised2020/amconll/EM3/AMRAllEdges/dev.amconll"]]}' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags EM3 allEdges --project unsupervised2020-amr &> /proj/irtg/sempardata/unsupervised2020/logs/AMREM3-allEdges-jan18.log &
+python -u train.py jsonnets/acl2019/single/bert/AMR-2017.jsonnet -s /local/jonasg/unsupervised2020/temp/AMREM3-allEdges-jan18/ -f --file-friendly-logging -o ' {"trainer" : {"cuda_device" :  0 }, "train_data_path": [["AMR-2017", "/proj/irtg/sempardata/unsupervised2020/amconll/EM3/AMRAllEdges/train.amconll"]], "validation_data_path": [["AMR-2017", "/proj/irtg/sempardata/unsupervised2020/amconll/EM3/AMRAllEdges/corpus.amconll"]]}' --comet Yt3xk2gaFeevDwlxSNzN2VUKh --tags EM3 allEdges --project unsupervised2020-amr &> /proj/irtg/sempardata/unsupervised2020/logs/AMREM3-allEdges-jan18.log &
 
 
 # training AMR with the automata method, all edges, 3 sources

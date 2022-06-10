@@ -205,7 +205,7 @@ printf "\nGenerate amconll for (gold) dev data\n"
 printf "\nGenerate amconll for (gold) dev data\n" >> $log
 echo $devamconllCMD >> $log
 eval $devamconllCMD
-mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
+mv $outputPath/corpus.amconll $outputPath/gold-corpus.amconll
 
 
 #Create empty amconll for (actual) dev set, also called evalDev
@@ -229,8 +229,8 @@ mkdir -p $outputPath/output/gold-dev
 mkdir -p $outputPath/output/test
 
 mv $outputPath/train.amconll "$outputPath/output/train/"
-mv $outputPath/gold-dev.amconll "$outputPath/output/gold-dev/"
-mv $outputPath/dev.amconll "$outputPath/output/dev/"
+mv $outputPath/gold-corpus.amconll "$outputPath/output/gold-dev/"
+mv $outputPath/corpus.amconll "$outputPath/output/dev/"
 mv $outputPath/test.amconll "$outputPath/output/test/"
 
 #gold AMRs, create an empty line after each graph
