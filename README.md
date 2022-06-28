@@ -31,7 +31,7 @@ This repository (jointly with its sister-repository at [am-tools](https://www.gi
 
 We recommend running am-parser using Docker environment.
 - Build image - `docker build -t IMAGE_NAME .`
-- Run container - `docker run -it --name CONTAINER_NAME IMAGE_NAME bash`
+- Run container - `docker run --gpus all -it --name CONTAINER_NAME IMAGE_NAME bash`
 - Activate conda env inside container: `source /root/miniconda3/bin/activate`
 
 Later you can detach from container using `Ctrl-P + Ctrl-Q` command, and reconnect using `docker exec -it CONTAINER_NAME`.
