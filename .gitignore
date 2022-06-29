@@ -5,6 +5,8 @@ temp/*
 tmp/*
 
 .idea/
+# NN checkpoints
+*.th
 
 __pycache__/
 *.py[cod]

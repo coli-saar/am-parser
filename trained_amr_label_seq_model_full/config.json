@@ -1,0 +1,261 @@
+{
+    "dataset_reader": {
+        "type": "amconll_automata",
+        "token_indexers": {
+            "bert": {
+                "type": "bert-pretrained",
+                "pretrained_model": "bert-large-uncased"
+            }
+        }
+    },
+    "iterator": {
+        "type": "same_formalism",
+        "batch_size": 32,
+        "formalisms": [
+            "AMR-2017"
+        ]
+    },
+    "model": {
+        "type": "graph_dependency_parser_automata",
+        "encoder": {
+            "type": "shared_split_encoder",
+            "encoder": {
+                "type": "stacked_bidirectional_lstm",
+                "hidden_size": 256,
+                "input_size": 1136,
+                "layer_dropout_probability": 0.3,
+                "num_layers": 2,
+                "recurrent_dropout_probability": 0.4,
+                "use_highway": false
+            },
+            "formalisms": [
+                "AMR-2017"
+            ],
+            "formalisms_without_tagging": []
+        },
+        "input_dropout": 0.3,
+        "lemma_embedding": {
+            "embedding_dim": 64,
+            "vocab_namespace": "lemmas"
+        },
+        "ne_embedding": {
+            "embedding_dim": 16,
+            "vocab_namespace": "ner_labels"
+        },
+        "pos_tag_embedding": {
+            "embedding_dim": 32,
+            "vocab_namespace": "pos"
+        },
+        "tasks": [
+            {
+                "all_automaton_loss": true,
+                "dropout": 0.3,
+                "edge_model": {
+                    "edge_dim": 256,
+                    "edge_label_namespace": "AMR-2017_head_tags",
+                    "encoder_dim": 512,
+                    "label_dim": 256,
+                    "type": "kg_edges"
+                },
+                "lexlabel_loss": {
+                    "normalize_wrt_seq_len": false
+                },
+                "lexlabeltagger": {
+                    "label_namespace": "AMR-2017_lex_labels",
+                    "mlp": {
+                        "activations": "tanh",
+                        "dropout": [
+                            0.4
+                        ],
+                        "hidden_dims": [
+                            1024
+                        ],
+                        "input_dim": 512,
+                        "num_layers": 1
+                    }
+                },
+                "loss_function": {
+                    "existence_loss": {
+                        "normalize_wrt_seq_len": false,
+                        "type": "kg_edge_loss"
+                    },
+                    "label_loss": {
+                        "normalize_wrt_seq_len": false,
+                        "type": "dm_label_loss"
+                    }
+                },
+                "loss_mixing": {
+                    "edge_existence": 1,
+                    "lexlabel": 1,
+                    "supertagging": 1
+                },
+                "name": "AMR-2017",
+                "output_null_lex_label": true,
+                "supertagger": {
+                    "label_namespace": "AMR-2017_supertag_labels",
+                    "mlp": {
+                        "activations": "tanh",
+                        "dropout": [
+                            0.4
+                        ],
+                        "hidden_dims": [
+                            1024
+                        ],
+                        "input_dim": 512,
+                        "num_layers": 1
+                    }
+                },
+                "supertagger_loss": {
+                    "normalize_wrt_seq_len": false
+                },
+                "validation_evaluator": {
+                    "formalism": "AMR-2017",
+                    "gold_file": "../non-graph-formalisms-parsing/amr_labels_full/gold_dev.txt",
+                    "predictor": {
+                        "data_iterator": {
+                            "batch_size": 32,
+                            "formalisms": [
+                                "AMR-2017"
+                            ],
+                            "type": "same_formalism"
+                        },
+                        "dataset_reader": {
+                            "token_indexers": {
+                                "bert": {
+                                    "pretrained_model": "bert-large-uncased",
+                                    "type": "bert-pretrained"
+                                }
+                            },
+                            "type": "amconll_unannotated"
+                        },
+                        "evaluation_command": {
+                            "command": "java -cp am-tools.jar de.saar.coli.amtools.evaluation.EvaluateAMConll --corpus {system_output} -o {tmp}/ -et AMRFromNodeLabelsEvaluationToolset && python2 external_eval_tools//smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt",
+                            "result_regexes": {
+                                "F": [
+                                    2,
+                                    "F-score: (?P<value>.+)"
+                                ],
+                                "P": [
+                                    0,
+                                    "Precision: (?P<value>.+)"
+                                ],
+                                "R": [
+                                    1,
+                                    "Recall: (?P<value>.+)"
+                                ]
+                            },
+                            "type": "bash_evaluation_command"
+                        },
+                        "give_up": 15,
+                        "k": 6,
+                        "threads": 1,
+                        "type": "amconll_automata_predictor"
+                    },
+                    "system_input": "../non-graph-formalisms-parsing/amr_labels_full/dev.amconll",
+                    "type": "standard_evaluator",
+                    "use_from_epoch": 10
+                }
+            }
+        ],
+        "text_field_embedder": {
+            "type": "basic",
+            "allow_unmatched_keys": true,
+            "embedder_to_indexer_map": {
+                "bert": [
+                    "bert",
+                    "bert-offsets"
+                ]
+            },
+            "token_embedders": {
+                "bert": {
+                    "type": "bert-pretrained",
+                    "pretrained_model": "bert-large-uncased"
+                }
+            }
+        }
+    },
+    "train_data_path": [
+        [
+            "AMR-2017",
+            "../non-graph-formalisms-parsing/amr_labels_full/train.zip"
+        ]
+    ],
+    "validation_data_path": [
+        [
+            "AMR-2017",
+            "../non-graph-formalisms-parsing/amr_labels_full/dev.zip"
+        ]
+    ],
+    "trainer": {
+        "type": "am-trainer",
+        "cuda_device": 1,
+        "num_epochs": 100,
+        "num_serialized_models_to_keep": 1,
+        "optimizer": {
+            "type": "adam",
+            "lr": 0.001
+        },
+        "patience": 1000,
+        "validation_metric": "+AMR-2017_F"
+    },
+    "vocabulary": {
+        "min_count": {
+            "lemmas": 7,
+            "words": 7
+        }
+    },
+    "evaluate_on_test": true,
+    "test_evaluators": [
+        [
+            [
+                "AMR-2017",
+                {
+                    "formalism": "AMR-2017",
+                    "gold_file": "../non-graph-formalisms-parsing/amr_labels_full/gold_test.txt",
+                    "predictor": {
+                        "data_iterator": {
+                            "batch_size": 32,
+                            "formalisms": [
+                                "AMR-2017"
+                            ],
+                            "type": "same_formalism"
+                        },
+                        "dataset_reader": {
+                            "token_indexers": {
+                                "bert": {
+                                    "pretrained_model": "bert-large-uncased",
+                                    "type": "bert-pretrained"
+                                }
+                            },
+                            "type": "amconll_unannotated"
+                        },
+                        "evaluation_command": {
+                            "command": "java -cp am-tools.jar de.saar.coli.amtools.evaluation.EvaluateAMConll --corpus {system_output} -o {tmp}/ -et AMRFromNodeLabelsEvaluationToolset && python2 external_eval_tools//smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt",
+                            "result_regexes": {
+                                "F": [
+                                    2,
+                                    "F-score: (?P<value>.+)"
+                                ],
+                                "P": [
+                                    0,
+                                    "Precision: (?P<value>.+)"
+                                ],
+                                "R": [
+                                    1,
+                                    "Recall: (?P<value>.+)"
+                                ]
+                            },
+                            "type": "bash_evaluation_command"
+                        },
+                        "give_up": 15,
+                        "k": 6,
+                        "threads": 1,
+                        "type": "amconll_predictor"
+                    },
+                    "system_input": "../non-graph-formalisms-parsing/amr_labels_full/test.amconll",
+                    "type": "standard_evaluator"
+                }
+            ]
+        ]
+    ]
+}
