@@ -181,7 +181,7 @@ class AMAutomataTask(Model):
         :return:
         """
 
-        print_time = True
+        print_time = False
         print_diagnostics = False  # = self.training
 
         start_time = time()
