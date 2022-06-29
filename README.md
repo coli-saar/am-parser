@@ -17,7 +17,12 @@ You can find documentation on how to train the parser in the [wiki pages](https:
 - [dependency_decoding](https://github.com/andersjo/dependency_decoding)
 - a build of [am-tools](https://github.com/coli-saar/am-tools); will be downloaded automatically.
 
-(We recommend to set up a conda environment.)
+We recommend running am-parser using Docker environment.
+ - Build image - `docker build -t IMAGE_NAME .`
+ - Run container - `docker run --gpus all -it --name CONTAINER_NAME IMAGE_NAME bash`
+ - Activate conda env inside container: `source /root/miniconda3/bin/activate`
+
+ Later you can detach from container using `Ctrl-P + Ctrl-Q` command, and reconnect using `docker exec -it CONTAINER_NAME`.
 
 __Internal note:__ this is already set up on the Saarland servers, see details [here](https://github.com/coli-saar/am-parser/wiki/Setup-and-file-locations-on-the-Saarland-servers).
 

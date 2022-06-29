@@ -1,0 +1,6 @@
+allennlp==0.8.4
+comet_ml
+scikit-learn==0.22.2
+overrides==3.1.0
+pyjnius==1.2.1
+git+https://github.com/andersjo/dependency_decoding
