@@ -8,5 +8,5 @@ setup(name='am-parser',
       author='Saarland University',
       author_email='jonasg@coli.uni-saarland.de',
       url='github.com/coli-saar/am-parser',
-      package_dir={'am_parser': './'},
+      package_dir={'am_parser': '.'},
      )
