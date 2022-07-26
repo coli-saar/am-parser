@@ -33,6 +33,12 @@ RUN . /root/miniconda3/bin/activate
 RUN conda install -y Cython
 RUN conda install -y -c conda-forge jsonnet
 
+# allennlp recommends installing pytorch first if you're installing allennlp via pip:
+# https://pypi.org/project/allennlp/#installing-via-pip
+# instructions for conda install old versions of pytorch (am-parser documentation recommends 1.1)
+# https://pytorch.org/get-started/previous-versions/
+RUN conda install pytorch==1.1.0 torchvision==0.3.0 cudatoolkit=10.0 -c pytorch
+
 # install am-parser requirements
 COPY requirements.txt /am-parser-app/requirements.txt
 WORKDIR /am-parser-app
