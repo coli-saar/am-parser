@@ -41,7 +41,7 @@ local task_model(task,dataset_reader, iterator, final_encoder_output_dim, edge_m
     "name" : task,
     "dropout": 0.0,
 
-    "output_null_lex_label" : false,
+    "output_null_lex_label" : true,
 	
 	"all_automaton_loss": true,
 

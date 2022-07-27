@@ -12,8 +12,9 @@ local dropout_mlp = 0.4;  # dropout rate in the final supertagger and edge model
 local final_encoder_output_dim = 2 * hidden_dim; # gets one input per encoder direction, so total will be twice as large
 local k = 6;  # number of supertags per word to be used during evaluation (i.e. using top-k supertags).
 local eval_threads = 1;  # number of threads to be used during evaluation.
-local eval_timeout = 15;  # When to give up on evaluating an instance with the current k and reduce k by 1 for that instance (in seconds) 
-	
+local eval_timeout = 15;  # When to give up on evaluating an instance with the current k and reduce k by 1 for that instance (in seconds) 	
+local bert_model = "bert-large-uncased";
+
 local dataset_reader =  {
         "type": "amconll_automata",
          "token_indexers": {
@@ -45,7 +46,7 @@ local task_model(task,dataset_reader, iterator, final_encoder_output_dim, edge_m
     "name" : task,
     "dropout": dropout,
 
-    "output_null_lex_label" : false,
+    "output_null_lex_label" : true,
 	
 	"all_automaton_loss": true,
 
