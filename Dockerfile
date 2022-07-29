@@ -32,6 +32,7 @@ RUN . /root/miniconda3/bin/activate
 # RUN conda list python -f
 RUN conda install -y Cython
 RUN conda install -y -c conda-forge jsonnet
+RUN python2 -m pip install cython
 
 # allennlp recommends installing pytorch first if you're installing allennlp via pip:
 # https://pypi.org/project/allennlp/#installing-via-pip
