@@ -21,7 +21,7 @@ local formalism_config = import "<path to formalism config file>"; # The formali
 
 local raw_model_config = import '../models/default2021.libsonnet';  # You can typically use one of the predefined models here. Use ../models/toy.libsonnet for
 # experimenting on a toy dataset (say 1-10 sentences) and ../models/default2021.libsonnet for a full dataset.
-# To finetune the model parameters, look at this raw_model_config file.
+# To tune the model's hyperparameters, look at this raw_model_config file.
 
 
 
