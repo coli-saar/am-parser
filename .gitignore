@@ -205,3 +205,7 @@ test_output/dm/readme.txt
 test_output/dm/test.id/en.id.dm.sdp
 test_output/dm/test.ood/en.ood.dm.sdp
 test_output/dm/train/train-supertags.txt
+example/output/*
+downloaded_models/raw_text_model.tar.gz
+example/decomposition/amr/corpus/dev/input.txt.raw.features
+example/decomposition/amr/corpus/dev/input.txt.raw

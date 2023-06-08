@@ -21,10 +21,10 @@ RUN apt-get -y install gcc
 RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py37_23.1.0-1-Linux-x86_64.sh \
     && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh
+    && bash Miniconda3-py37_23.1.0-1-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-py37_23.1.0-1-Linux-x86_64.sh
 
 RUN conda install python=3.7
 # RUN conda --version
@@ -32,6 +32,7 @@ RUN . /root/miniconda3/bin/activate
 # RUN conda list python -f
 RUN conda install -y Cython
 RUN conda install -y -c conda-forge jsonnet
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py && python2 get-pip.py && rm -f get-pip.py
 RUN python2 -m pip install cython
 
 # allennlp recommends installing pytorch first if you're installing allennlp via pip:
