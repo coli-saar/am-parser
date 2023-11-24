@@ -26,6 +26,14 @@ from typing import Dict, Any
 import logging
 import json
 
+import jnius_config
+
+import torch
+
+import asyncio
+
+torch.set_num_threads(1)
+
 from allennlp.common.checks import ConfigurationError
 from allennlp.common.util import prepare_environment
 
@@ -67,11 +75,6 @@ parser.add_argument("--port",
                     type=int,
                     default=8888,
                     help='Port to be used')
-
-parser.add_argument("--mtool",
-                    type=str,
-                    default=None,
-                    help='Path to main.py of mtool, for visualizations of the graphs.')
 
 parser.add_argument("--lookup",
                     type=str,
@@ -138,30 +141,10 @@ else:
 
 predictor = AMconllPredictor(dataset_reader, args.k, args.give_up, args.threads, model=model)
 
+print("Server is ready.")
+
 requires_art_root = {"DM": True, "PAS": True, "PSD": True, "EDS": False, "AMR-2015": False, "AMR-2017": False}
 requires_ne_merging = {"DM": False, "PAS": False, "PSD": False, "EDS": False, "AMR-2015": True, "AMR-2017": True}
-
-import asyncio
-import json
-
-if args.mtool:
-    # Load mtool codecs
-    dname = os.path.dirname(os.path.abspath(args.mtool))
-    sys.path.append(dname)
-    import codec.amr
-    import codec.sdp
-
-
-    def get_mtool_graph(g, format):
-        stream = StringIO(g)
-        if format == "dm" or format == "psd":
-            r, _ = next(codec.sdp.read(stream, framework=format))
-        elif format == "amr":
-            r, _ = next(codec.amr.read(stream))
-        r.normalize("edges")
-        return r
-
-import jnius_config
 
 jnius_config.set_classpath(".", args.am_tools)
 from jnius import autoclass
@@ -249,24 +232,13 @@ def postprocess(filename, output_path, formalism):
 
     t = time.time()
     # Create svg file.
-    svg = ""
-    if args.mtool:
-        with TemporaryDirectory() as direc:
-            # os.system(f"python3 {args.mtool} --normalize edges --read {format} --write dot {o_fil} {direc}/o.dot") # takes long, like 0.26s
-            graph = get_mtool_graph(text, format)
-            with open(direc + "/o.dot", "w") as f:
-                graph.dot(f)
-            os.system(f"dot -Tsvg {direc}/o.dot -o {direc}/o.svg")
-            with open(f"{direc}/o.svg") as f:
-                svg = f.read()
-    svg_time = time.time() - t
-    return (text, graph_time), (svg, svg_time)
+    return (text, graph_time)
 
 
 async def handle_client(reader, writer):
     request = (await reader.read(4048)).decode('utf8')  # read a maximum of 4048 bytes, that's more than enough
     print("Request", request)
-    ret_val = {"errors": [], "times" : {"amdep" : 0.0 , "svg" : 0.0, "graph" : 0.0, "amdep-svg" : 0.0}}
+    ret_val = {"errors": []}
     # times: amdep: parse time, svg: time to visualize graph, graph: evaluation time from amdep to graph, amdep-svg: viz. of amdep tree.
     t1 = time.time()
     try:
@@ -313,28 +285,14 @@ async def handle_client(reader, writer):
                 # Read AM dependency tree
                 with open(output_filename) as f:
                     ret_val["parses"][formalism]["amdep"] = f.read()
-                ret_val["times"]["amdep"] += time.time() - t
-
-                # ...and as svg:
-                t = time.time()
-                with open(output_filename) as f:
-                    amdep = next(parse_amconll(f))
-                    #with open(direc + "/amdep.dot", "w") as g:
-                    #    g.write(amdep.to_dot())
-                    #os.system(f"dot -Tsvg {direc}/amdep.dot -o {direc}/amdep.svg")
-                    #with open(direc + "/amdep.svg") as g:
-                    #    ret_val["parses"][formalism]["amdep-svg"] = g.read()
-                    ret_val["parses"][formalism]["amdep-svg"] = amdep.displacy_svg()
-                ret_val["times"]["amdep-svg"] += time.time() - t
+                ret_val["parses"][formalism]["parse_time"] = time.time() - t
 
                 # Evaluate to graph
-                (raw_graph, graph_time), (svg, svg_time) = postprocess(output_filename, direc, formalism)
-                ret_val["parses"][formalism]["graph"] = raw_graph
-                if svg:
-                    ret_val["parses"][formalism]["svg"] = svg
+                raw_graph, graph_time = postprocess(output_filename, direc, formalism)
+                graph_format = "penman" if formalism in {"AMR-2017", "EDS"} else "sdp"
+                ret_val["parses"][formalism][graph_format] = raw_graph
+                ret_val["parses"][formalism]["postprocess_time"] = graph_time
 
-                ret_val["times"]["graph"] += graph_time
-                ret_val["times"]["svg"] += svg_time
     except BaseException as ex:  #
         err = "".join(traceback.TracebackException.from_exception(ex).format_exception_only())
         ret_val["errors"].append(err)
