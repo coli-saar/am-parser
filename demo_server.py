@@ -157,22 +157,22 @@ class AMToolsInterface:
 
 class DMInterface(AMToolsInterface):
     def __init__(self):
-        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPCorpus")
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.dm.tools.ToSDPJsonl")
 
     def evaluate(self, input_file: str, output_path: str) -> str:
         save_to = input_file + "_o"
         self.main.main(["-c", input_file, "-o", save_to])
-        return save_to + ".sdp"
+        return save_to + ".jsonl"
 
 
 class PSDInterface(AMToolsInterface):
     def __init__(self):
-        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPCorpus")
+        self.main = autoclass("de.saar.coli.amrtagging.formalisms.sdp.psd.tools.ToSDPJsonl")
 
     def evaluate(self, input_file: str, output_path: str) -> str:
         save_to = input_file + "_o"
         self.main.main(["-c", input_file, "-o", save_to])
-        return save_to + ".sdp"
+        return save_to + ".jsonl"
 
 
 class EDSInterface(AMToolsInterface):
@@ -228,6 +228,10 @@ def postprocess(filename, output_path, formalism):
 
     with open(o_fil) as f:
         text = f.read()
+
+    if formalism in {"DM", "PSD", "PAS"}:
+        text = json.loads(text) # convert json string into an actual json object
+
     graph_time = time.time() - t
 
     t = time.time()
