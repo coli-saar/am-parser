@@ -304,7 +304,6 @@ async def handle_client(reader, writer):
     writer.close()
     t2 = time.time()
     print("Handling request took", t2 - t1)
-    print("Breakdown:",ret_val["times"])
 
 
 loop = asyncio.get_event_loop()
